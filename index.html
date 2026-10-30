@@ -1,0 +1,126 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f1e8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="a little courtyard, a very small minister, and a lantern leading to something more. a cozy companion game.">
+  <title>a minister in your sleeve</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./app-layout.css"><link rel="stylesheet" href="./phase-two.css">
+  <link rel="preload" href="./assets/courtyard.png" as="image"><link rel="preload" href="./assets/minister-sprites.png" as="image">
+</head>
+<body>
+  <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></symbol>
+    <symbol id="i-coins" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M8 8h6v6H8zM19 7a8 8 0 0 1-12 12"/></symbol>
+    <symbol id="i-journal" viewBox="0 0 24 24"><path d="M12 5C8 2 4 3 2 4v15c3-2 7-1 10 1 3-2 7-3 10-1V4c-2-1-6-2-10 1Zm0 0v15M5 8h4M5 12h4M15 8h4M15 12h4"/></symbol>
+    <symbol id="i-ribbon" viewBox="0 0 24 24"><path d="M11 9C5 0 0 5 3 10c2 3 6 1 8 0M13 9c6-9 11-4 8 1-2 3-6 1-8 0M10 11 5 21l5-2 1 3 2-11M14 11l5 10-5-2-1 3"/><circle cx="12" cy="10" r="2"/></symbol>
+    <symbol id="i-stone" viewBox="0 0 24 24"><ellipse cx="12" cy="13" rx="9" ry="6"/><path d="M3 13v2c1 7 17 7 18 0v-2M8 10c2-1 4-1 6 0"/></symbol>
+    <symbol id="i-cushion" viewBox="0 0 24 24"><path d="M4 6c5 2 11 2 16 0-2 4-2 8 0 12-5-2-11-2-16 0 2-4 2-8 0-12ZM4 6 2 3M20 6l2-3M4 18l-2 3M20 18l2 3M9 12h6"/></symbol>
+    <symbol id="i-orchid" viewBox="0 0 24 24"><path d="M6 17h12l-2 5H8l-2-5ZM12 17V6M12 16C3 16 2 7 4 8c6 2 6 5 8 8M12 14c1-7 8-9 8-7 0 6-5 7-8 7M12 6c-6-1-3-6 0-3 3-3 6 2 0 3Z"/></symbol>
+    <symbol id="i-scroll" viewBox="0 0 24 24"><path d="M6 3h12v17H6zM3 3h18M3 21h18M4 1v4M20 1v4M4 19v4M20 19v4M9 7h6M9 11h5M9 15h6"/></symbol>
+    <symbol id="i-seal" viewBox="0 0 24 24"><path d="M4 14h16v7H4zM7 14V8h10v6M8 8V3h8v5M7 18h10"/></symbol>
+    <symbol id="i-chime" viewBox="0 0 24 24"><path d="M12 1v4c-5 0-7 5-7 9h14c0-4-2-9-7-9ZM4 15h16M12 15v7M10 18h4l-1 5h-2z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M10 21v-7h4v7"/></symbol>
+    <symbol id="i-lantern" viewBox="0 0 24 24"><path d="M8 3h8M12 1v2M7 5h10c4 4 4 10 0 14H7C3 15 3 9 7 5ZM8 7c-1 4-1 6 0 10M16 7c1 4 1 6 0 10M12 5v14M8 21h8M12 21v2"/></symbol>
+    <symbol id="i-bun" viewBox="0 0 24 24"><path d="M12 4c1 3 8 3 9 10 1 5-3 6-9 6S2 19 3 14c1-7 8-7 9-10ZM12 5v7M9 7l-2 5M15 7l2 5M7 16h10"/></symbol>
+    <symbol id="i-tea" viewBox="0 0 24 24"><path d="M4 10h14v4a6 6 0 0 1-6 6h-2a6 6 0 0 1-6-6v-4ZM18 11h2a3 3 0 0 1 0 6h-3M2 22h19M8 7c-3-3 3-3 0-6M13 7c-3-3 3-3 0-6"/></symbol>
+    <symbol id="i-pet" viewBox="0 0 24 24"><path d="M8 14V5a2 2 0 0 1 4 0v7-8a2 2 0 0 1 4 0v8-6a2 2 0 0 1 4 0v10c0 4-3 6-7 6-3 0-4-1-6-4l-4-5c-2-2 1-4 3-2l2 3ZM4 2v3M2 3h4"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11a9 9 0 0 1-9 8H8l-5 3 1-6a9 9 0 1 1 17-5Z"/><path d="M7 10h10M7 14h6"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 15A9 9 0 0 1 9 3a9 9 0 1 0 11 12ZM18 2v4M16 4h4M21 7v3M19.5 8.5h3"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21S2 15 2 8a5 5 0 0 1 10-2A5 5 0 0 1 22 8c0 7-10 13-10 13Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4 4l2 2M18 18l2 2M20 4l-2 2M6 18l-2 2"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 3C7 1 1 10 6 17s18 1 14-14ZM4 22 17 7M8 17v-6M12 13h6"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M3 9h4l5-5v16l-5-5H3V9ZM16 8c3 2 3 6 0 8M19 4c5 4 5 12 0 16"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+  </defs></svg>
+
+  <div class="app-shell">
+    <header class="site-header">
+      <button class="brand" id="homeButton" aria-label="return to the courtyard"><span class="brand-mark"><svg><use href="#i-lantern"/></svg></span><span>a minister<br>in your sleeve</span></button>
+      <div class="header-actions"><span class="day-tag"><svg><use href="#i-sun"/></svg><span id="dayLabel">day 01</span></span><button id="soundButton" class="icon-button" aria-label="turn sound on" aria-pressed="false"><svg><use href="#i-volume"/></svg><span class="sound-slash"></span></button></div>
+    </header>
+    <main class="app-main" id="appMain">
+      <section class="app-panel care-panel" id="carePanel" role="tabpanel" aria-labelledby="tab-care">
+      <div class="needs-list">
+        <div class="need"><svg><use href="#i-bun"/></svg><div><div class="need-label"><span>fullness</span><span id="fullnessValue">54</span></div><div class="need-track" role="meter" aria-label="fullness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="54" id="fullnessMeter"><span id="fullnessBar"></span></div></div></div>
+        <div class="need"><svg><use href="#i-sun"/></svg><div><div class="need-label"><span>energy</span><span id="energyValue">72</span></div><div class="need-track" role="meter" aria-label="energy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" id="energyMeter"><span id="energyBar"></span></div></div></div>
+        <div class="need"><svg><use href="#i-leaf"/></svg><div><div class="need-label"><span>comfort</span><span id="comfortValue">63</span></div><div class="need-track" role="meter" aria-label="comfort" aria-valuemin="0" aria-valuemax="100" aria-valuenow="63" id="comfortMeter"><span id="comfortBar"></span></div></div></div>
+        <div class="need"><svg><use href="#i-heart"/></svg><div><div class="need-label"><span>mood</span><span id="moodValue">67</span></div><div class="need-track" role="meter" aria-label="mood" aria-valuemin="0" aria-valuemax="100" aria-valuenow="67" id="moodMeter"><span id="moodBar"></span></div></div></div>
+      </div>
+      <div class="scene-frame" id="sceneFrame">
+        <div class="scene-art" role="img" aria-label="a sunlit scholar’s courtyard, with wisteria, a moon gate, and a little tea table"></div>
+        <div class="scene-shade"></div><div class="scene-topline"><button id="requestShortcut" class="request-shortcut"><svg><use href="#i-journal"/></svg><span id="requestSummary">a small request</span></button><span id="sceneStatus">settling in</span></div>
+        <button id="sceneLantern" class="scene-lantern" aria-label="the lantern: bond 0 of 20 needed" title="the lantern is gathering light"><span class="lantern-halo"></span><svg><use href="#i-lantern"/></svg><span class="lantern-spark">✦</span></button>
+        <button id="bondShortcut" class="scene-bond-button" aria-label="view your bond and lantern"><svg><use href="#i-heart"/></svg><span id="bondSummary">0 / 20</span></button>
+        <div id="roomDecor" class="room-decor"></div><div class="rain-effect" aria-hidden="true"></div>
+        <button id="paperClutter" class="paper-clutter" aria-label="tidy the loose papers"><svg><use href="#i-scroll"/></svg><span>tidy up?</span></button>
+        <div class="character-area" id="characterArea"><div class="character-shadow"></div><button id="characterButton" class="character-button" aria-label="pet lin yan"><span class="character-sprite" id="characterSprite" role="img" aria-label="lin yan, a tiny minister in a blue robe and black winged hat"></span><span id="ribbonTie" class="ribbon-tie" hidden aria-hidden="true"><svg><use href="#i-ribbon"/></svg></span></button><div id="hearts" class="hearts" aria-hidden="true"></div><div id="bondFloat" class="bond-float" aria-hidden="true"></div></div>
+        <div class="keepsake" id="keepsake" hidden><svg><use href="#i-tea"/></svg><span>your place</span></div>
+        <div id="speechBubble" class="speech-bubble" role="status" aria-live="polite"><span class="speech-name">lin yan</span><p id="speechText">“ahem. the cup is only a temporary residence.”</p></div>
+        <div class="scene-caption"><span class="caption-rule"></span><span id="activityLabel">an unexpected guest, making himself at home.</span><span class="caption-rule"></span></div>
+        <div class="pet-hint" id="petHint">a little headpat?</div>
+      <button class="new-day-button" id="newDayButton" hidden><svg><use href="#i-sun"/></svg>begin a new day<svg><use href="#i-arrow"/></svg></button>
+      </div>
+      <div class="care-tray" aria-label="care actions">
+        <button class="care-action" data-action="feed" aria-expanded="false" aria-controls="foodTray"><svg><use href="#i-bun"/></svg><span>feed</span><small>a warm bite</small></button>
+        <button class="care-action" data-action="tea" aria-expanded="false" aria-controls="teaTray"><svg><use href="#i-tea"/></svg><span>give tea</span><small>take a moment</small></button>
+        <button class="care-action" data-action="pet"><svg><use href="#i-pet"/></svg><span>pet</span><small>just one pat</small></button>
+        <button class="care-action" data-action="talk"><svg><use href="#i-chat"/></svg><span>talk</span><small>stay a while</small></button>
+        <button class="care-action" data-action="rest"><svg><use href="#i-moon"/></svg><span>rest</span><small>sweet dreams</small></button>
+        <button class="care-action" data-action="more"><svg><use href="#i-more"/></svg><span>more</span></button>
+      </div>
+      <div class="choice-tray" id="foodTray" hidden><div><span class="eyebrow">something warm</span><p>he insists he can manage the spoon.</p></div><button data-food="steamed bun">a steamed bun</button><button data-food="dumplings">dumplings</button><button class="tray-close icon-button" aria-label="close food selection"><svg><use href="#i-close"/></svg></button></div>
+      <div class="choice-tray" id="teaTray" hidden><div><span class="eyebrow">a small ceremony</span><p>leave the paperwork for a moment.</p></div><button data-tea="jasmine">jasmine tea</button><button data-tea="lotus">lotus tea</button><button data-tea="rice">roasted rice</button><button class="tray-close icon-button" aria-label="close tea selection"><svg><use href="#i-close"/></svg></button></div>
+      </section>
+      <section class="app-panel lantern-panel" id="lanternPanel" role="tabpanel" aria-labelledby="tab-lantern" hidden>
+        <div class="panel-heading lantern-heading"><div><p class="eyebrow">your time together</p><h1>a thread of light.</h1></div><button id="albumButton" class="text-button">memories <svg><use href="#i-journal"/></svg></button></div>
+      <section class="bond-section"><div class="bond-heading"><svg><use href="#i-heart"/></svg><h3>a thread of trust</h3><span id="bondValue">0 / 20</span></div><div class="bond-track"><span id="bondBar"></span></div><p id="bondDescription">small kindnesses have a way of adding up.</p></section>
+      <div id="chapterTabs" class="chapter-tabs" aria-label="choose a chapter"></div>
+      <section class="chapter-invitation" id="chapterInvitation"><div class="chapter-number" id="chapterNumber">a lanternlit encounter · 01</div><div class="chapter-cover" id="chapterCover" role="img" aria-label="a glimpse of lin yan’s lanternlit study"><span class="cover-mark" id="coverMark">01</span></div><div class="chapter-details"><h3 id="chapterTitle">tea at his true height</h3><p id="chapterDescription">a little care might bring<br>his world a little closer.</p><button id="chapterButton" class="chapter-button" disabled><span>gathering light</span><svg><use href="#i-arrow"/></svg></button><span class="chapter-note" id="chapterNote">unlocks at 20 bond</span></div></section>
+
+      </section>
+      <section class="app-panel room-panel" id="roomPanel" role="tabpanel" aria-labelledby="tab-room" hidden>
+        <div class="panel-heading room-heading"><div><p class="eyebrow">a little home</p><h1>his small luxuries.</h1></div><span class="copper-purse"><svg><use href="#i-coins"/></svg><span id="copperValue">20</span></span></div>
+        <div class="segmented" id="roomSegments"><button data-room-view="outfits" aria-pressed="true">wardrobe</button><button data-room-view="furnishings" aria-pressed="false">furnishings</button></div>
+        <div id="roomContent" class="room-content"></div>
+      </section>
+      <section class="app-panel journal-panel" id="journalPanel" role="tabpanel" aria-labelledby="tab-journal" hidden>
+        <div class="panel-heading"><p class="eyebrow">things worth keeping</p><h1>the little journal.</h1></div>
+        <div class="segmented" id="journalSegments"><button data-journal-view="today" aria-pressed="true">today</button><button data-journal-view="keepsakes" aria-pressed="false">keepsakes</button><button data-journal-view="you" aria-pressed="false">you &amp; him</button></div>
+        <div id="journalContent" class="journal-content"></div>
+      </section>
+      <section class="app-panel settings-panel" id="settingsPanel" role="tabpanel" aria-labelledby="tab-settings" hidden>
+        <div class="panel-heading"><p class="eyebrow">make yourself at home</p></div>
+<h2>little comforts.</h2><label class="setting-row"><span>gentle sounds<small>tea, small chimes, and a soft greeting</small></span><input id="soundSetting" type="checkbox"></label><label class="setting-row"><span>less movement<small>still poses and quiet transitions</small></span><input id="motionSetting" type="checkbox"></label><div class="save-settings"><p class="eyebrow">your time together</p><p>your courtyard saves to your claude account, so he’ll be waiting on any device you open him from. a copy file still works as a backup.</p><p id="cloudStatus" class="cloud-status" role="status">checking your cloud save…</p><div class="save-buttons"><button id="exportButton"><svg><use href="#i-save"/></svg>save a copy</button><button id="importButton">restore a copy</button><input id="importFile" type="file" accept=".json,application/json" hidden></div><p id="settingsMessage" role="status" class="dialog-footnote"></p></div><footer class="site-footer"><span id="saveStatus"><span class="save-dot"></span> progress saved on this device</span><button id="helpButton">a small guide <span>↗</span></button></footer>
+      </section>
+    </main>
+    <nav class="app-tabs" role="tablist" aria-label="game navigation">
+      <button id="tab-care" role="tab" aria-selected="true" aria-controls="carePanel" data-page="care"><svg><use href="#i-home"/></svg><span>care</span></button>
+      <button id="tab-lantern" role="tab" aria-selected="false" aria-controls="lanternPanel" data-page="lantern" tabindex="-1"><span class="tab-icon"><svg><use href="#i-lantern"/></svg><i id="lanternNavDot" class="tab-dot" hidden></i></span><span>lantern</span></button>
+      <button id="tab-room" role="tab" aria-selected="false" aria-controls="roomPanel" data-page="room" tabindex="-1"><svg><use href="#i-ribbon"/></svg><span>room</span></button>
+      <button id="tab-journal" role="tab" aria-selected="false" aria-controls="journalPanel" data-page="journal" tabindex="-1"><svg><use href="#i-journal"/></svg><span>journal</span></button>
+      <button id="tab-settings" role="tab" aria-selected="false" aria-controls="settingsPanel" data-page="settings" tabindex="-1"><svg><use href="#i-settings"/></svg><span>settings</span></button>
+    </nav>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="talkDialog" class="small-dialog" aria-label="a moment with lin yan"><div class="dialog-topline"><span class="eyebrow">a moment together</span><button class="icon-button" data-close="talkDialog" aria-label="close conversation"><svg><use href="#i-close"/></svg></button></div><div class="dialog-ornament"><svg><use href="#i-chat"/></svg></div><h2>what’s on his mind?</h2><p id="talkIntro" class="talk-prose"></p><div id="talkChoices" class="dialog-choices"></div><p id="talkReward" class="dialog-footnote"></p></dialog>
+
+  <dialog id="storyDialog" class="story-dialog" aria-label="tea at his true height"><div class="story-topline"><span id="storyTitle"><svg><use href="#i-lantern"/></svg> 01 · tea at his true height</span><button id="viewArtButton" class="story-exit" aria-pressed="false">view art</button><button id="exitStoryButton" class="story-exit">back <svg><use href="#i-close"/></svg></button></div><div class="story-art" id="storyArt" role="img" aria-label="the full-size adult lin yan offering you a hand across a tea table in his warm study"><div class="story-art-shade"></div><span class="story-art-label">a familiar face. a little closer.</span></div><div class="story-reading"><span class="eyebrow story-speaker" id="storySpeaker"></span><p id="storyText"></p><div id="storyChoices" class="story-choices"></div></div><div class="story-controls"><span id="storyProgress"></span><button id="storyNext">continue <svg><use href="#i-arrow"/></svg></button></div></dialog>
+
+
+
+  <dialog id="activityDialog" class="small-dialog activity-dialog" aria-label="a little time together"><div class="dialog-topline"><button id="activityBack" class="icon-button" aria-label="back to activities" hidden><svg class="back-arrow"><use href="#i-arrow"/></svg></button><span id="activityEyebrow" class="eyebrow">a little time together</span><button class="icon-button" data-close="activityDialog" aria-label="close activity"><svg><use href="#i-close"/></svg></button></div><h2 id="activityTitle">little things, together.</h2><div id="activityContent" class="activity-content"></div></dialog>
+  <dialog id="albumDialog" class="small-dialog album-dialog" aria-label="your memories"><div class="dialog-topline"><span class="eyebrow">your time together</span><button class="icon-button" data-close="albumDialog" aria-label="close memories"><svg><use href="#i-close"/></svg></button></div><h2>memories to keep.</h2><div id="albumContent" class="album-grid"></div></dialog>
+  <dialog id="helpDialog" class="small-dialog" aria-label="a small guide"><div class="dialog-topline"><span class="eyebrow">a small guide</span><button class="icon-button" data-close="helpDialog" aria-label="close guide"><svg><use href="#i-close"/></svg></button></div><h2>a little care goes a long way.</h2><p class="talk-prose">offer him something to eat, share some tea, and give him a headpat. you can pet him by tapping him, too.</p><p class="talk-prose">a new kind of care gives <strong>5 bond</strong>. your first conversation each in-game day gives <strong>15</strong>. food and tea share one care reward; you can enjoy them as often as you like.</p><p class="talk-prose">at <strong>20 bond</strong>, follow the lantern into his world. after three kinds of care and a conversation or request, you can begin another day whenever you’re ready. tidy, pick up, and play live under more.</p><p class="dialog-footnote">four full-size encounters await. requests and games earn copper for his wardrobe and little home. there’s no penalty for taking your time.</p></dialog>
+
+  <dialog id="syncDialog" class="small-dialog" aria-label="two courtyards"><div class="dialog-topline"><span class="eyebrow">your cloud save</span></div><h2>two courtyards.</h2><p id="syncIntro" class="talk-prose"></p><div class="dialog-choices"><button id="syncUseCloud"></button><button id="syncUseLocal"></button></div><p class="dialog-footnote">the other one is replaced. to keep both, close this, save a copy from settings, then reopen him.</p></dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
+
+</body></html>
