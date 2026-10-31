@@ -1,4 +1,4 @@
-import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue, MEND_GOAL, orchidThirsty, checkinDue, aboutDue, answerCheckin, answerAbout, pendingFollowUp, followUp, finishDate } from './game.js';
+import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue, MEND_GOAL, orchidThirsty, checkinDue, aboutDue, answerCheckin, answerAbout, pendingFollowUp, followUp, finishDate } from './game.js';
 import { SPOTS, chooseActivity, activityById } from './life.js';
 import { DATES } from './dates.js';
 import { TREATS } from './catalog.js';
@@ -126,7 +126,7 @@ function render(){
   $('sceneFrame').classList.toggle('lantern-ready',ready);$('sceneFrame').classList.toggle('is-asleep',state.asleep);
   $('sceneLantern').setAttribute('aria-label',ready?'follow the lantern to his study':'visit the lantern and your memories');
   $('sceneLantern').title=ready?'an evening is waiting':'your time together';
-  $('keepsake').hidden=!state.chapter.complete;$('newDayButton').hidden=!canBeginDay(state);$('sceneFrame').classList.toggle('day-ready',canBeginDay(state));
+  $('keepsake').hidden=!state.chapter.complete;
   $('sceneStatus').textContent=state.asleep?'dreaming, probably of dumplings':moodStatus[mood]||relationshipLabel(state);
   document.body.classList.toggle('reduced-motion',state.settings.reducedMotion);applyTheme();
   $('soundButton').setAttribute('aria-pressed',String(state.settings.sound));$('soundButton').setAttribute('aria-label','turn sound '+(state.settings.sound?'off':'on'));
@@ -359,7 +359,6 @@ function welcome(gap){
   const lines=awayLines(gap);speak(lines[Math.floor(Math.random()*lines.length)],'glad you’re here. no explanations needed.');
   toast(gap>=7?'he kept the courtyard while you were away':'welcome back');
 }
-$('newDayButton').onclick=()=>{state=beginDay(state);save();animation={mode:'idle',start:performance.now()};render();selectPage('care');speak(state.memories.name?'“good morning, '+state.memories.name+'. i was just thinking about breakfast.”':'“a new day. shall we see what it brings?”','another small day, together.');ping();};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
 $('momentButton').onclick=()=>phaseTwo.openMoment();$('homeButton').onclick=()=>selectPage('care');$('bondShortcut').onclick=()=>selectPage('lantern');$('helpButton').onclick=()=>showSheet('helpDialog');
 // light, dark, or whatever the device prefers; the browser chrome follows along

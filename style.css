@@ -80,7 +80,6 @@ a{color:inherit}
 .chapter-button svg{width:18px;height:18px}
 .chapter-button:disabled{color:#ab9caa}
 .chapter-invitation.ready{background:linear-gradient(120deg,#f1e6ef,#fff5e5);border-color:#cdb3c5}
-.new-day-button svg{width:16px;height:16px}
 .site-footer{max-width:560px;margin:auto;padding:8px 22px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#ada1aa;font-size:8px;line-height:1.8}
 .site-footer>span:nth-child(2){display:none}
 .save-dot{display:inline-block;width:4px;height:4px;background:#a5ad99;border-radius:50%;margin-right:4px;vertical-align:middle}
@@ -195,8 +194,6 @@ body{margin:0;color:var(--ink);font-family:var(--sans);font-size:14px;background
 .care-action{display:flex;align-items:center;flex-direction:column;background:none;border-radius:10px;transition:background .2s;color:#6f657c;min-height:59px;padding:5px 1px;gap:5px}
 .choice-tray p{font-family:var(--serif);margin-top:5px;color:#897a8c;font-size:17px}
 .choice-tray>button:not(.tray-close){border:1px solid #ded3de;border-radius:7px;background:#f6eff5;padding:14px 10px;min-height:48px;font-size:13px}
-.new-day-button{order:6;display:flex;align-items:center;justify-content:center;position:absolute;z-index:8;left:50%;bottom:10px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);min-height:40px;margin:0;padding:10px 15px;background:#fff8eced;border:1px solid #eee1cb;color:#88734e;border-radius:22px;gap:8px;font-size:12px;box-shadow:0 3px 12px #48324710}
-.scene-frame.day-ready .scene-caption,.scene-frame.day-ready .pet-hint{display:none}
 .app-tabs{padding:4px 14px calc(5px + env(safe-area-inset-bottom));min-height:64px;display:grid;flex-shrink:0;border-top:1px solid #e0d7dc;background:#f7f3ecf5;grid-template-columns:repeat(5,minmax(0,1fr));padding-left:6px;padding-right:6px;gap:1px}
 .app-tabs button{min-height:54px;position:relative;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:12px;color:#a395a7;font-size:9px;letter-spacing:0;min-width:0}
 .app-tabs button[aria-selected=true]{color:#73617f;background:#eae1ed70}

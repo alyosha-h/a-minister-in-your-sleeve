@@ -45,7 +45,6 @@
 :root[data-theme=dark] .care-action{color:#887e96}
 :root[data-theme=dark] .choice-tray p{color:#a195a4}
 :root[data-theme=dark] .choice-tray>button:not(.tray-close){border:1px solid #37303e;background:#25202a}
-:root[data-theme=dark] .new-day-button{background:#231b2aed;border:1px solid #342b3d;color:#a68e63}
 :root[data-theme=dark] .app-tabs{border-top:1px solid #352f3b;background:#261f2cf5}
 :root[data-theme=dark] .app-tabs button{color:#bbb1be}
 :root[data-theme=dark] .app-tabs button[aria-selected=true]{color:#8d7a99;background:#2d273370}
