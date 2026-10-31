@@ -1,0 +1,170 @@
+/* dark theme, generated from style.css by tools/dark-theme.mjs. do not edit by hand:
+   rerun the script after changing colours, and put hand adjustments in its MANUAL block. */
+:root[data-theme=dark]{color-scheme:dark;--paper:#27212d;--ink:#ceccd7;--muted:#a7a2ab;--line:#37303d;--purple:#a29fbc;--purple-dark:#80799e;--pink:#d9b3c1;--gold:#be9f76}
+:root[data-theme=dark] .icon-button:hover{background:#2d2832}
+:root[data-theme=dark] .need-track{background:#322c37}
+:root[data-theme=dark] .need-track>span{background:#bebfd1}
+:root[data-theme=dark] .need:nth-child(2) .need-track>span{background:#d5c2a1}
+:root[data-theme=dark] .need:nth-child(3) .need-track>span{background:#b9c0b3}
+:root[data-theme=dark] .need:nth-child(4) .need-track>span{background:#d8bec9}
+:root[data-theme=dark] .need.low .need-label>span:first-child{color:#b07d8d}
+:root[data-theme=dark] .scene-lantern{background:rgba(54,42,65,.22);color:#33283f;border:1px solid rgba(52,40,63,.55)}
+:root[data-theme=dark] .lantern-ready .scene-lantern{background:#2e243842}
+:root[data-theme=dark] .speech-bubble:after{background:#211a28}
+:root[data-theme=dark] .speech-name{color:#b3a0b7}
+:root[data-theme=dark] .hearts span{color:#40334e}
+:root[data-theme=dark] .bond-float{color:#292032}
+:root[data-theme=dark] .care-action small{color:#bdb6bf}
+:root[data-theme=dark] .care-action:active,:root[data-theme=dark] .care-action[aria-expanded="true"]{background:#2d2734}
+:root[data-theme=dark] .bond-track{background:#312a37}
+:root[data-theme=dark] .bond-track>span{background:linear-gradient(90deg,#bfb2c7,#dfc0c9)}
+:root[data-theme=dark] .chapter-button:disabled{color:#c2b8c2}
+:root[data-theme=dark] .chapter-invitation.ready{background:linear-gradient(120deg,#2a2430,#251d2d);border-color:#483f52}
+:root[data-theme=dark] .site-footer{color:#c5bcc3}
+:root[data-theme=dark] .save-dot{background:#bec4b5}
+:root[data-theme=dark] dialog{border:1px solid #312b37}
+:root[data-theme=dark] dialog::backdrop{background:#dad3e36b}
+:root[data-theme=dark] .dialog-ornament{color:#bfadc1}
+:root[data-theme=dark] .talk-prose{color:#c0b6c4}
+:root[data-theme=dark] .dialog-choices button,:root[data-theme=dark] .story-choices button{border:1px solid #3b3342;background:#2a253066}
+:root[data-theme=dark] .dialog-choices button:active,:root[data-theme=dark] .story-choices button:active{background:#352d3c}
+:root[data-theme=dark] .story-topline{background:#27212d}
+:root[data-theme=dark] .story-topline>span svg{color:#b59db5}
+:root[data-theme=dark] .story-exit{color:#ac9eaf}
+:root[data-theme=dark] .story-speaker{color:#ba9ab3}
+:root[data-theme=dark] .story-controls>span{color:#c7bcc6}
+:root[data-theme=dark] .story-controls>button{color:#997fa3}
+:root[data-theme=dark] #viewArtButton{border-bottom:1px solid #463d4f}
+:root[data-theme=dark] body{background:radial-gradient(ellipse at 80% 0,rgba(57,49,65,.19),transparent 50%),var(--paper)}
+:root[data-theme=dark] .need>svg{color:#aaa3b6}
+:root[data-theme=dark] .need-label{color:#9a939f}
+:root[data-theme=dark] .need-label>span:last-child{color:#bbb5bb}
+:root[data-theme=dark] .scene-frame{background:#443c4c}
+:root[data-theme=dark] .speech-bubble{background:rgba(33,26,40,.96);border:1px solid #241c2c}
+:root[data-theme=dark] .scene-bond-button{background:#231b2adf;border:1px solid #271f3090;color:#a289a4}
+:root[data-theme=dark] .care-action{color:#887e96}
+:root[data-theme=dark] .choice-tray p{color:#a195a4}
+:root[data-theme=dark] .choice-tray>button:not(.tray-close){border:1px solid #37303e;background:#25202a}
+:root[data-theme=dark] .new-day-button{background:#231b2aed;border:1px solid #342b3d;color:#a68e63}
+:root[data-theme=dark] .app-tabs{border-top:1px solid #352f3b;background:#261f2cf5}
+:root[data-theme=dark] .app-tabs button{color:#bbb1be}
+:root[data-theme=dark] .app-tabs button[aria-selected=true]{color:#8d7a99;background:#2d273370}
+:root[data-theme=dark] .tab-dot{background:#d2b498}
+:root[data-theme=dark] .bond-heading>span{color:#b19db0}
+:root[data-theme=dark] .bond-section p{color:#b2a8b1}
+:root[data-theme=dark] .chapter-invitation{border:1px solid #393340;background:#231c2a}
+:root[data-theme=dark] .chapter-number{color:#241c2c}
+:root[data-theme=dark] .setting-row{border-bottom:1px solid #332d3a}
+:root[data-theme=dark] .setting-row small{color:#baafb9}
+:root[data-theme=dark] .save-settings>p:nth-child(2){color:#afa2af}
+:root[data-theme=dark] .save-buttons button{border:1px solid #3e3646}
+:root[data-theme=dark] .settings-panel .site-footer{border-top:1px solid #332d3a}
+:root[data-theme=dark] .site-footer button{color:#b3a3b5}
+:root[data-theme=dark] .dialog-footnote{color:#b7aab7}
+:root[data-theme=dark] .toast{border:1px solid #38313f;background:#201926ed}
+:root[data-theme=dark] .choice-tray{background:#211928;border:1px solid #342e3b}
+:root[data-theme=dark] .setting-row input{accent-color:#a293b0;background:#37303d}
+:root[data-theme=dark] .setting-row input:before{background:#201926}
+:root[data-theme=dark] .setting-row input:checked{background:#ac9db8}
+:root[data-theme=dark] .object-orchid{color:#c4d3bf}
+:root[data-theme=dark] .object-orchid svg{fill:#c9d1c140}
+:root[data-theme=dark] .object-scroll{color:#3c3048;background:#41354c45}
+:root[data-theme=dark] .object-cup{color:#3f3747;fill:#3b3443}
+:root[data-theme=dark] .object-seal{color:#e1bfa2}
+:root[data-theme=dark] .object-chime{color:#e5d3b6}
+:root[data-theme=dark] .object-cushion{color:#dbc4d7}
+:root[data-theme=dark] .object-cushion svg{fill:#4a40557d}
+:root[data-theme=dark] .care-action.ritual small{color:#b07d8d}
+:root[data-theme=dark] .care-action.ritual svg{color:#b07d8d}
+:root[data-theme=dark] .care-action.ritual::after{background:#d29faf}
+:root[data-theme=dark] .text-button{color:#aa97af}
+:root[data-theme=dark] .chapter-tabs button{background:#2a253055;border:1px solid #362f3d;color:#bcacbc}
+:root[data-theme=dark] .chapter-tabs button[aria-pressed=true]{color:#90719d;border-color:#d3c4d7;background:#322b39a1}
+:root[data-theme=dark] .chapter-invitation p{color:#ad9fae}
+:root[data-theme=dark] .chapter-button{border-top:1px solid #3a3341;color:#826c97}
+:root[data-theme=dark] .chapter-note{color:#c7b7c2}
+:root[data-theme=dark] .copper-purse{color:#b89f77}
+:root[data-theme=dark] .segmented{background:#2f293466}
+:root[data-theme=dark] .segmented button{color:#b8a9bb}
+:root[data-theme=dark] .segmented button[aria-pressed=true]{color:#927a9a;background:#211a29}
+:root[data-theme=dark] .primary-button{border:1px solid #d3c3d9;background:#2f2936a1;color:#8e719c}
+:root[data-theme=dark] .primary-button:disabled{background:#2b263066;border-color:#362f3c;color:#c5b6c4}
+:root[data-theme=dark] .shop-note{color:#bdaebb}
+:root[data-theme=dark] .outfit-stage{background:radial-gradient(ellipse at 50% 65%,#292231 5%,#2f2936 75%)}
+:root[data-theme=dark] .outfit-stage:after{background:radial-gradient(ellipse,#b19eb02b,transparent 70%)}
+:root[data-theme=dark] .outfit-stage-note{color:#c1acbc}
+:root[data-theme=dark] .outfit-pager>button{color:#b19eb9}
+:root[data-theme=dark] .outfit-description p{color:#b7a9b6}
+:root[data-theme=dark] .furnishing-card{border:1px solid #37303e;background:#211a294d}
+:root[data-theme=dark] .furnishing-card.is-placed{border-color:#4e4457;background:#2e2834a6}
+:root[data-theme=dark] .prop-icon{color:#c4aec1}
+:root[data-theme=dark] .prop-orchid{color:#aab8a3}
+:root[data-theme=dark] .prop-seal,:root[data-theme=dark] .prop-chime{color:#c3b191}
+:root[data-theme=dark] .prop-cup{color:#a9bfbb}
+:root[data-theme=dark] .furnishing-card button{border-top:1px solid #332d3a;color:#b29db8}
+:root[data-theme=dark] .request-card{border:1px solid #3b3342;background:linear-gradient(130deg,#221b29,#2d263380)}
+:root[data-theme=dark] .request-label{color:#c4abbb}
+:root[data-theme=dark] .request-card blockquote{color:#a289a6}
+:root[data-theme=dark] .request-card>p{color:#b9a6b5}
+:root[data-theme=dark] .letter-preview>p{color:#b9a6b5}
+:root[data-theme=dark] .journal-note{color:#bcadba}
+:root[data-theme=dark] .keepsake-card{background:#221a2966;border:1px solid #3a3342;color:#b9a7bb}
+:root[data-theme=dark] .keepsake-card small{color:#c8bac6}
+:root[data-theme=dark] .journal-facts>p{color:#b8a7b4}
+:root[data-theme=dark] .relationship-card{background:#2d26338c}
+:root[data-theme=dark] .relationship-card p{color:#b8a7b4}
+:root[data-theme=dark] .memory-form>label,:root[data-theme=dark] .memory-label{color:#a891ad}
+:root[data-theme=dark] .memory-form input{border:1px solid #3d3545;background:#211928;color:#8e6e9c}
+:root[data-theme=dark] .memory-form input::placeholder{color:#cbbacd}
+:root[data-theme=dark] .preference-buttons button{border:1px solid #3b3343;color:#b9a4bd}
+:root[data-theme=dark] .preference-buttons button[aria-pressed=true]{background:#322b39;border-color:#4d4258;color:#977ba3}
+:root[data-theme=dark] .activity-menu>button{background:#221a2970;border:1px solid #3b3342;color:#baa7c0}
+:root[data-theme=dark] .activity-menu>button strong{color:#9b7ba7}
+:root[data-theme=dark] .activity-menu>button small{color:#c2afc1}
+:root[data-theme=dark] .held-line{color:#a184aa}
+:root[data-theme=dark] .game-intro{color:#a17da6}
+:root[data-theme=dark] .game-instruction{color:#c2abc0}
+:root[data-theme=dark] .paper-pieces button{background:#221b29;border:1px solid #383040;color:#9d82a5}
+:root[data-theme=dark] .paper-order{color:#c0aac1}
+:root[data-theme=dark] .paper-order li{color:#b199b4}
+:root[data-theme=dark] .hint-text{color:#c6b5c6;background:#2d2633}
+:root[data-theme=dark] .tea-options button{border:1px solid #403749;color:#bea8c1}
+:root[data-theme=dark] .tea-options button[aria-pressed=true],:root[data-theme=dark] .steep-options button[aria-pressed=true]{background:#332b3a;color:#92669d;border-color:#cdbad3}
+:root[data-theme=dark] .steep-options button{border:1px solid #403749;color:#bba6bf}
+:root[data-theme=dark] .search-locations button{border:1px solid #403749;color:#b399b9}
+:root[data-theme=dark] .earned-reward{color:#c2a383;background:#2d2436a1}
+:root[data-theme=dark] .letter-prose{color:#a589a8}
+:root[data-theme=dark] .album-card{border:1px solid #3b3343;background:#221a2980;color:#ae8fb3}
+:root[data-theme=dark] .album-art i{color:#261e2ed9}
+:root[data-theme=dark] .album-card small{color:#cab8cb}
+:root[data-theme=dark] .album-card.locked strong{color:#cab8cb}
+:root[data-theme=dark] .album-card.locked{border-color:#332c39}
+:root[data-theme=dark] .cloud-status{color:#a9b1a2}
+:root[data-theme=dark] .cloud-status[data-status=offline],:root[data-theme=dark] .cloud-status[data-status=full],:root[data-theme=dark] .cloud-status[data-status=waiting]{color:#c2a383}
+:root[data-theme=dark] .cloud-status[data-status=local]{color:#baafb9}
+:root[data-theme=dark] .affinity-row{color:#9a939f}
+:root[data-theme=dark] .affinity-row .need-track>span{background:#d8bec9}
+:root[data-theme=dark] .affinity-row.leading{color:#c0b5c5}
+:root[data-theme=dark] .affinity-row.leading .need-track>span{background:#b07d8d}
+:root[data-theme=dark] .affinity-note{color:#9a939f}
+:root[data-theme=dark] .moment-list button{border:1px solid #3a3342;background:#221a2966;color:#c0b5c5}
+:root[data-theme=dark] .moment-list small{color:#c8bac6}
+:root[data-theme=dark] .moment-list .unread{color:#c8bac6}
+:root[data-theme=dark] .moment-reply{border-top:1px solid #3a3342;color:#c0b5c5}
+:root[data-theme=dark] .tea-notes{color:#9a939f}
+:root[data-theme=dark] .tea-notes summary{color:#bba6bf}
+:root[data-theme=dark] .tea-notes li span{color:#bdb6bf}
+:root[data-theme=dark] .effect-note{color:#b4a6b7}
+:root[data-theme=dark] .jade-card{border:1px solid #3d3544;background:#27222c88}
+:root[data-theme=dark] .jade-card>svg{stroke:#8ca593}
+:root[data-theme=dark] .jade-card p{color:#877f8c}
+:root[data-theme=dark] .jade-card .need-track>span{background:#9dbaa5}
+:root[data-theme=dark] .jade-card small{color:#a5b3a9}
+
+/* selected tabs should look lifted, not pressed in */
+:root[data-theme=dark] .segmented button[aria-pressed=true]{background:#40364b;color:#efe5f3}
+:root[data-theme=dark] .app-tabs button[aria-selected=true]{background:#3a3144b0;color:#e8dcef}
+/* empty meter tracks need to stay visible against the dark */
+:root[data-theme=dark] .need-track{background:#463d50}
+/* a soft lavender glow so his black hat doesn't vanish into the dark */
+:root[data-theme=dark] .outfit-stage{background:radial-gradient(ellipse at 50% 60%,#5e5070 5%,#2d2634 72%)}
