@@ -9,7 +9,9 @@
   <script>
     // pick the theme before first paint, so a dark-mode visit never flashes light
     (function(){var t='system';try{t=JSON.parse(localStorage.getItem('sleeve-and-lantern.v1')).settings.theme||'system';}catch(e){}
-      var dark=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=dark?'dark':'light';})();
+      var dark=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=dark?'dark':'light';
+      // opened from the home screen: iOS blurs a band below the status bar, so the page needs a little extra room
+      if(navigator.standalone||matchMedia('(display-mode: standalone)').matches)document.documentElement.classList.add('standalone');})();
   </script>
   <link rel="preload" href="./assets/courtyard.webp" as="image"><link rel="preload" href="./assets/minister-sprites.webp" as="image">
 </head>
