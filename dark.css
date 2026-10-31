@@ -63,14 +63,6 @@
 :root[data-theme=dark] .setting-row input{accent-color:#a293b0;background:#37303d}
 :root[data-theme=dark] .setting-row input:before{background:#201926}
 :root[data-theme=dark] .setting-row input:checked{background:#ac9db8}
-:root[data-theme=dark] .object-orchid{color:#c4d3bf}
-:root[data-theme=dark] .object-orchid svg{fill:#c9d1c140}
-:root[data-theme=dark] .object-scroll{color:#3c3048;background:#41354c45}
-:root[data-theme=dark] .object-cup{color:#3f3747;fill:#3b3443}
-:root[data-theme=dark] .object-seal{color:#e1bfa2}
-:root[data-theme=dark] .object-chime{color:#e5d3b6}
-:root[data-theme=dark] .object-cushion{color:#dbc4d7}
-:root[data-theme=dark] .object-cushion svg{fill:#4a40557d}
 :root[data-theme=dark] .care-action.ritual small{color:#b07d8d}
 :root[data-theme=dark] .care-action.ritual svg{color:#b07d8d}
 :root[data-theme=dark] .care-action.ritual::after{background:#d29faf}

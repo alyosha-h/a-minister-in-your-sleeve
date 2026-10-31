@@ -288,18 +288,24 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .request-done{opacity:.8}
 .scene-topline>span:last-child{opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:39%;font-size:8px}
 .room-decor{position:absolute;inset:0;z-index:3;pointer-events:none}
-.room-object{position:absolute;background:none;padding:5px;width:48px;height:54px;pointer-events:auto;color:#b69bae;filter:drop-shadow(0 3px 2px #35243735)}
-.room-object svg{width:100%;height:100%;stroke-width:1.25}
-.object-orchid{left:3%;bottom:18%;color:#a8bea1}
-.object-orchid svg{fill:#b0bba440}
-.object-scroll{left:5%;top:14%;color:#f0d8b3;width:42px;height:64px;background:#e6d3af45;border-radius:3px}
-.object-cup{right:8%;bottom:15%;color:#c4d6ce;fill:#cadbd0;width:45px;height:45px}
-.object-seal{right:3%;bottom:24%;color:#d4a47c;width:44px;height:46px}
-.object-chime{right:24%;top:9%;color:#d7bd91;height:62px;transform-origin:50% 0;animation:chimeSway 6s ease-in-out infinite}
-.object-cushion{left:50%;bottom:12%;transform:translateX(-50%);color:#c8a4c1;width:110px;height:35px}
-.object-cushion svg{fill:#ceacc67d;stroke-width:.9}
-.paper-clutter{position:absolute;z-index:3;left:12%;bottom:25%;width:49px;height:51px;background:none;color:#f2dec1;transform:rotate(-12deg);padding:3px;filter:drop-shadow(0 2px 2px #47333f44)}
-.paper-clutter svg{width:31px;height:31px;fill:#efdfc960;stroke-width:1}
+.room-object{position:absolute;background:none;padding:0;height:auto;pointer-events:auto}
+/* painted props on the cleared table; sizes are a share of the scene's width so they scale with it */
+.room-object img{display:block;width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 3px 2px #2a1c2a55)}
+.object-orchid{left:1%;bottom:26%;width:23%}
+.object-cushion{left:54%;bottom:22%;width:38%}
+.object-scroll{left:85%;bottom:26%;width:14%}
+.object-cup{left:3%;bottom:12%;width:17%}
+.object-seal{left:83%;bottom:11%;width:15%}
+.object-chime{left:33%;top:-1%;width:8%;transform-origin:50% 0;animation:chimeSway 6s ease-in-out infinite}
+.object-chime img{filter:none}
+/* the props share the scene's light */
+[data-period=evening] .room-object img{filter:drop-shadow(0 3px 2px #2a1c2a55) brightness(.9) sepia(.18)}
+[data-period=night] .room-object img{filter:drop-shadow(0 3px 2px #10102055) brightness(.62) saturate(.72)}
+.rainy[data-period=morning] .room-object img,.rainy[data-period=afternoon] .room-object img{filter:drop-shadow(0 3px 2px #2a1c2a40) brightness(.88) saturate(.85)}
+.paper-clutter{position:absolute;z-index:3;left:30%;bottom:27%;width:16%;background:none;color:#fff7ed;padding:0;text-shadow:0 1px 4px #4f3640}
+.paper-clutter img{display:block;width:100%;height:auto;transform:rotate(-8deg);filter:drop-shadow(0 3px 2px #2a1c2a55)}
+[data-period=evening] .paper-clutter img{filter:drop-shadow(0 3px 2px #2a1c2a55) brightness(.9) sepia(.18)}
+[data-period=night] .paper-clutter img{filter:drop-shadow(0 3px 2px #10102055) brightness(.62) saturate(.72)}
 .paper-clutter span{font-family:var(--serif);font-style:italic;font-size:10px;display:block;margin-top:-2px}
 .ribbon-tie{position:absolute;z-index:2;width:18px;height:22px;right:28%;top:60%;filter:drop-shadow(0 1px 1px #362f4360);pointer-events:none}
 .ribbon-tie svg{width:100%;height:100%;fill:currentColor;stroke:#fff6;stroke-width:.7;transform:rotate(-12deg)}
@@ -556,11 +562,11 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .search-locations.many button{min-height:52px;padding:9px 10px;gap:8px;font-size:11px;text-align:left}
 .search-locations.many svg{width:19px;height:19px;flex:none}
 .effect-note{font-size:10px;line-height:1.35;color:#9c8aa0;margin:-2px 0 6px;text-align:center}
-.room-object.thirsty{filter:saturate(.4);transform:rotate(-8deg);opacity:.75}
+.room-object.thirsty img{transform:rotate(-7deg) scaleY(.94);transform-origin:50% 100%;filter:saturate(.4) brightness(.92)}
 .room-object.thirsty::after{content:'water?';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-style:italic;color:#fff7ed;text-shadow:0 1px 4px #4f3640;white-space:nowrap}
-.room-object.stirring svg{animation:chime-sway 1.6s ease-in-out infinite;transform-origin:50% 0}
+.room-object.stirring img{animation:chime-sway 1.6s ease-in-out infinite;transform-origin:50% 0}
 @keyframes chime-sway{25%{transform:rotate(9deg)}75%{transform:rotate(-9deg)}}
-.reduced-motion .room-object.stirring svg{animation:none}
+.reduced-motion .room-object.stirring img{animation:none}
 .treat-button small{opacity:.7;margin-left:3px}
 .jade-card{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:12px;border:1px solid #c9d8cc;border-radius:12px;background:#eef3ec88}
 .jade-card>svg{width:30px;height:30px;flex:none;stroke:#6f8f78;stroke-width:1.2;fill:none}
@@ -584,3 +590,4 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .standalone .app-shell,.standalone .story-dialog{padding-top:calc(env(safe-area-inset-top) + var(--top-buffer))}
 /* the story reader covers the page completely, status bar included, in either theme */
 .story-dialog::backdrop{background:#f6f2e9;backdrop-filter:none}
+.prop-icon img{max-width:62px;max-height:52px;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 2px 2px #2a1c2a40)}
