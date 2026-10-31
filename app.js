@@ -1,4 +1,4 @@
-import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel } from './game.js';
+import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS } from './game.js';
 import { CHAPTERS, RIBBONS } from './catalog.js';
 import { allConversations, chapterStories } from './more-content.js';
 import { spriteFrameStyle } from './sprites.js';
@@ -6,11 +6,31 @@ import { createPhaseTwoUI } from './phase-two-ui.js';
 import { createCloudSync } from './cloud.js';
 
 const $=id=>document.getElementById(id),backupKey=SAVE_KEY+'.backup';
-let storageAvailable=true,recovered=false,state=load();
+let storageAvailable=true,recovered=false,state=load(),welcomeGap=0;
+({state,gap:welcomeGap}=rollDay(state));
 for(const c of CHAPTERS)chapterRecord(state,c.id).inProgress=false;
 let busy=false,animation={mode:state.asleep?'sleep':'idle',start:performance.now()},storySession=null;
 let animationTimer,toastTimer,audio,isTalking=false,phaseTwo,cloud=null;
 const pages=['care','lantern','room','journal','settings'];
+const moodStatus={stuffed:'pleasantly, regrettably full',peckish:'eyeing the kitchen',drowsy:'nodding over his papers',restless:'fidgeting with his sleeves',wistful:'a little wistful today',flourishing:'in excellent spirits'};
+const ritualHints={morning:'breakfast time',afternoon:'it’s teatime',evening:'an evening chat',night:'past his bedtime'};
+const ritualToasts={morning:'breakfast together · +3 bond',afternoon:'afternoon tea, properly observed · +3 bond',evening:'an evening’s conversation · +3 bond',night:'tucked in for the night · +3 bond'};
+const periodLines={
+  morning:['“good morning. i have already reviewed two memorials and one very small breakfast.”','“the light is kind at this hour. so, apparently, are you.”'],
+  afternoon:['“it is nearly teatime. i say this as a matter of record.”','“the afternoon is for correspondence. or for not doing correspondence, together.”'],
+  evening:['“the lanterns are being lit. i always liked this part of the day.”','“stay for a while? the evening is better with company.”'],
+  night:['“you are up late. so am i. we needn’t tell anyone.”','“the moon is out. the paperwork, mercifully, is not.”']
+};
+const rainLines=['“listen. the rain is doing all the talking today. it’s rather restful.”','“a wet day. i have no intention of going anywhere. you?”','“the wisteria is drinking. i shall have tea in solidarity.”'];
+const awayLines=gap=>gap>=7?['“you are back.” he sets down his brush very carefully. “i kept your cup out. every day. it was no trouble.”','“there you are. the courtyard has been very well administered in your absence. and very quiet.”']:gap>=3?['“ah. i had begun drafting a memorial on your whereabouts. it can be shelved.”','“welcome back. i have saved three stories and one dumpling. the dumpling did not survive.”']:['“you missed a rather good sunset. i watched it twice, for both of us.”','“yesterday was quiet. i’m glad today isn’t.”'];
+const moodLines={
+  stuffed:['“i have made an error of policy. it was delicious.”','“no more buns. possibly ever. ask me again at supper.”','“i shall simply lie here and govern from a horizontal position.”'],
+  peckish:['“is it lunchtime? i ask on behalf of a colleague.”','“i could manage a dumpling. purely to keep my strength up for the paperwork.”','“the kitchen is very far away for someone my size. i mention it only in passing.”'],
+  drowsy:['“i am reading. with my eyes closed. it is a technique.”','“the characters keep… wandering about the page.”','“if i were to rest my head on this scroll, it would be strictly temporary.”'],
+  restless:['“something is out of place. possibly everything.”','“this cushion has developed opinions. so have the papers.”','“a cup of something warm might settle the administration.”'],
+  wistful:['“it is quiet today. that is not a complaint. not exactly.”','“you are here. good. i was beginning to talk to the inkstone.”','“would you sit with me? there is no particular reason.”'],
+  flourishing:['“i feel as though i could draft an entire edict before supper. i won’t. but i could.”','“everything is in order. i do not trust it, but i am enjoying it.”','“you have been taking very good care of me. i have noticed. officially.”']
+};
 let activePage='care',selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;
 
 function load(){
@@ -24,7 +44,7 @@ function save(){
   cloud?.changed();
 }
 function adoptState(candidate){
-  candidate=elapsedCare(candidate);for(const c of CHAPTERS)chapterRecord(candidate,c.id).inProgress=false;
+  candidate=rollDay(elapsedCare(candidate)).state;for(const c of CHAPTERS)chapterRecord(candidate,c.id).inProgress=false;
   state=candidate;selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;save();render();
   animation={mode:state.asleep?'sleep':'idle',start:performance.now()};idleSpeech();return state;
 }
@@ -89,8 +109,12 @@ function renderLantern(){
   document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{selectedChapter=b.dataset.chapter;renderLantern();});
 }
 function render(){
-  $('dayLabel').textContent='day '+String(state.day).padStart(2,'0');
-  for(const [k,v]of Object.entries(state.needs)){const n=Math.round(v);$(k+'Value').textContent=n;$(k+'Bar').style.width=n+'%';$(k+'Meter').setAttribute('aria-valuenow',n);}
+  const now=Date.now(),period=periodOf(now),rain=weatherOf(dateKey(now))==='rain',due=ritualDue(state,now);
+  $('dayLabel').textContent='day '+String(state.day).padStart(2,'0')+' · '+period;
+  $('sceneFrame').dataset.period=period;$('dayIcon').setAttribute('href',period==='night'||period==='evening'?'#i-moon':'#i-sun');$('sceneFrame').classList.toggle('rainy',rain);
+  document.querySelectorAll('.care-action').forEach(b=>{const a=b.dataset.action,hint=due&&RITUALS[due]===a;b.classList.toggle('ritual',Boolean(hint));if(b.dataset.small===undefined)b.dataset.small=b.querySelector('small')?.textContent??'';const sm=b.querySelector('small');if(sm)sm.textContent=hint?ritualHints[due]:b.dataset.small;});
+  for(const [k,v]of Object.entries(state.needs)){const n=Math.round(v);$(k+'Value').textContent=n;$(k+'Bar').style.width=n+'%';$(k+'Meter').setAttribute('aria-valuenow',n);$(k+'Meter').closest('.need').classList.toggle('low',v<LOW);}
+  const mood=moodOf(state);$('sceneFrame').dataset.mood=mood;
   const upcoming=nextChapter(state),ready=CHAPTERS.some(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});
   $('bondSummary').textContent=upcoming?state.bond+' / '+upcoming.bond:state.bond+' bond';$('lanternNavDot').hidden=!ready;
   $('tab-lantern').setAttribute('aria-label',ready?'lantern, encounter ready':'lantern');
@@ -98,7 +122,7 @@ function render(){
   $('sceneLantern').setAttribute('aria-label',ready?'follow the lantern to his study':'visit the lantern and your memories');
   $('sceneLantern').title=ready?'an evening is waiting':'your time together';
   $('keepsake').hidden=!state.chapter.complete;$('newDayButton').hidden=!canBeginDay(state);$('sceneFrame').classList.toggle('day-ready',canBeginDay(state));
-  $('sceneStatus').textContent=state.asleep?'dreaming, probably of dumplings':relationshipLabel(state);
+  $('sceneStatus').textContent=state.asleep?'dreaming, probably of dumplings':moodStatus[mood]||relationshipLabel(state);
   document.body.classList.toggle('reduced-motion',state.settings.reducedMotion);
   $('soundButton').setAttribute('aria-pressed',String(state.settings.sound));$('soundButton').setAttribute('aria-label','turn sound '+(state.settings.sound?'off':'on'));
   $('soundSetting').checked=state.settings.sound;$('motionSetting').checked=state.settings.reducedMotion;
@@ -109,6 +133,9 @@ function speak(text,activity){$('speechText').textContent=text;if(activity)$('ac
 function idleSpeech(){
   if(document.querySelector('dialog[open]')||busy)return;
   if(state.asleep){speak('“mm… the memorial can wait.”','an important minister, taking a very important nap.');return;}
+  const mood=moodOf(state);
+  if(moodLines[mood]&&Math.random()<(mood==='flourishing'?.4:.7)){speak(moodLines[mood][Math.floor(Math.random()*moodLines[mood].length)],moodStatus[mood]+'.');return;}
+  if(Math.random()<.3){const now=Date.now(),pool=weatherOf(dateKey(now))==='rain'?rainLines:periodLines[periodOf(now)];speak(pool[Math.floor(Math.random()*pool.length)],'a familiar little presence, glad you’re here.');return;}
   let lines;
   if(state.chapters.game.complete)lines=['“a rematch? i have saved you a very good seat.”','“you may sit closer. i find it improves my concentration.”','“the white stone is still yours. so is the afternoon.”'];
   else if(state.chapters.ribbon.complete)lines=['“the ribbon? perfectly serviceable. i see no reason to change it.”','“a quiet moment? i have one here, just for you.”'];
@@ -128,7 +155,7 @@ const frames={feed:[2,3],tea:[4,5],pet:[6,7],talk:[8,9],rest:[10,11],sleep:[11,1
 let previousFrame='';
 function animate(time){
   const noMotion=state.settings.reducedMotion||matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let frame;if(animation.mode==='idle')frame=!noMotion&&time%6400<170?1:0;else{const list=frames[animation.mode]||[0];frame=list[noMotion?0:Math.floor(Math.max(0,time-animation.start)/(animation.mode==='sleep'?2400:650))%list.length];}
+  let frame;if(animation.mode==='idle')frame=noMotion?0:time%6400<170?1:moodOf(state)==='drowsy'&&time%9000>7400?10:0;else{const list=frames[animation.mode]||[0];frame=list[noMotion?0:Math.floor(Math.max(0,time-animation.start)/(animation.mode==='sleep'?2400:650))%list.length];}
   const key=state.outfit+':'+frame;if(key!==previousFrame){Object.assign($('characterSprite').style,spriteFrameStyle(frame,state.outfit));previousFrame=key;}
   requestAnimationFrame(animate);
 }
@@ -137,7 +164,10 @@ function commitResult(result){
   if(result.reward){$('bondFloat').textContent='+'+result.reward+' bond';$('bondFloat').classList.remove('show');void $('bondFloat').offsetWidth;$('bondFloat').classList.add('show');}
   const unlocked=CHAPTERS.find(c=>chapterRecord(state,c.id).unlocked&&!before.has(c.id));
   if(unlocked){selectedChapter=unlocked.id;renderLantern();ping('lantern');toast('the lantern is glowing · '+unlocked.title);}
+  else if(result.flourished)toast('he’s flourishing · a bonus for keeping him well, +5 bond');
   else if(result.requestCompleted)toast('a small request, fulfilled · +15 bond and +12 copper');
+  else if(result.ritual)toast(ritualToasts[result.ritual]);
+  else if(result.attuned)toast('just what he needed · +3 bond');
   return result;
 }
 function doCare(action,item=null,allowSheet=false){
@@ -149,6 +179,8 @@ function doCare(action,item=null,allowSheet=false){
   if(action==='rest')speak('“five minutes. wake me before the next dynasty.”','an important minister, taking a very important nap.');
   if(action==='tidy')speak('“a remarkably efficient administration. i was keeping that poem, though.”','the papers settle. he looks quietly pleased.');
   if(action==='pickup')speak('“a better view. and rather agreeable company.”','a little trust, in the palm of your hand.');
+  if(r.stuffed)speak(['“i… could not possibly. and yet.”','“this is how dynasties fall. one more bun.”','“i will require a short lie-down. for the good of the state.”'][Math.floor(Math.random()*3)],'one bun past diplomacy.');
+  else if(r.attuned&&Math.random()<.5)speak(['“how did you know?”','“exactly that. i was about to ask. eventually.”','“you read me better than my own secretaries.”'][Math.floor(Math.random()*3)]);
   return r;
 }
 function toggleTray(action){const tray=$(action==='feed'?'foodTray':'teaTray'),open=tray.hidden;closeTrays();tray.hidden=!open;document.querySelector('[data-action="'+action+'"]').setAttribute('aria-expanded',String(open));}
@@ -211,18 +243,26 @@ $('characterButton').onclick=()=>doCare('pet');$('chapterButton').onclick=()=>op
 $('sceneLantern').onclick=()=>{const ready=CHAPTERS.find(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});if(ready)openStory(ready.id);else selectPage('lantern');};
 $('storyNext').onclick=advanceStory;$('exitStoryButton').onclick=()=>$('storyDialog').close();
 $('viewArtButton').onclick=()=>{const v=$('storyDialog').classList.toggle('art-only');$('viewArtButton').textContent=v?'read on':'view art';$('viewArtButton').setAttribute('aria-pressed',String(v));};
+function checkDay(){
+  const r=rollDay(state);if(r.state===state)return;state=r.state;save();render();if(r.gap>=2)welcome(r.gap);
+  else if(r.rolled){speak('“a new day. i have taken the liberty of starting without you.”','another small day, together.');ping();}
+}
+function welcome(gap){
+  const lines=awayLines(gap);speak(lines[Math.floor(Math.random()*lines.length)],'glad you’re here. no explanations needed.');
+  toast(gap>=7?'he kept the courtyard while you were away':'welcome back');
+}
 $('newDayButton').onclick=()=>{state=beginDay(state);save();animation={mode:'idle',start:performance.now()};render();selectPage('care');speak(state.memories.name?'“good morning, '+state.memories.name+'. i was just thinking about breakfast.”':'“a new day. shall we see what it brings?”','another small day, together.');ping();};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
 $('homeButton').onclick=()=>selectPage('care');$('bondShortcut').onclick=()=>selectPage('lantern');$('helpButton').onclick=()=>showSheet('helpDialog');
 $('soundButton').onclick=()=>{state.settings.sound=!state.settings.sound;save();render();ping();};$('soundSetting').onchange=e=>{state.settings.sound=e.target.checked;save();render();ping();};$('motionSetting').onchange=e=>{state.settings.reducedMotion=e.target.checked;save();render();};
 $('exportButton').onclick=()=>{save();const blob=new Blob([JSON.stringify({app:'a-minister-in-your-sleeve',savedAt:new Date().toISOString(),state},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minister-in-your-sleeve-day-'+state.day+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);$('settingsMessage').textContent='your copy is ready. keep it somewhere safe.';};
 $('importButton').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>150000)throw new Error('that file is too large for a courtyard save.');const data=JSON.parse(await file.text());if(data.app!=='a-minister-in-your-sleeve')throw new Error('please choose an exported courtyard save.');const candidate=elapsedCare(validateState(data.state));if(!confirm('restore day '+candidate.day+' with '+candidate.bond+' bond? this replaces progress on this device.'))return;for(const c of CHAPTERS)chapterRecord(candidate,c.id).inProgress=false;state=candidate;selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;save();render();animation={mode:state.asleep?'sleep':'idle',start:performance.now()};$('settingsMessage').textContent='your courtyard is restored. he’s glad you’re back.';idleSpeech();}catch(error){$('settingsMessage').textContent=error instanceof SyntaxError?'that file could not be read. try an exported courtyard save.':error.message;}e.target.value='';};
+$('importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>150000)throw new Error('that file is too large for a courtyard save.');const data=JSON.parse(await file.text());if(data.app!=='a-minister-in-your-sleeve')throw new Error('please choose an exported courtyard save.');const candidate=rollDay(elapsedCare(validateState(data.state))).state;if(!confirm('restore day '+candidate.day+' with '+candidate.bond+' bond? this replaces progress on this device.'))return;for(const c of CHAPTERS)chapterRecord(candidate,c.id).inProgress=false;state=candidate;selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;save();render();animation={mode:state.asleep?'sleep':'idle',start:performance.now()};$('settingsMessage').textContent='your courtyard is restored. he’s glad you’re back.';idleSpeech();}catch(error){$('settingsMessage').textContent=error instanceof SyntaxError?'that file could not be read. try an exported courtyard save.':error.message;}e.target.value='';};
 
-document.addEventListener('visibilitychange',()=>{if(document.hidden){save();cloud?.flush();}else if(!$('storyDialog').open){state=elapsedCare(state);save();render();cloud?.pull();}});window.addEventListener('pagehide',()=>{save();cloud?.flush();});
-setInterval(()=>{if(!document.hidden&&!document.querySelector('dialog[open]')&&!busy){state=elapsedCare(state);save();render();}},60000);setInterval(idleSpeech,24000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){save();cloud?.flush();}else if(!$('storyDialog').open){state=elapsedCare(state);save();render();checkDay();cloud?.pull();}});window.addEventListener('pagehide',()=>{save();cloud?.flush();});
+setInterval(()=>{if(!document.hidden&&!document.querySelector('dialog[open]')&&!busy){state=elapsedCare(state);save();render();checkDay();}},60000);setInterval(idleSpeech,24000);
 phaseTwo=createPhaseTwoUI({state:()=>state,commit:commitResult,care:doCare,careInSheet:a=>doCare(a,null,true),speak,toast,ping,selectPage,page:()=>activePage,showSheet,replaceSheet,openTalk,openStory,openTray:toggleTray});
 const initial=pageFromLocation();history.replaceState({page:initial},'','#'+initial);selectPage(initial,false);save();render();requestAnimationFrame(animate);
-if(state.asleep)idleSpeech();else if(state.chapter.complete)idleSpeech();
+if(welcomeGap>=2)welcome(welcomeGap);else if(state.asleep||state.chapter.complete||moodLines[moodOf(state)])idleSpeech();
 cloud=createCloudSync({getState:()=>state,adopt:adoptState,canAdopt:()=>!$('storyDialog').open,onStatus:cloudStatus,askConflict});cloud.init().catch(()=>cloudStatus('local'));
 if(recovered)toast('your last good save has been restored.');if(!storageAvailable)toast('browser saving is unavailable. keep a copy from settings.');

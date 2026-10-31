@@ -1,5 +1,5 @@
 import { CHAPTERS, ITEMS, RIBBONS, MEMORIALS, TEA_CLUES, LETTERS } from './catalog.js';
-import { chapterRecord, requestDefinition, relationshipLabel, finishGame, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
+import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
 import { spriteFrameStyle } from './sprites.js';
 
 const $=id=>document.getElementById(id);
@@ -60,7 +60,6 @@ export function createPhaseTwoUI(ctx){
     document.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{ctx.speak(ITEMS.find(i=>i.id===b.dataset.object).reaction,'a little corner that feels more like home.');ctx.ping('tea');});
     $('paperClutter').hidden=s.tidied;
     const ribbon=RIBBONS.find(r=>r.id===s.memories.ribbon);$('ribbonTie').hidden=!ribbon||s.asleep;if(ribbon)$('ribbonTie').style.color=ribbon.color;
-    $('sceneFrame').classList.toggle('rainy',s.chapters.rain.complete&&s.day%3===0);
     $('requestSummary').textContent=s.request.done?'a small kindness, remembered':requestDefinition(s).title;
     $('requestShortcut').classList.toggle('request-done',s.request.done);
   }
@@ -98,6 +97,10 @@ export function createPhaseTwoUI(ctx){
       $('activityTitle').textContent='a little closer.';
       root.innerHTML='<div class="held-scene"><img src="./assets/cupped-palm.webp" alt="your open hand, gently holding him"><div class="held-minister"><span class="character-sprite" id="heldSprite"></span></div></div><p class="held-line">'+esc(s.memories.holdCount>1?'“yes. this is a very agreeable view. you may take your time.”':'“an unconventional mode of transport. i find i approve.”')+'</p><button id="setDown" class="primary-button">set him down gently</button><p class="dialog-footnote">'+(activity.result?.reward?'a little trust · +'+activity.result.reward+' bond':'no hurry. he looks quite comfortable.')+'</p>';
       Object.assign($('heldSprite').style,spriteFrameStyle(9,s.outfit));$('setDown').onclick=()=>{$('activityDialog').close();ctx.speak('“a very satisfactory excursion. i may request another.”','he looks at your hand a little more fondly.');};
+    }else if(activity.view==='games'&&tooTiredToPlay(s)){
+      $('activityTitle').textContent='a forfeit, of sorts.';
+      root.innerHTML='<div class="game-result-icon">'+icon('moon')+'</div><p class="game-intro">“i could beat you in my sleep. that is precisely the problem.”</p><p class="dialog-footnote">he’s too drowsy for games. a rest or a warm cup first.</p><button id="resultDone" class="primary-button">let him be</button>';
+      $('resultDone').onclick=()=>$('activityDialog').close();
     }else if(activity.view==='games'){
       $('activityTitle').textContent='a worthy opponent.';
       root.innerHTML='<div class="activity-menu"><button id="playMemorial">'+icon('scroll')+'<span><strong>scattered memorial</strong><small>put his thoughts in order</small></span>'+icon('arrow')+'</button><button id="playTea">'+icon('tea')+'<span><strong>tea for two</strong><small>find the cup he has in mind</small></span>'+icon('arrow')+'</button></div><p class="dialog-footnote">'+(s.played?'today’s game reward is already yours. play again for the pleasure of it.':'your first game today · +10 bond and +8 copper, plus any new care category.')+'</p>';

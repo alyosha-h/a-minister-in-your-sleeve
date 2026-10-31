@@ -31,6 +31,11 @@ a{color:inherit}
 .need:nth-child(2) .need-track>span{background:#c5ab7e}
 .need:nth-child(3) .need-track>span{background:#9fa997}
 .need:nth-child(4) .need-track>span{background:#c59eae}
+.need.low .need-label>span:first-child{color:#9b5f72}
+.need.low .need-track>span{animation:need-low 2.4s ease-in-out infinite}
+@keyframes need-low{50%{opacity:.45}}
+.reduced-motion .need.low .need-track>span{animation:none}
+@media (prefers-reduced-motion:reduce){.need.low .need-track>span{animation:none}}
 .scene-art,.scene-shade{position:absolute;inset:0}
 .scene-shade{background:linear-gradient(180deg,rgba(42,30,55,.22),transparent 18%,transparent 80%,rgba(49,29,39,.28));pointer-events:none}
 .scene-frame.is-asleep .scene-art{filter:brightness(.68) saturate(.76)}
@@ -310,6 +315,18 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .rain-effect{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;background-image:repeating-linear-gradient(107deg,transparent 0,transparent 57px,#e6dcf44d 59px,transparent 60px);background-size:120% 130%;transition:opacity 1s}
 .rainy .rain-effect{opacity:.35;animation:rainDrift 1.5s linear infinite}
 .rainy .scene-art{filter:brightness(.88) saturate(.9)}
+/* time of day: a tint over the courtyard art, so it stacks with rain and sleep */
+.scene-art::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity 2s,background 2s;pointer-events:none}
+[data-period=morning] .scene-art::after{opacity:1;background:linear-gradient(180deg,#fff6e026,#ffe9c41a 60%,transparent);mix-blend-mode:screen}
+/* dusk and night have painted versions; the tint stays light so the art carries it */
+[data-period=evening] .scene-art{background-image:url('./assets/courtyard-dusk.webp')}
+[data-period=night] .scene-art{background-image:url('./assets/courtyard-night.webp')}
+[data-period=night].is-asleep .scene-art{filter:brightness(.8) saturate(.85)}
+[data-period=night] .scene-lantern,[data-period=evening] .scene-lantern{filter:drop-shadow(0 0 10px #ffd59a)}
+.care-action.ritual small{color:#9b5f72}
+.care-action.ritual svg{color:#9b5f72}
+.care-action.ritual{position:relative}
+.care-action.ritual::after{content:'';position:absolute;top:6px;right:calc(50% - 16px);width:5px;height:5px;border-radius:50%;background:#c27c92}
 .lantern-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .lantern-heading h1{font-size:31px}
 .text-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;background:none;padding:8px 3px;color:#927a99;font-size:11px}
