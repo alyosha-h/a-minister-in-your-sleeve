@@ -2,7 +2,12 @@ export const CHAPTERS = [
   { id:'tea', number:'01', title:'tea at his true height', bond:20, day:1, art:'tea-at-true-height.webp', keepsake:'a second cup', icon:'tea', letter:'your place is still set', choices:{thanks:3,hand:2} },
   { id:'rain', number:'02', title:'beneath one umbrella', bond:220, day:4, art:'beneath-one-umbrella.webp', keepsake:'a pressed wisteria petal', icon:'leaf', letter:'regarding the weather', choices:{shelter:3,goodbye:2} },
   { id:'ribbon', number:'03', title:'the ribbon at his nape', bond:540, day:9, art:'ribbon-at-his-nape.webp', keepsake:'the ribbon you chose', icon:'ribbon', letter:'a very minor matter of appearance', choices:{color:3,comfort:3} },
-  { id:'game', number:'04', title:'a game he intends to lose', bond:950, day:15, art:'game-he-intends-to-lose.webp', keepsake:'a white game stone', icon:'stone', letter:'an invitation to a rematch', choices:{bluff:3,touch:2} }
+  { id:'game', number:'04', title:'a game he intends to lose', bond:950, day:15, art:'game-he-intends-to-lose.webp', keepsake:'a white game stone', icon:'stone', letter:'an invitation to a rematch', choices:{bluff:3,touch:2} },
+  { id:'lamp', number:'05', title:'stay until the lamp goes out', bond:1100, day:18, art:'stay-until-the-lamp.webp', keepsake:'the finished poem', icon:'scroll', letter:'regarding a lamp, and the hour', choices:{comfort:3,lamp:2} },
+  { id:'lotus', number:'06', title:'the lotus pavilion', bond:1250, day:21, art:'lotus-pavilion.webp', keepsake:'two paper lotus lanterns', icon:'lantern', letter:'a plain statement of fact', choices:{pace:3} },
+  { id:'beside', number:'07', title:'a place beside him', bond:1400, day:24, art:'place-beside-him.webp', keepsake:'a seal with two names', icon:'seal', letter:'a matter of household arrangements', choices:{answer:3,name:3} },
+  // the finale waits on the talisman itself, mended a little each well-kept day
+  { id:'jade', number:'08', title:'the jade made whole', bond:1550, day:27, mend:40, art:'jade-made-whole.webp', keepsake:'the mended talisman', icon:'jade', letter:'concerning the talisman', choices:{ask:3,stay:2} }
 ];
 export const REQUESTS = [
   {id:'company',title:'stay a little while',quote:'“this paragraph refuses to finish itself. perhaps it needs an audience.”',description:'share a conversation while he puts his thoughts in order.',actions:['talk'],cta:'sit with him',action:'talk'},
@@ -18,18 +23,28 @@ export const ITEMS = [
   {id:'official',kind:'outfit',name:'the official robe',price:0,icon:'ribbon',description:'periwinkle silk. an impressive hat. considerable authority.'},
   {id:'leisure',kind:'outfit',name:'a morning at home',price:48,icon:'ribbon',description:'ivory silk, jade edging, and absolutely no official hat.'},
   {id:'travel',kind:'outfit',name:'the road to somewhere',price:72,icon:'ribbon',description:'deep teal, a little satchel, and the suggestion of an adventure.'},
-  {id:'cushion',kind:'furnishing',name:'a silk cushion',price:24,icon:'cushion',description:'a very small luxury for a very important nap.',reaction:'“this is excellent. i may have to postpone several appointments.”'},
-  {id:'orchid',kind:'furnishing',name:'a little orchid',price:30,icon:'orchid',description:'a small garden at the edge of his desk.',reaction:'“it is good company. never interrupts a sentence.”'},
-  {id:'scroll',kind:'furnishing',name:'an evening poem',price:38,icon:'scroll',description:'a few original lines in his own untidy hand.',reaction:'“stay until the lamp is low / and call this little corner home.” he pretends to inspect the mounting.'},
-  {id:'cup',kind:'furnishing',name:'a painted cup',price:20,icon:'tea',description:'blue leaves and a rim just right for tiny hands.',reaction:'“i shall need to test it. repeatedly. you may keep me company.”'},
-  {id:'seal',kind:'furnishing',name:'his desk seal',price:28,icon:'seal',description:'a little piece of official dignity, restored.',reaction:'“at last. i may now issue properly authorised requests for dumplings.”'},
-  {id:'chime',kind:'furnishing',name:'a wind chime',price:32,icon:'chime',description:'one soft note when the garden stirs.',reaction:'“listen. even the wind has decided to speak more gently here.”'}
+  {id:'cushion',kind:'furnishing',name:'a silk cushion',price:24,icon:'cushion',description:'a very small luxury for a very important nap.',effect:'his naps restore more energy.',reaction:'“this is excellent. i may have to postpone several appointments.”'},
+  {id:'orchid',kind:'furnishing',name:'a little orchid',price:30,icon:'orchid',description:'a small garden at the edge of his desk.',effect:'water it every couple of days. a happy orchid keeps him comfortable.',reaction:'“it is good company. never interrupts a sentence.”'},
+  {id:'scroll',kind:'furnishing',name:'an evening poem',price:38,icon:'scroll',description:'a few original lines in his own untidy hand.',effect:'conversations lift his mood further.',reaction:'“stay until the lamp is low / and call this little corner home.” he pretends to inspect the mounting.'},
+  {id:'cup',kind:'furnishing',name:'a painted cup',price:20,icon:'tea',description:'blue leaves and a rim just right for tiny hands.',effect:'tea is more comforting.',reaction:'“i shall need to test it. repeatedly. you may keep me company.”'},
+  {id:'seal',kind:'furnishing',name:'his desk seal',price:28,icon:'seal',description:'a little piece of official dignity, restored.',effect:'properly authorised requests pay 6 more copper.',reaction:'“at last. i may now issue properly authorised requests for dumplings.”'},
+  {id:'chime',kind:'furnishing',name:'a wind chime',price:32,icon:'chime',description:'one soft note when the garden stirs.',effect:'his mood fades more slowly. it rings when he has something to show you.',reaction:'“listen. even the wind has decided to speak more gently here.”'}
+];
+// a pantry of treats: copper well spent once the shop is bought out
+export const TREATS = [
+  {id:'osmanthus',tray:'feed',name:'osmanthus cakes',price:14,description:'golden, fragrant, and far too small to share. he shares anyway.',boost:{fullness:40,mood:15},line:'“osmanthus. you have been talking to the kitchen.” he takes a very dignified bite. “they told you everything.”'},
+  {id:'mooncake',tray:'feed',name:'a tiny mooncake',price:22,description:'lotus paste, a salted yolk, and a stamped little moon.',boost:{fullness:30,mood:25,comfort:10},line:'“a mooncake. for no festival at all.” he holds it in both hands like a seal of office. “i accept.”'},
+  {id:'mist',tray:'tea',name:'mountain mist tea',price:16,description:'picked high up, where the clouds sit. strong and clear.',boost:{comfort:35,energy:15,mood:10},line:'“mountain tea. this is the cup they serve to visiting dignitaries.” he sips. “i am being visited by one.”'}
 ];
 export const RIBBONS = [{id:'rose',name:'rose silk',color:'#d995b5'},{id:'blue',name:'blue silk',color:'#8aaed7'},{id:'gold',name:'gold silk',color:'#d5b56e'}];
 export const LETTERS = {
   tea:'i have put the second cup beside mine. this is a practical arrangement: it will save me the trouble of finding it every time you visit.\n\ni thought you should know that the place by the window is still the best one.\n\n— lin yan',
   rain:'the umbrella has dried. my sleeve, eventually, has done the same.\n\ni am told there may be rain again this week. i offer this information without any particular motive.\n\nif you happen to be nearby, you know where to find me.\n\n— lin yan',
   ribbon:'the ribbon has proved entirely suitable. it stays where it is put, does not catch on my collar, and has attracted no comment from anyone whose opinion matters.\n\ni have kept it on today.\n\n— lin yan',
+  lamp:'i have rewritten the canal memorial. it is shorter, angrier, and considerably better. i shall present it again in spring, and in the meantime i have written to the villages myself.\n\nthe lamp is lit tonight. i thought you should know that it is not for working by.\n\n— lin yan',
+  lotus:'the paper lanterns were found this morning by the gardener, still together against the far bank. he asked whether he should clear them away. i told him they were a matter of state and not to be disturbed.\n\ni meant what i said in the pavilion. i expect i shall go on meaning it.\n\n— lin yan',
+  beside:'i have instructed the household to set two places at every meal, and to stop asking why. the steward wept a little. he has wanted me settled for years.\n\nthe seal is on my desk. i have used it once, on this letter.\n\n— lin yan',
+  jade:'the ministry has received me back with considerable relief and very little curiosity. i told them i had been away on a matter of some delicacy. this is accurate.\n\ni work at my desk until noon. after that, my time is my own, and you know where it takes me.\n\nthe second cup is still out. it always will be.\n\n— lin yan',
   game:'i have reviewed the final position. several alternative moves were available. i have decided not to explain them in writing.\n\na rematch would be the sensible way to settle the matter. same table. same company.\n\nthere is no need to return the white stone.\n\n— lin yan'
 };
 // a line at the foot of each letter, in the voice of how you've been with him
@@ -37,5 +52,9 @@ export const POSTSCRIPTS = {
   tea:{gentle:'p.s. you were kind to me when i was small and difficult. i noticed. i keep noticing.',teasing:'p.s. if you mention the saucer to anyone, i shall deny it with great dignity.',quiet:'p.s. the window seat. whenever you like. you needn’t say anything.'},
   rain:{gentle:'p.s. my sleeve asks me to tell you it regrets nothing.',teasing:'p.s. you stepped in at least four puddles on purpose. i counted.',quiet:'p.s. it rained again last night. i listened for a while. it was better than it used to be.'},
   ribbon:{gentle:'p.s. you were very careful. i could tell.',teasing:'p.s. a colleague asked about the ribbon. i told him it was a matter of state. he has stopped asking.',quiet:'p.s. i retied it myself this morning. it was not as good.'},
+  lamp:{gentle:'p.s. thank you for staying until it went out. it went out quite late. i did not hurry it.',teasing:'p.s. the cat has read the poem. it had no notes. i have chosen to take that as praise.',quiet:'p.s. i still have the lamp, and the dark after it. both are better now.'},
+  lotus:{gentle:'p.s. i have walked out to the pavilion twice since. it is very pleasant. it is not as pleasant.',teasing:'p.s. my secretary has been asked to practise the flute somewhere further away. another province, ideally.',quiet:'p.s. the lotus have opened again. i thought of you, and then i went on thinking of you.'},
+  beside:{gentle:'p.s. i love you. i am told it is customary to repeat it. i intend to follow custom exactly.',teasing:'p.s. the cat has been informed. it has requested a seal of its own.',quiet:'p.s. the cushion by the window is yours now. i have stopped pretending it is for guests.'},
+  jade:{gentle:'p.s. thank you for asking what i wanted. no one had, in a long time.',teasing:'p.s. the cat has been informed of my decision. it seemed unsurprised.',quiet:'p.s. today, i chose. tomorrow, i expect i will choose the same.'},
   game:{gentle:'p.s. you were a kind opponent. i intend to be a kinder one.',teasing:'p.s. i let you win. you let me let you. we are both very generous people.',quiet:'p.s. i have set up the board again. i have not made a move. it seemed like yours to make.'}
 };

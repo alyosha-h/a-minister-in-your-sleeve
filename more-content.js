@@ -115,6 +115,116 @@ export const chapterStories = {
   ]
 };
 
+// The middle of the romance: vulnerability, an honest admission, and a place made for you.
+chapterStories.lamp = [
+  {speaker:'the lantern',text:'the lantern opens late, onto a study lit by a single lamp. the brazier has gone cold. lin yan is at his desk, full-sized, still in his court robe, and he has not heard you arrive.'},
+  {speaker:'you',text:'there is a memorial in front of him with a long red line through it. he is looking at it the way people look at something they have already read too many times.'},
+  {speaker:'lin yan',text:'“ah.” he turns, and for a moment the polished minister arrives too late to cover the tired man. “you caught me at a poor hour. i was about to be very composed.”'},
+  {speaker:'stay until the lamp goes out',text:'the lamp throws one warm circle across the desk and leaves the rest of the study to the dark. his hat lies on the floor where it fell, or was put.'},
+  {speaker:'lin yan',text:'“the canal repairs,” he says. “twelve workers and some timber. the ministry has decided the villages can wait until spring.” he laughs, without much in it. “i argued very well. i was told i argued too well.”'},
+  {speaker:'lin yan',text:'“i am supposed to be good at this.” he rubs his thumb along the red line. “some days i think i am only good at sounding as if i am.”'},
+  {speaker:'you',text:'the lamp hisses softly. he is waiting to see what you will do with him like this.',choice:'comfort',options:['tell me what happened, from the beginning.','you don’t have to be brilliant tonight.','sit down beside him and say nothing.']},
+  {speaker:'lin yan',branch:'comfort',variants:[
+    'so he does. all of it: the meeting, the colleague who smiled the whole way through, the moment he knew he had lost.\n\nyou listen. when he finishes, he looks surprised to find the telling is over, and that it helped.',
+    'he stares at you. then something in his shoulders gives way, very quietly.\n\n“no,” he says. “i suppose i don’t.” he sets down the brush as though it weighed more than it should.',
+    'you sit. after a while, without looking at you, he moves the memorial aside and leans until his shoulder rests against yours.\n\nneither of you mentions it.'
+  ]},
+  {speaker:'the study',text:'the lamp gutters and steadies. somewhere outside, a night bird tries one note and gives up. he has pushed the memorial off the edge of the desk entirely.'},
+  {speaker:'lin yan',text:'“when i was small,” he says, “the other kind of small, a boy, i thought a minister’s house would feel like an achievement.”\n\nhe looks around the study. “it felt like an office with a bed in it. until recently.”'},
+  {speaker:'you',text:'“until recently?”\n\nhe takes a breath like a man stepping off a ledge.'},
+  {speaker:'lin yan',text:'“you are here,” he says simply, “and then this is a home. you leave, and it is an office again. i have tried to reason my way out of it. i am, as noted, very good at reasoning.”\n\na small, wrecked smile. “it did not work.”'},
+  {speaker:'the study',text:'from the drawer he takes a sheet you recognise: the poem, four lines about a lamp left burning for someone late. there is a fifth line now, the ink newer than the rest.'},
+  {speaker:'lin yan',text:'“it came to me a few days ago.” he doesn’t read it aloud. he hands it to you instead.\n\nthe last line reads: and find that someone kept a lamp for me.'},
+  {speaker:'you',text:'the paper is warm from the drawer, or from his hands. the lamp is burning low.',choice:'lamp',options:['turn the lamp down, and stay.','leave it burning a little longer.']},
+  {speaker:'lin yan',branch:'lamp',variants:[
+    'you lower the wick until the room is only shapes and warmth. in the dark he finds your hand on the first try, as if he has known where it was all evening.\n\n“stay until it goes out,” he says. “that is all. just until then.”',
+    'you leave it. by its light you watch him read the poem over your shoulder, mouthing the last line as if checking it is still true.\n\n“a little longer,” he agrees, and his head comes to rest, very lightly, against yours.'
+  ]},
+  {speaker:'lin yan',text:'when the lantern begins to gather at the door, the lamp is very low. he walks you there with the poem still in your hand.\n\n“keep it,” he says. “it was always going to be yours. i only needed the ending.”'},
+  {speaker:'home again',text:'the little courtyard is quiet. lin yan is at his tiny desk, but he has pushed his papers aside. when he sees you, he sets down his brush at once.'},
+  {speaker:'lin yan',text:'“you look tired,” he says. “sit down. today i am in charge of the tea.”',ending:true}
+];
+chapterStories.lotus = [
+  {speaker:'the lantern',text:'the lantern opens onto water. a long wooden walk runs out over a lotus pond toward a pavilion with its lamps already lit. lin yan waits at the start of it, holding two paper lanterns folded into flowers.'},
+  {speaker:'lin yan',text:'“the pavilion is the only place in the residence without a desk,” he says. “i checked. thoroughly.”\n\nhe hands you one of the paper lotuses. “there is a custom with these. i shall explain it badly when we get there.”'},
+  {speaker:'the lotus pavilion',text:'the boards creak softly under you both. the leaves on either side are as wide as parasols, and the flowers have half closed for the evening, pale and pink in the lamplight. the air smells green and warm.'},
+  {speaker:'you',text:'he walks closer than the path requires. when it narrows, he doesn’t fall behind. his sleeve brushes your hand, and then again, and the second time does not feel like an accident.'},
+  {speaker:'lin yan',text:'“i have been thinking,” he says, “about honesty. as a policy.” he keeps his eyes on the pavilion ahead. “i have recommended it to a great many people. it seems unfair not to try it myself.”'},
+  {speaker:'the pavilion',text:'inside, the lamps hang low and the water is all around. he kneels at the edge to set his paper lotus on the surface, lights the little wick inside it, and lets it go. it drifts away, glowing.'},
+  {speaker:'lin yan',text:'“you make a wish,” he explains, badly, as promised. “or a confession. traditionally, nobody can tell which.”\n\nhe watches his float out of reach. “i have just done one of the two.”'},
+  {speaker:'you',text:'you set yours on the water beside his. the two lights turn slowly, then drift together, nudging against the same lotus leaf, and stay there.'},
+  {speaker:'lin yan',text:'he laughs under his breath at the lanterns, embarrassed. then he turns to you, and the laugh goes.\n\n“i am attracted to you,” he says. “there. a plain statement of fact, no decoration. i have been carrying it around for weeks like a seal i was afraid to use.”'},
+  {speaker:'lin yan',text:'“i do not need anything from you because of it,” he adds quickly. “i only did not want to keep sitting beside you, pretending it was the cushion i liked.”',choice:'pace',options:['close the distance, and invite a kiss.','take his hand.','ask if you can take this slowly.']},
+  {speaker:'lin yan',branch:'pace',variants:[
+    'you step closer. he understands a moment after you do, and then he is the one who closes the last of the distance, carefully, as if he wants to leave you every chance to change your mind.\n\nyou don’t. the kiss is brief and very warm and tastes faintly of lotus tea. when it ends, he keeps his forehead against yours. “oh,” he says, which is not like him at all.',
+    'you take his hand. he looks down at your joined fingers as if reading a document he has waited years to see signed.\n\n“yes,” he says. “that. exactly that.” his thumb moves once across your knuckles, slowly, and stays.',
+    'his whole face softens. “of course,” he says, and means it. “slowly is a speed i am very good at. you have seen how long it takes me to finish a poem.”\n\nhe offers his arm, nothing more, and you take it, and that is plenty.'
+  ]},
+  {speaker:'the pavilion',text:'the paper lanterns have reached the far side of the pond, still together. on the bank, someone in the residence has begun to play a flute, badly, with great feeling.'},
+  {speaker:'lin yan',text:'“that is my secretary,” he says. “i shall speak to him in the morning.”\n\nhe does not sound as though he will speak to him at all.'},
+  {speaker:'you',text:'you stay until the pavilion lamps burn down to their last inch. he talks about nothing much: the carp, the flute, a childhood fear of frogs he swears you must never repeat. every so often he stops mid-sentence just to look at you.'},
+  {speaker:'lin yan',text:'at the end of the walk, the lantern waits. he stops you with a hand at your sleeve.\n\n“thank you,” he says, “for letting me be honest. it was much less terrible than i feared.”'},
+  {speaker:'home again',text:'the courtyard returns. lin yan is sitting on the rim of his teacup, and when he sees you he doesn’t straighten his robe or settle his hat. he simply smiles, with his whole face, before he can think better of it.'},
+  {speaker:'lin yan',text:'“you’re here,” he says. “good. i missed you. that is also a plain statement of fact.”',ending:true}
+];
+chapterStories.beside = [
+  {speaker:'the lantern',text:'the lantern opens, and for a moment you think it has failed: you are standing in the courtyard. the wisteria, the moon gate, the tea table.\n\nthen you understand. it is his courtyard, at its true size, and he is sitting at the table where you have fed him a hundred buns.'},
+  {speaker:'lin yan',text:'“i wanted you to see it properly,” he says, rising. “the real one. this is where my residence was folded up from. it seemed only right that you should see it unfolded.”'},
+  {speaker:'a place beside him',text:'everything is the size it should be. the teacup he used to sleep against is an ordinary cup. the cushion you bought him is an ordinary cushion, set in the best place by the window. on the table: two cups, one of them chipped.'},
+  {speaker:'you',text:'it is very strange, and then it isn’t strange at all. you know every corner of this place. you have only never stood in it.'},
+  {speaker:'lin yan',text:'“i am not good at doing things without a plan,” he says, “so i have made one. it is very short. it has a great many crossings-out.”\n\nhe takes a small square of folded paper from his sleeve, and doesn’t look at it.'},
+  {speaker:'the courtyard',text:'he sits, and gestures to the place beside him. not across the table this time. beside. the second cup is already poured.'},
+  {speaker:'lin yan',text:'he sets a small object between the cups: a seal carved from pale stone, with a red silk tassel. he turns it so you can see its face.\n\ntwo names are carved there, side by side. his, and yours.'},
+  {speaker:'lin yan',text:'“a seal is a promise,” he says. “anything pressed with it is meant. i had this one made weeks ago, and then i hid it in a drawer, because i am a coward with excellent handwriting.”'},
+  {speaker:'lin yan',text:'“the lantern brings you here and takes you back. i am grateful for it. but i find i do not want to be visited.” he swallows. “i want to be lived with. i want a life with you in it that does not end when the light gathers at the door. i want to know if you want that too.”',choice:'answer',options:['yes. of course yes.','only if you admit you’re sentimental.','press the seal into his palm, and close his hand.']},
+  {speaker:'lin yan',branch:'answer',variants:[
+    'you barely get the word out before he laughs, a startled, helpless sound, and then you are in his arms, and he is saying something into your hair that you can’t quite hear and don’t need to.',
+    '“i am appallingly sentimental,” he says at once. “i have kept every pressed petal. i have a book of your visits. i named a cushion.” he is laughing, and very close to something else. “so. is that a yes?”\n\nyou tell him it is.',
+    'you close his fingers around the seal with both your hands over his. he looks at them for a long time.\n\n“that is a yes,” he says, very softly, as if confirming a document. “i am going to keep that yes. i am going to keep it forever.”'
+  ]},
+  {speaker:'the courtyard',text:'for a while neither of you says anything useful. the tea goes cold. the cat appears on the wall, assesses the situation, and leaves, apparently satisfied.'},
+  {speaker:'lin yan',text:'“i love you,” he says eventually, as if he has only now realised he never actually said it. “i should have opened with that. it was the first line on the plan. i crossed it out four times for being too obvious.”'},
+  {speaker:'you',text:'you tell him you love him too. he goes quiet and pink and pleased in a way that makes him look, briefly, about nineteen.'},
+  {speaker:'lin yan',text:'“may i call you something?” he asks. “something that isn’t for anyone else. i have a shortlist. it is also very short.”',choice:'name',options:['little lantern.','trouble.','dearest.']},
+  {speaker:'lin yan',branch:'name',variants:[
+    '“little lantern,” he says, trying it out. “you did, after all, light the way.” he looks absurdly pleased with himself. “i have been saving that one.”',
+    '“trouble,” he agrees, delighted. “it is accurate. you have been nothing but trouble since the teacup.” he kisses your knuckles. “my favourite kind.”',
+    '“dearest,” he says, and then has to look away for a moment, because saying it out loud has turned out to be a great deal more than he expected.'
+  ]},
+  {speaker:'lin yan',text:'when the light gathers at the gate, he walks you there with your hand in his.\n\n“this is the last time i shall say goodbye properly,” he says. “from now on, it is only ‘see you soon’. that is the plan. it is the only line i did not cross out.”'},
+  {speaker:'home again',text:'the little courtyard returns, exactly the same and entirely different. beside his tiny cup, lin yan has set the tiniest seal you have ever seen, its red tassel no longer than an eyelash.'},
+  {speaker:'lin yan',text:'“welcome home,” he says. then, catching himself, quite deliberately: “no. i mean it. welcome home.”',ending:true}
+];
+
+// The finale: the talisman mends, and for the first time in years he gets to choose.
+chapterStories.jade = [
+  {speaker:'the lantern',text:'the light opens onto his study at dusk. on the table, on its square of cloth, lies the jade disc.\n\nthe crack is gone.'},
+  {speaker:'lin yan',text:'“it finished mending this morning,” he says. “i watched the last of the line close. it took about as long as a cup of tea.”\n\nhe is standing by the window, at his full height, and he looks as if he has been waiting there for some time.'},
+  {speaker:'the jade made whole',text:'the talisman is warm when you touch it, like a hand that has just let go of yours. the carving you could never quite make out is clear now: two cups, side by side.'},
+  {speaker:'lin yan',text:'“my well-meaning colleague finally sent instructions.” he unfolds a letter, very small writing, very many apologies. “whole, it answers to whoever holds it. tall or small, as one pleases.”'},
+  {speaker:'you',text:'he turns the jade over in his fingers.\n\n“which means the ministry will expect me back at my desk, at my usual height. and it means,” he adds, more slowly, “that i get to choose.”'},
+  {speaker:'the study',text:'your cup sits on the table, chip turned toward the wall. the record of ordinary days lies beside it, closed. outside, the wisteria moves in the evening air.'},
+  {speaker:'lin yan',text:'“i have spent a long time being chosen for things. appointed. summoned. assigned.”\n\nhe sets the jade down between you. “this is the first thing in years that is mine to decide. i find i want to ask you first.”'},
+  {speaker:'you',text:'he waits. for once, he has not prepared a speech.',choice:'ask',options:['what do you want?','whatever you choose, i’m here.','say nothing. take his hand.']},
+  {speaker:'lin yan',branch:'ask',variants:[
+    '“what do i want.” he says it as though nobody has asked him in a very long time, which you suspect is true.\n\n“i want my work. i am good at it, and it matters.” he looks at you. “and i want the evenings. i want to know that the second cup is still out.”',
+    'he lets out a breath. “i know. that is rather the trouble.” he smiles. “it is very hard to leave somewhere that keeps a place for you.”\n\n“so i shan’t,” he says. “not entirely.”',
+    'your hand finds his. he looks down at it for a long moment, and his fingers close.\n\n“yes,” he says quietly, as if you had said a great deal. “that is what i thought too.”'
+  ]},
+  {speaker:'the study',text:'he picks up the jade and places it in your palm, then folds your fingers around it, the way he once folded them around a white stone.\n\n“you have kept me in your sleeve all this while. it seems only fair you keep this, too.”'},
+  {speaker:'lin yan',text:'“the ministry may have me in the mornings, at my usual height. the rest of the time…”\n\nhe glances toward the lantern, toward the courtyard somewhere beyond it. “i have grown very fond of the view from the tea tray.”'},
+  {speaker:'you',text:'the jade is warm in your hand. whatever you ask of it, he will be the one to answer.',choice:'stay',options:['then come back small. every evening.','stay tall a while longer. sit with me.']},
+  {speaker:'lin yan',branch:'stay',variants:[
+    '“every evening,” he agrees. “i shall be insufferable about it. i will expect dumplings.”\n\nhe is smiling so widely he has to look away. “i would not have it any other way.”',
+    'he sits. not across from you: beside you, close enough that his sleeve lies over your wrist.\n\n“a while longer,” he agrees. the lantern can wait. for once, everything can.'
+  ]},
+  {speaker:'lin yan',text:'“there is one more thing.” he opens the record of ordinary days to its last page, dips his brush, and writes a single careful line.\n\nhe turns the book so you can read it: today, i chose.'},
+  {speaker:'the lantern',text:'the light begins to gather at the door. he walks you to it with your hand in his, unhurried, the way people walk when they know they will be back.'},
+  {speaker:'lin yan',text:'“thank you,” he says at the threshold. “for the cushion. the tea. the patience.” a pause. “for asking.”\n\nhe lets go of your hand last.'},
+  {speaker:'home again',text:'the little courtyard returns. lin yan stands beside his cup, small again by his own choosing, the jade hanging from his belt on a length of {{ribbon}}.\n\nhe looks entirely at home.'},
+  {speaker:'lin yan',text:'“good evening,” he says, as if he had never been anywhere else.\n\n“i saved you a seat. i always will.”',ending:true}
+];
+
 // How the evening sounds depends on how you've usually spent time with him.
 // The written text is the gentle version; these replace it for teasing and quiet company.
 const toneVariants = {
@@ -148,6 +258,46 @@ const toneVariants = {
       quiet: 'he touches the knot once, as if checking it is still there.\n\n“you could retie it,” he says. “sometimes. if it ever needed it.” the way he says it, it needn’t need it at all.'
     }
   },
+  lamp: {
+    5: {
+      teasing: '“i am supposed to be good at this.” he flicks the red line with one finger. “ask anyone. ask me. i shall give you a very persuasive answer.”\n\nthe joke doesn’t quite land, even for him.',
+      quiet: 'he doesn’t explain at first. he only turns the memorial so you can see the red line, and lets you look at it with him, and that seems to be the explanation.'
+    },
+    16: {
+      teasing: 'when the lantern begins to gather at the door, the lamp is very low. he walks you there with the poem still in your hand.\n\n“keep it,” he says. “and if you ever show it to the cat, i shall deny writing it.” a pause. “i wrote it. it is yours.”',
+      quiet: 'when the lantern begins to gather at the door, the lamp is very low. he walks you there, presses the folded poem into your hand and closes your fingers over it.\n\nhe says nothing. it says enough.'
+    }
+  },
+  lotus: {
+    4: {
+      teasing: '“i have been thinking,” he says, “about honesty as a policy. i have recommended it to a great many people.” he glances at you sideways. “they never thank me. i expect you won’t either.”',
+      quiet: 'he says very little on the walk. it is a comfortable silence, and then a slightly less comfortable one: the kind that has something waiting at the end of it.'
+    },
+    14: {
+      teasing: 'at the end of the walk, the lantern waits. he stops you with a hand at your sleeve.\n\n“thank you for letting me be honest,” he says. “i may do it again. you may find it becomes a habit. a terrible one.”',
+      quiet: 'at the end of the walk, the lantern waits. he stops, says nothing, and lifts your hand to rest against his chest, where you can feel exactly how fast his heart is going.\n\nthen he lets you go, slowly.'
+    }
+  },
+  beside: {
+    4: {
+      teasing: '“i have made a plan,” he says. “do not laugh. it is very short and has a great many crossings-out.”\n\nyou do not laugh. he looks almost disappointed. “you may laugh a little.”',
+      quiet: 'he doesn’t explain. he only shows you a square of folded paper, worn soft at the creases, as though he has carried it for a long time, and puts it back in his sleeve.'
+    },
+    15: {
+      teasing: 'when the light gathers at the gate, he walks you there with your hand in his.\n\n“this is the last time i shall say goodbye properly,” he says. “from now on i shall say ‘see you soon’, and be insufferable about it. you have been warned.”',
+      quiet: 'when the light gathers at the gate, he walks you there with your hand in his. he doesn’t say goodbye at all. he presses his lips to your knuckles, then to the seal’s red tassel, and lets you go.'
+    }
+  },
+  jade: {
+    6: {
+      teasing: '“i have spent a long time being chosen for things. appointed. summoned. assigned. once, memorably, volunteered by a cat.”\n\nhe sets the jade down between you. “this is the first thing in years that is mine to decide. naturally, i want a second opinion.”',
+      quiet: 'he doesn’t explain at first. he only sets the jade down between you, and his hand stays near it, and near yours.\n\n“it is mine to decide,” he says eventually. “i wanted you here when i did.”'
+    },
+    15: {
+      teasing: '“thank you,” he says at the threshold. “for the cushion. the tea. the endless commentary.” a pause. “mostly the commentary.”\n\nhe lets go of your hand last, and makes a point of it.',
+      quiet: 'at the threshold he doesn’t say anything at all. he lifts your hand, the one holding the jade, and rests his forehead against your knuckles for a moment.\n\nthen he lets go, last.'
+    }
+  },
   game: {
     1: {
       teasing: '“nothing terribly serious. i have done quite enough serious thinking today.”\n\nhe waits until you sit opposite him. “i should warn you, i was provincial champion. of a very small province. in a very poor year.”',
@@ -161,3 +311,35 @@ const toneVariants = {
 };
 for (const [id, beats] of Object.entries(toneVariants))
   for (const [i, tones] of Object.entries(beats)) chapterStories[id][i].tones = tones;
+
+// Once a day he asks how yours went, and remembers. `follow` is what he says next time.
+export const CHECKIN = {
+  intro: '“how was your day?” he sets down his brush, which means he actually wants to know.',
+  answers: [
+    { id:'tired', label:'long. i’m tired.', style:'gentle', response:'“then you are not to do anything else today. sit. i shall manage the tea, and the conversation.”', follow:'“you said it had been a long day. i have already put the kettle on.”' },
+    { id:'good', label:'genuinely good, actually.', style:'teasing', response:'“genuinely good. how suspicious.” he leans in. “tell me everything, and leave out nothing flattering.”', follow:'“was today as good as the one you told me about? i have been hoping so. i have been hoping quite hard.”' },
+    { id:'quiet', label:'quiet. not much happened.', style:'quiet', response:'“quiet days are underrated.” he pushes a cushion toward your hand. “we could have another one here, if you like.”', follow:'“another quiet day? i saved you one. the courtyard has been very cooperative.”' },
+    { id:'lonely', label:'a bit lonely, honestly.', style:'gentle', response:'he is still for a moment. then he moves to the very edge of the table, as close to your hand as he can get.\n\n“not here,” he says. “not while i am around.”', follow:'“you said you were feeling lonely. i have cleared my afternoon. all of it. for no particular reason.”' },
+    { id:'stressed', label:'stressful. too much at once.', style:'quiet', response:'“then we shall do one thing at a time. this cup of tea. then the next thing.” he pours. “i am told this works. i have never tried it. let us find out together.”', follow:'“how is the too-much? smaller, i hope. i have been doing one thing at a time, in solidarity.”' }
+  ]
+};
+// Things he asks once, over time, and brings up afterwards.
+export const ABOUT_YOU = [
+  { id:'drink', intro:'“i realise i have never asked. what do you drink, when i am not the one pouring?”', answers:[
+    { id:'tea', label:'tea, always.', style:'gentle', response:'“good. correct. i knew there was a reason.”', callback:'“i have set aside the good leaves. for you, not me. mostly.”' },
+    { id:'coffee', label:'coffee. sorry.', style:'teasing', response:'he looks genuinely wounded. “i shall… research it,” he says, with tremendous dignity.', callback:'“i asked the kitchen about this coffee. they made a face. i am considering it anyway.”' },
+    { id:'any', label:'whatever’s nearest.', style:'quiet', response:'“a practical answer.” he nudges the nearest cup toward you. “then this one is yours.”', callback:'“i poured you whatever was nearest. you seemed the type to approve.”' } ] },
+  { id:'time', intro:'“when are you happiest? the time of day, i mean. i am collecting facts about you. it is very scholarly.”', answers:[
+    { id:'morning', label:'mornings.', style:'gentle', response:'“mornings. all that light and nothing yet gone wrong. i see it.”', callback:'“it is morning. your favourite. i noticed. i have been noticing.”', period:'morning' },
+    { id:'night', label:'late at night.', style:'quiet', response:'“late at night,” he repeats. “when everything is quiet enough to hear yourself. yes.”', callback:'“it is late. your favourite hour. i saved it for you.”', period:'night' },
+    { id:'between', label:'the in-between hours.', style:'teasing', response:'“the in-between hours. very evasive. i respect it.”', callback:'“it is one of your in-between hours. i have not worked out which. i am enjoying it anyway.”', period:'afternoon' } ] },
+  { id:'work', intro:'“what do you do, when you are not here? i should know. i tell you about canals constantly.”', answers:[
+    { id:'work', label:'i work. a lot.', style:'gentle', response:'“then here is the one place nobody will ask you for anything.” he considers. “except tea. and company. and possibly dumplings.”', callback:'“how was work? did anyone deserve a strongly worded memorial? i can draft one.”' },
+    { id:'study', label:'i study.', style:'teasing', response:'“ah. examinations.” he shudders theatrically. “i was insufferable at them. i can help. i shall try to be less insufferable.”', callback:'“how are the studies? quiz me on something. no, quiz yourself. i shall supervise.”' },
+    { id:'make', label:'i make things.', style:'quiet', response:'his eyes light up. “then you understand the poem. the one line that will not come.”', callback:'“have you made anything lately? i would like to see. i am an excellent audience.”' },
+    { id:'complicated', label:'it’s complicated.', style:'quiet', response:'“then it can stay complicated,” he says. “you can tell me as much or as little as you like.”', callback:'“still complicated? that is allowed. the tea does not mind either way.”' } ] },
+  { id:'teasing', intro:'“a question of protocol. do you mind being teased? i ask because i intend to, and i would rather it landed well.”', answers:[
+    { id:'yes', label:'tease away.', style:'teasing', response:'“excellent.” he cracks his knuckles, which, at his size, is very quiet. “you will regret this.”', callback:null },
+    { id:'gently', label:'gently, please.', style:'gentle', response:'“gently,” he agrees. “a feather of a tease. barely a tease at all.”', callback:null },
+    { id:'no', label:'i’d rather you didn’t.', style:'quiet', response:'“then i won’t,” he says simply, and you can tell he means it. “thank you for telling me.”', callback:null } ] }
+];
