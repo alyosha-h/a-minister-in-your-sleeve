@@ -71,6 +71,7 @@ export function createPhaseTwoUI(ctx){
     return '<div class="affinity" role="list">'+STYLES.map(k=>'<div class="affinity-row'+(k===style?' leading':'')+'" role="listitem"><span>'+k+'</span><span class="need-track" role="meter" aria-label="'+k+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(s.affinity[k]/total*100)+'"><span style="width:'+(s.affinity[k]/total*100)+'%"></span></span></div>').join('')+'</div><p class="affinity-note">'+esc(blurb)+'</p>';
   }
   function openMomentSheet(){const m=momentDue(ctx.state());if(!m)return;activity={view:'moment',id:m.id};renderActivity();ctx.showSheet('activityDialog');}
+  const KEEPSAKE_PROPS=[{id:'secondcup',chapter:'tea'},{id:'petal',chapter:'rain'},{id:'stone',chapter:'game'},{id:'poem',chapter:'lamp'},{id:'lanterns',chapter:'lotus'},{id:'sealtwo',chapter:'beside'},{id:'jade',chapter:'jade'}];
   function renderDecor(){
     // a thirsty orchid droops until watered; the chime stirs when he has something to show you
     const s=ctx.state(),thirsty=orchidThirsty(s),stirring=Boolean(momentDue(s));
@@ -82,7 +83,11 @@ export function createPhaseTwoUI(ctx){
       ctx.speak(ITEMS.find(i=>i.id===id).reaction,'a little corner that feels more like home.');ctx.ping('tea');
     });
     $('paperClutter').hidden=s.tidied;
-    const ribbon=RIBBONS.find(r=>r.id===s.memories.ribbon);$('ribbonTie').hidden=!ribbon||s.asleep;if(ribbon)$('ribbonTie').style.color=ribbon.color;
+    const ribbon=RIBBONS.find(r=>r.id===s.memories.ribbon);$('ribbonTie').hidden=!ribbon||s.asleep;if(ribbon)$('ribbonTie').src='./assets/prop-ribbon-'+ribbon.id+'.webp';
+    // each lantern evening leaves something behind in the courtyard; the finished poem takes the stand if he has one
+    const kept=KEEPSAKE_PROPS.filter(k=>chapterRecord(s,k.chapter).complete&&!(k.chapter==='lamp'&&s.placed.includes('scroll')));
+    $('keepsakes').innerHTML=kept.map(k=>'<img class="keepsake-prop keepsake-'+k.id+'" src="./assets/prop-'+k.id+'.webp" alt="">').join('');
+    $('roomDecor').querySelector('.object-scroll img')?.setAttribute('src','./assets/prop-'+(chapterRecord(s,'lamp').complete?'poem':'scroll')+'.webp');
     $('requestSummary').textContent=s.request.done?'a small kindness, remembered':requestDefinition(s).title;
     $('requestShortcut').classList.toggle('request-done',s.request.done);
   }
