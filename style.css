@@ -584,3 +584,6 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .date-button{top:36px;left:auto;right:12px}
 .offer-button{top:80px;left:auto;right:12px;animation:moment-glow 3.2s ease-in-out infinite}
 .theme-row .segmented{margin:0;min-width:186px;flex:none}
+/* home-screen app: clear the blurred band iOS draws under the status bar */
+.standalone{--top-buffer:20px}
+.standalone .app-shell,.standalone .story-dialog{padding-top:calc(env(safe-area-inset-top) + var(--top-buffer))}
