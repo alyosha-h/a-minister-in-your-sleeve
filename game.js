@@ -37,7 +37,7 @@ const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,
 
 export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
-    claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
+    claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
     chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter(),lamp:blankChapter(),lotus:blankChapter(),beside:blankChapter(),jade:blankChapter()},talisman:{mend:0,key:null,today:0},pantry:{},orchidKey:null,request:requestForDay(1),
     owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0,pace:null,nickname:null,you:{day:null,about:{},aboutKey:null},datesDone:0,dateKey:null},
     settings:{sound:false,reducedMotion:false,theme:'system'},lastSeen:now};
@@ -133,7 +133,7 @@ export function validateState(input) {
   for(const key of Object.keys(s.needs)){if(!Number.isFinite(input.needs[key]))throw new Error('The save has an incomplete care record.');s.needs[key]=clamp(input.needs[key]);}
   s.attuned=Number.isInteger(input.attuned)?clamp(input.attuned,0,ATTUNE_CAP):0;s.flourished=input.flourished===true;s.stuffedAt=Number.isFinite(input.stuffedAt)?input.stuffedAt:null;
   // saves from before real days start counting from today
-  s.dayKey=KEY.test(input.dayKey)?input.dayKey:dateKey();s.manualKey=KEY.test(input.manualKey)?input.manualKey:null;
+  s.dayKey=KEY.test(input.dayKey)?input.dayKey:dateKey();
   if(KEY.test(input.rituals?.key))s.rituals={key:input.rituals.key,done:(Array.isArray(input.rituals.done)?input.rituals.done:[]).filter(p=>p in RITUALS)};
   s.asleep=input.asleep===true;s.claimed=[...new Set(input.claimed.filter(c=>CATEGORIES.includes(c)))];s.talked=input.talked===true;
   s.preference=STYLES.includes(input.preference)?input.preference:'gentle';
@@ -280,14 +280,8 @@ export function searchPage(input,spot,now=Date.now()){
   if(spot!==s.request.spot)return {state:s,reward:0,copper:0,requestCompleted:false,found:false};
   s.tidied=true;s.memories.tidyCount++;s.needs.comfort=clamp(s.needs.comfort+20);return {...result(s,categoryReward(s,'comfort'),finishRequest(s,'find')),found:true};
 }
-// the manual skip ahead is a catch-up: once per real day, after a full day's care
-export function canBeginDay(s,now=Date.now()){return s.claimed.length>=3&&(s.talked||s.request.done)&&s.manualKey!==dateKey(now);}
 function nextDay(s){
   s.day++;s.claimed=[];s.talked=false;s.played=false;s.asleep=false;s.tidied=false;s.attuned=0;s.flourished=false;s.nudged=[];s.request=requestForDay(s.day);return s;
-}
-export function beginDay(input,now=Date.now()){
-  if(!canBeginDay(input,now))throw new Error('Share three kinds of care and a conversation or request first, once per day.');
-  const s=nextDay(elapsedCare(input,now));s.manualKey=dateKey(now);return s;
 }
 // a new real day turns the page on its own; gap is how many calendar days passed
 export function rollDay(input,now=Date.now()){
