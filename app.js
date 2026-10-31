@@ -1,4 +1,5 @@
-import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue } from './game.js';
+import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue, MEND_GOAL } from './game.js';
+import { TREATS } from './catalog.js';
 import { CHAPTERS, RIBBONS } from './catalog.js';
 import { allConversations, chapterStories } from './more-content.js';
 import { spriteFrameStyle, MOOD_FRAMES } from './sprites.js';
@@ -96,14 +97,14 @@ function renderLantern(){
   const meta=CHAPTERS.find(c=>c.id===selectedChapter)||CHAPTERS[0],record=chapterRecord(state,meta.id),index=CHAPTERS.indexOf(meta),previous=index?CHAPTERS[index-1]:null;
   $('bondValue').textContent=state.bond+' / '+meta.bond;
   $('bondBar').style.width=Math.min(100,state.bond/meta.bond*100)+'%';
-  $('bondDescription').textContent=record.complete?'a memory you can return to.':record.unlocked?'the lantern holds another evening together.':previous&&!chapterRecord(state,previous.id).complete?'first, share “'+previous.title+'”.':state.bond>=meta.bond?'some evenings can’t be hurried. this one waits for day '+meta.day+'.':'small kindnesses bring this evening closer.';
+  $('bondDescription').textContent=record.complete?'a memory you can return to.':record.unlocked?'the lantern holds another evening together.':previous&&!chapterRecord(state,previous.id).complete?'first, share “'+previous.title+'”.':state.bond>=meta.bond&&state.day<meta.day?'some evenings can’t be hurried. this one waits for day '+meta.day+'.':meta.mend&&state.talisman.mend<meta.mend?'the jade is still mending: '+state.talisman.mend+' of '+meta.mend+'. good days help it along.':'small kindnesses bring this evening closer.';
   $('chapterTitle').textContent=meta.title;$('chapterNumber').textContent='a lanternlit encounter · '+meta.number;$('coverMark').textContent=meta.number;
   $('chapterCover').style.backgroundImage='linear-gradient(180deg,#33243c20,transparent 50%,#30203c22),url("./assets/'+meta.art+'")';
   $('chapterCover').setAttribute('aria-label',meta.title+' · illustrated portrait');
   $('chapterButton').disabled=!record.unlocked;
   $('chapterButton').querySelector('span').textContent=record.complete?'revisit this memory':record.unlocked?record.cursor>0?'continue your visit':'follow the lantern':'gathering light';
   $('chapterDescription').textContent=record.complete?meta.keepsake+' · kept in your journal':record.unlocked?'his world is waiting. come a little closer.':'a little care might bring his world a little closer.';
-  $('chapterNote').textContent=record.complete?'replay anytime · your choices are safely kept':record.unlocked?'ready · he’ll meet your '+((!record.complete&&record.tone)||styleOf(state))+' company in kind':meta.bond+' bond · from day '+meta.day+(previous&&!chapterRecord(state,previous.id).complete?' · previous chapter first':'');
+  $('chapterNote').textContent=record.complete?'replay anytime · your choices are safely kept':record.unlocked?'ready · he’ll meet your '+((!record.complete&&record.tone)||styleOf(state))+' company in kind':meta.bond+' bond · from day '+meta.day+(meta.mend?' · the jade whole':'')+(previous&&!chapterRecord(state,previous.id).complete?' · previous chapter first':'');
   $('chapterInvitation').classList.toggle('ready',record.unlocked);
   $('chapterTabs').innerHTML=CHAPTERS.map(c=>'<button data-chapter="'+c.id+'" aria-label="chapter '+c.number+': '+c.title+'" aria-pressed="'+(c.id===meta.id)+'"><span>'+c.number+'</span><small>'+ (chapterRecord(state,c.id).complete?'✓':chapterRecord(state,c.id).unlocked?'✦':'·')+'</small></button>').join('');
   document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{selectedChapter=b.dataset.chapter;renderLantern();});
@@ -117,6 +118,7 @@ function render(){
   const mood=moodOf(state);$('sceneFrame').dataset.mood=mood;
   const upcoming=nextChapter(state),ready=CHAPTERS.some(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});
   $('momentButton').hidden=!momentDue(state);
+  document.querySelectorAll('.treat-button').forEach(b=>{const n=state.pantry[b.dataset.food||b.dataset.tea]||0;b.hidden=!n;b.querySelector('small').textContent='×'+n;});
   $('bondSummary').textContent=upcoming?state.bond+' / '+upcoming.bond:state.bond+' bond';$('lanternNavDot').hidden=!ready;
   $('tab-lantern').setAttribute('aria-label',ready?'lantern, encounter ready':'lantern');
   $('sceneFrame').classList.toggle('lantern-ready',ready);$('sceneFrame').classList.toggle('is-asleep',state.asleep);
@@ -138,7 +140,8 @@ function idleSpeech(){
   if(moodLines[mood]&&Math.random()<(mood==='flourishing'?.4:.7)){speak(moodLines[mood][Math.floor(Math.random()*moodLines[mood].length)],moodStatus[mood]+'.');return;}
   if(Math.random()<.3){const now=Date.now(),pool=weatherOf(dateKey(now))==='rain'?rainLines:periodLines[periodOf(now)];speak(pool[Math.floor(Math.random()*pool.length)],'a familiar little presence, glad you’re here.');return;}
   let lines;
-  if(state.chapters.game.complete)lines=['“a rematch? i have saved you a very good seat.”','“you may sit closer. i find it improves my concentration.”','“the white stone is still yours. so is the afternoon.”'];
+  if(state.chapters.jade.complete)lines=['“the ministry had me all morning. this is much better.”','“small by choice. it is a very different thing.”','“i wrote another line in the record today. it was about you. it usually is.”'];
+  else if(state.chapters.game.complete)lines=['“a rematch? i have saved you a very good seat.”','“you may sit closer. i find it improves my concentration.”','“the white stone is still yours. so is the afternoon.”'];
   else if(state.chapters.ribbon.complete)lines=['“the ribbon? perfectly serviceable. i see no reason to change it.”','“a quiet moment? i have one here, just for you.”'];
   else if(state.chapters.rain.complete)lines=['“if it rains, we have a perfectly good umbrella.”','“a damp sleeve is a small price for such good company.”'];
   else if(state.chapter.complete)lines=['“i have left your cup out. just in case.”','“i was not waiting. i simply had nowhere better to be.”','“shall we leave the paperwork until tomorrow?”'];
@@ -170,7 +173,7 @@ function animate(time){
   requestAnimationFrame(animate);
 }
 function commitResult(result){
-  const before=new Set(CHAPTERS.filter(c=>chapterRecord(state,c.id).unlocked).map(c=>c.id));state=result.state;save();render();
+  const before=new Set(CHAPTERS.filter(c=>chapterRecord(state,c.id).unlocked).map(c=>c.id));before.mend=state.talisman.mend;state=result.state;save();render();
   if(result.reward){$('bondFloat').textContent='+'+result.reward+' bond';$('bondFloat').classList.remove('show');void $('bondFloat').offsetWidth;$('bondFloat').classList.add('show');}
   const unlocked=CHAPTERS.find(c=>chapterRecord(state,c.id).unlocked&&!before.has(c.id));
   if(unlocked){selectedChapter=unlocked.id;renderLantern();ping('lantern');toast('the lantern is glowing · '+unlocked.title);}
@@ -178,6 +181,7 @@ function commitResult(result){
   else if(result.requestCompleted)toast('a small request, fulfilled · +15 bond and +12 copper');
   else if(result.ritual)toast(ritualToasts[result.ritual]);
   else if(result.attuned)toast('just what he needed · +3 bond');
+  else if(state.talisman.mend>before.mend)toast(state.talisman.mend>=MEND_GOAL?'the jade is whole. the lantern is waiting.':'the jade mends a little · '+state.talisman.mend+' / '+MEND_GOAL);
   return result;
 }
 function doCare(action,item=null,allowSheet=false){
@@ -189,7 +193,8 @@ function doCare(action,item=null,allowSheet=false){
   if(action==='rest')speak('“five minutes. wake me before the next dynasty.”','an important minister, taking a very important nap.');
   if(action==='tidy')speak('“a remarkably efficient administration. i was keeping that poem, though.”','the papers settle. he looks quietly pleased.');
   if(action==='pickup')speak('“a better view. and rather agreeable company.”','a little trust, in the palm of your hand.');
-  if(r.stuffed)speak(['“i… could not possibly. and yet.”','“this is how dynasties fall. one more bun.”','“i will require a short lie-down. for the good of the state.”'][Math.floor(Math.random()*3)],'one bun past diplomacy.');
+  if(r.treat)speak(TREATS.find(t=>t.id===r.treat).line,'a small luxury, gratefully received.');
+  else if(r.stuffed)speak(['“i… could not possibly. and yet.”','“this is how dynasties fall. one more bun.”','“i will require a short lie-down. for the good of the state.”'][Math.floor(Math.random()*3)],'one bun past diplomacy.');
   else if(r.attuned&&Math.random()<.5)speak(['“how did you know?”','“exactly that. i was about to ask. eventually.”','“you read me better than my own secretaries.”'][Math.floor(Math.random()*3)]);
   return r;
 }
@@ -240,7 +245,7 @@ function advanceStory(){
   if(node.ending){
     const meta=CHAPTERS.find(c=>c.id===storySession.id),replay=storySession.replay;
     if(!replay){commitResult({state:completeChapter(state,Date.now(),meta.id)});selectedChapter=(nextChapter(state)||meta).id;}
-    $('storyDialog').close();render();speak(meta.id==='ribbon'?'“perfectly serviceable. and i like the way you tied it.”':meta.id==='rain'?'“if it rains, you know where to find me.”':meta.id==='game'?'“a rematch? whenever you like.”':'“your cup is still here. i thought we might keep it that way.”','another small memory, kept close.');
+    $('storyDialog').close();render();speak(meta.id==='jade'?'“good evening. i saved you a seat.”':meta.id==='ribbon'?'“perfectly serviceable. and i like the way you tied it.”':meta.id==='rain'?'“if it rains, you know where to find me.”':meta.id==='game'?'“a rematch? whenever you like.”':'“your cup is still here. i thought we might keep it that way.”','another small memory, kept close.');
     toast('a memory to keep · '+meta.keepsake);ping('lantern');return;
   }
   storySession.cursor++;if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),storySession.id,storySession.tone);save();}renderStory();
