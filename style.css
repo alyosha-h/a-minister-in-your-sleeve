@@ -104,9 +104,9 @@ dialog::backdrop{background:#2d223d6b;backdrop-filter:blur(5px)}
 .story-exit svg{width:15px;height:15px}
 .story-art{position:relative;background:url('./assets/tea-at-true-height.webp') center 32%/cover no-repeat;min-height:160px;transition:filter 1.5s}
 .story-art.before-reveal{filter:brightness(.42) saturate(.7)}
-.story-art-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 74%,#f6f2e9)}
+.story-art-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 74%,var(--paper))}
 .story-art-label{position:absolute;left:20px;bottom:14px;color:#f8f1e6;font-size:8px;letter-spacing:1px;opacity:0}
-.story-reading{padding:16px 24px 14px;position:relative;background:var(--paper);max-height:46dvh;overflow-y:auto;min-height:190px}
+.story-reading{padding:16px 24px 14px;position:relative;background:var(--paper);overflow-y:auto;min-height:0}
 .story-speaker{color:#a57c9c;font-size:9px}
 .story-reading>p{font-family:var(--serif);font-size:21px;line-height:1.32;white-space:pre-line;margin-top:9px;letter-spacing:-.1px}
 .story-choices{display:flex;flex-direction:column;gap:7px;margin-top:13px}
@@ -125,7 +125,7 @@ dialog::backdrop{background:#2d223d6b;backdrop-filter:blur(5px)}
 @keyframes rewardFloat{0%{opacity:0;transform:translateY(8px)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-35px)}}
 @media(min-width:600px){
   .care-action small{font-size:8px}
-  .story-reading{padding:20px 32px;min-height:220px}
+  .story-reading{padding:20px 32px}
   .story-reading>p{font-size:25px}
   .story-controls{padding-left:32px;padding-right:32px}
   .story-topline{padding-left:24px;padding-right:24px}
@@ -148,11 +148,9 @@ dialog::backdrop{background:#2d223d6b;backdrop-filter:blur(5px)}
 .story-dialog.art-only .story-art-shade{display:none}
 #viewArtButton{border-bottom:1px solid #cbb9ce;margin-right:8px;padding-left:0;padding-right:0;font-size:9px}
 .story-exit,.story-controls>button,.chapter-button,.site-footer button{min-height:44px}
-.story-dialog.has-choices .story-reading{max-height:60dvh}
-.story-dialog.has-choices .story-art{background-position:center 18%}
 @media(max-height:720px){
   .story-dialog.has-choices .story-reading>p{font-size:19px;line-height:1.25}
-  .story-dialog.has-choices .story-reading{padding-top:12px;padding-bottom:12px;max-height:61dvh}
+  .story-dialog.has-choices .story-reading{padding-top:12px;padding-bottom:12px}
   .story-dialog.has-choices .story-choices{gap:6px;margin-top:10px}
   .story-dialog.has-choices .story-choices button{padding-top:10px;padding-bottom:10px}
 }
@@ -231,7 +229,7 @@ body{margin:0;color:var(--ink);font-family:var(--sans);font-size:14px;background
 .dialog-footnote{line-height:1.65;color:#a08e9f;margin-top:16px;white-space:pre-line;font-size:11px}
 .toast{position:fixed;z-index:80;left:50%;transform:translate(-50%,10px);border:1px solid #ded1dd;background:#fffaf5ed;backdrop-filter:blur(10px);box-shadow:0 5px 20px #4933441a;border-radius:12px;text-align:center;width:max-content;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;bottom:calc(78px + env(safe-area-inset-bottom));font-size:12px;padding:12px 18px;max-width:calc(100% - 32px)}
 body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
-.story-dialog{width:100%;max-width:560px;max-height:100dvh;margin:0 auto;border:0;border-radius:0;overflow:hidden;grid-template-rows:48px minmax(160px,1fr) auto auto;padding-top:env(safe-area-inset-top);height:100dvh}
+.story-dialog{position:fixed;inset:0;width:100%;max-width:560px;max-height:none;margin:0 auto;border:0;border-radius:0;overflow:hidden;grid-template-rows:48px var(--story-art,44dvh) minmax(0,1fr) auto;padding-top:env(safe-area-inset-top);height:100dvh}
 .story-exit{min-height:44px}
 @media(min-width:600px){
   body{padding:0}
@@ -593,3 +591,5 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 /* home-screen app: clear the blurred band iOS draws under the status bar */
 .standalone{--top-buffer:20px}
 .standalone .app-shell,.standalone .story-dialog{padding-top:calc(env(safe-area-inset-top) + var(--top-buffer))}
+/* the story reader covers the page completely, status bar included, in either theme */
+.story-dialog::backdrop{background:#f6f2e9;backdrop-filter:none}

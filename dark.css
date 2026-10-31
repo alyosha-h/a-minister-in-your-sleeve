@@ -162,6 +162,7 @@
 :root[data-theme=dark] .jade-card p{color:#877f8c}
 :root[data-theme=dark] .jade-card .need-track>span{background:#9dbaa5}
 :root[data-theme=dark] .jade-card small{color:#a5b3a9}
+:root[data-theme=dark] .story-dialog::backdrop{background:#27212d}
 
 /* selected tabs should look lifted, not pressed in */
 :root[data-theme=dark] .segmented button[aria-pressed=true]{background:#40364b;color:#efe5f3}
