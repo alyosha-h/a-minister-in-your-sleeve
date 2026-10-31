@@ -31,6 +31,11 @@ a{color:inherit}
 .need:nth-child(2) .need-track>span{background:#c5ab7e}
 .need:nth-child(3) .need-track>span{background:#9fa997}
 .need:nth-child(4) .need-track>span{background:#c59eae}
+.need.low .need-label>span:first-child{color:#9b5f72}
+.need.low .need-track>span{animation:need-low 2.4s ease-in-out infinite}
+@keyframes need-low{50%{opacity:.45}}
+.reduced-motion .need.low .need-track>span{animation:none}
+@media (prefers-reduced-motion:reduce){.need.low .need-track>span{animation:none}}
 .scene-art,.scene-shade{position:absolute;inset:0}
 .scene-shade{background:linear-gradient(180deg,rgba(42,30,55,.22),transparent 18%,transparent 80%,rgba(49,29,39,.28));pointer-events:none}
 .scene-frame.is-asleep .scene-art{filter:brightness(.68) saturate(.76)}
