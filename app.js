@@ -123,7 +123,6 @@ function render(){
   $('bondSummary').textContent=upcoming?state.bond+' / '+upcoming.bond:state.bond+' bond';$('lanternNavDot').hidden=!ready;
   $('tab-lantern').setAttribute('aria-label',ready?'lantern, encounter ready':'lantern');
   $('sceneFrame').classList.toggle('is-asleep',state.asleep);
-  $('keepsake').hidden=!state.chapter.complete;
   $('sceneStatus').textContent=state.asleep?'dreaming, probably of dumplings':moodStatus[mood]||relationshipLabel(state);
   document.body.classList.toggle('reduced-motion',state.settings.reducedMotion);applyTheme();
   $('soundButton').setAttribute('aria-pressed',String(state.settings.sound));$('soundButton').setAttribute('aria-label','turn sound '+(state.settings.sound?'off':'on'));
