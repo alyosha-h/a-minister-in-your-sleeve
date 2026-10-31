@@ -1,12 +1,12 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f1e8"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="a little courtyard, a very small minister, and a lantern leading to something more. a cozy companion game.">
   <title>a minister in your sleeve</title>
-  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./app-layout.css"><link rel="stylesheet" href="./phase-two.css">
-  <link rel="preload" href="./assets/courtyard.png" as="image"><link rel="preload" href="./assets/minister-sprites.png" as="image">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml"><link rel="preload" href="./assets/fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="./assets/fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="preload" href="./assets/courtyard.webp" as="image"><link rel="preload" href="./assets/minister-sprites.webp" as="image">
 </head>
 <body>
   <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -94,7 +94,7 @@
       </section>
       <section class="app-panel settings-panel" id="settingsPanel" role="tabpanel" aria-labelledby="tab-settings" hidden>
         <div class="panel-heading"><p class="eyebrow">make yourself at home</p></div>
-<h2>little comforts.</h2><label class="setting-row"><span>gentle sounds<small>tea, small chimes, and a soft greeting</small></span><input id="soundSetting" type="checkbox"></label><label class="setting-row"><span>less movement<small>still poses and quiet transitions</small></span><input id="motionSetting" type="checkbox"></label><div class="save-settings"><p class="eyebrow">your time together</p><p>your courtyard saves to your claude account, so he’ll be waiting on any device you open him from. a copy file still works as a backup.</p><p id="cloudStatus" class="cloud-status" role="status">checking your cloud save…</p><div class="save-buttons"><button id="exportButton"><svg><use href="#i-save"/></svg>save a copy</button><button id="importButton">restore a copy</button><input id="importFile" type="file" accept=".json,application/json" hidden></div><p id="settingsMessage" role="status" class="dialog-footnote"></p></div><footer class="site-footer"><span id="saveStatus"><span class="save-dot"></span> progress saved on this device</span><button id="helpButton">a small guide <span>↗</span></button></footer>
+<h2>little comforts.</h2><label class="setting-row"><span>gentle sounds<small>tea, small chimes, and a soft greeting</small></span><input id="soundSetting" type="checkbox"></label><label class="setting-row"><span>less movement<small>still poses and quiet transitions</small></span><input id="motionSetting" type="checkbox"></label><div class="save-settings"><p class="eyebrow">your time together</p><p>your courtyard saves in this browser, so he’ll be waiting whenever you come back. save a copy to keep a backup or move him to another device.</p><p id="cloudStatus" class="cloud-status" role="status" hidden></p><div class="save-buttons"><button id="exportButton"><svg><use href="#i-save"/></svg>save a copy</button><button id="importButton">restore a copy</button><input id="importFile" type="file" accept=".json,application/json" hidden></div><p id="settingsMessage" role="status" class="dialog-footnote"></p></div><footer class="site-footer"><span id="saveStatus"><span class="save-dot"></span> progress saved on this device</span><button id="helpButton">a small guide <span>↗</span></button></footer>
       </section>
     </main>
     <nav class="app-tabs" role="tablist" aria-label="game navigation">

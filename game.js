@@ -1,7 +1,6 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS } from './catalog.js';
 
 export const SAVE_KEY = 'sleeve-and-lantern.v1';
-export const CHAPTER_BOND = 20;
 export const CATEGORIES = ['nourishment','affection','comfort','rest'];
 const clamp = (v,lo=0,hi=100)=>Math.min(hi,Math.max(lo,v));
 const blankChapter = ()=>({unlocked:false,complete:false,cursor:0,choices:{},inProgress:false});

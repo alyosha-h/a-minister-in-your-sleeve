@@ -1,8 +1,8 @@
 export const CHAPTERS = [
-  { id:'tea', number:'01', title:'tea at his true height', bond:20, art:'tea-at-true-height.png', keepsake:'a second cup', icon:'tea', letter:'your place is still set', choices:{thanks:3,hand:2} },
-  { id:'rain', number:'02', title:'beneath one umbrella', bond:70, art:'beneath-one-umbrella.png', keepsake:'a pressed wisteria petal', icon:'leaf', letter:'regarding the weather', choices:{shelter:3,goodbye:2} },
-  { id:'ribbon', number:'03', title:'the ribbon at his nape', bond:150, art:'ribbon-at-his-nape.png', keepsake:'the ribbon you chose', icon:'ribbon', letter:'a very minor matter of appearance', choices:{color:3,comfort:3} },
-  { id:'game', number:'04', title:'a game he intends to lose', bond:260, art:'game-he-intends-to-lose.png', keepsake:'a white game stone', icon:'stone', letter:'an invitation to a rematch', choices:{bluff:3,touch:2} }
+  { id:'tea', number:'01', title:'tea at his true height', bond:20, art:'tea-at-true-height.webp', keepsake:'a second cup', icon:'tea', letter:'your place is still set', choices:{thanks:3,hand:2} },
+  { id:'rain', number:'02', title:'beneath one umbrella', bond:70, art:'beneath-one-umbrella.webp', keepsake:'a pressed wisteria petal', icon:'leaf', letter:'regarding the weather', choices:{shelter:3,goodbye:2} },
+  { id:'ribbon', number:'03', title:'the ribbon at his nape', bond:150, art:'ribbon-at-his-nape.webp', keepsake:'the ribbon you chose', icon:'ribbon', letter:'a very minor matter of appearance', choices:{color:3,comfort:3} },
+  { id:'game', number:'04', title:'a game he intends to lose', bond:260, art:'game-he-intends-to-lose.webp', keepsake:'a white game stone', icon:'stone', letter:'an invitation to a rematch', choices:{bluff:3,touch:2} }
 ];
 export const REQUESTS = [
   {id:'company',title:'stay a little while',quote:'“this paragraph refuses to finish itself. perhaps it needs an audience.”',description:'share a conversation while he puts his thoughts in order.',actions:['talk'],cta:'sit with him',action:'talk'},

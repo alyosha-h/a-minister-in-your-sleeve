@@ -8,12 +8,16 @@ const icon=name=>'<svg aria-hidden="true"><use href="#i-'+name+'"/></svg>';
 const teaName=id=>({jasmine:'jasmine tea',lotus:'lotus tea',rice:'roasted rice tea'}[id]||'a warm cup');
 
 export function createPhaseTwoUI(ctx){
-  let roomView='outfits',journalView='today',outfitIndex=ITEMS.filter(i=>i.kind==='outfit').findIndex(i=>i.id===ctx.state().outfit);
-  let activity={view:'menu'},draftPreference=null;
   const outfits=ITEMS.filter(i=>i.kind==='outfit');
+  let roomView='outfits',journalView='today',outfitIndex=0,shownOutfit=null;
+  let activity={view:'menu'},draftPreference=null;
+  // Browsing previews is free, but when what he's wearing changes (shop, import,
+  // cloud restore), bring the wardrobe back to the outfit he actually has on.
+  function followOutfit(){const id=ctx.state().outfit;if(id!==shownOutfit){shownOutfit=id;outfitIndex=Math.max(0,outfits.findIndex(i=>i.id===id));}}
+  followOutfit();
 
   function renderRoom(){
-    const s=ctx.state();$('copperValue').textContent=s.copper;
+    followOutfit();const s=ctx.state();$('copperValue').textContent=s.copper;
     document.querySelectorAll('[data-room-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.roomView===roomView)));
     if(roomView==='outfits'){
       const item=outfits[outfitIndex],owned=s.owned.includes(item.id),wearing=s.outfit===item.id;
@@ -92,7 +96,7 @@ export function createPhaseTwoUI(ctx){
       });
     }else if(activity.view==='held'){
       $('activityTitle').textContent='a little closer.';
-      root.innerHTML='<div class="held-scene"><img src="./assets/cupped-palm.png" alt="your open hand, gently holding him"><div class="held-minister"><span class="character-sprite" id="heldSprite"></span></div></div><p class="held-line">'+esc(s.memories.holdCount>1?'“yes. this is a very agreeable view. you may take your time.”':'“an unconventional mode of transport. i find i approve.”')+'</p><button id="setDown" class="primary-button">set him down gently</button><p class="dialog-footnote">'+(activity.result?.reward?'a little trust · +'+activity.result.reward+' bond':'no hurry. he looks quite comfortable.')+'</p>';
+      root.innerHTML='<div class="held-scene"><img src="./assets/cupped-palm.webp" alt="your open hand, gently holding him"><div class="held-minister"><span class="character-sprite" id="heldSprite"></span></div></div><p class="held-line">'+esc(s.memories.holdCount>1?'“yes. this is a very agreeable view. you may take your time.”':'“an unconventional mode of transport. i find i approve.”')+'</p><button id="setDown" class="primary-button">set him down gently</button><p class="dialog-footnote">'+(activity.result?.reward?'a little trust · +'+activity.result.reward+' bond':'no hurry. he looks quite comfortable.')+'</p>';
       Object.assign($('heldSprite').style,spriteFrameStyle(9,s.outfit));$('setDown').onclick=()=>{$('activityDialog').close();ctx.speak('“a very satisfactory excursion. i may request another.”','he looks at your hand a little more fondly.');};
     }else if(activity.view==='games'){
       $('activityTitle').textContent='a worthy opponent.';

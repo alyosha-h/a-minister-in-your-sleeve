@@ -30,7 +30,8 @@ function adoptState(candidate){
 }
 const cloudMessages={local:'cloud save isn’t available in this view, so progress stays in this browser.',connecting:'checking your cloud save…',syncing:'syncing to your claude account…',synced:'safely kept in your claude account.',restored:'picked up from your claude account.',offline:'couldn’t reach the cloud just now. progress is safe here and will sync on your next action.',full:'the cloud save is full. progress is still kept in this browser.',waiting:'two different saves were found. reopen him to choose which to keep.'};
 function cloudStatus(status){
-  $('cloudStatus').textContent=cloudMessages[status]||'';$('cloudStatus').dataset.status=status;
+  // Standalone (no cloud platform): the settings copy already explains browser saving.
+  $('cloudStatus').hidden=status==='local';$('cloudStatus').textContent=cloudMessages[status]||'';$('cloudStatus').dataset.status=status;
   if(status==='restored')toast('welcome back. your courtyard followed you here.');
 }
 function askConflict(local,remote,savedAt){
@@ -223,5 +224,5 @@ setInterval(()=>{if(!document.hidden&&!document.querySelector('dialog[open]')&&!
 phaseTwo=createPhaseTwoUI({state:()=>state,commit:commitResult,care:doCare,careInSheet:a=>doCare(a,null,true),speak,toast,ping,selectPage,page:()=>activePage,showSheet,replaceSheet,openTalk,openStory,openTray:toggleTray});
 const initial=pageFromLocation();history.replaceState({page:initial},'','#'+initial);selectPage(initial,false);save();render();requestAnimationFrame(animate);
 if(state.asleep)idleSpeech();else if(state.chapter.complete)idleSpeech();
-cloud=createCloudSync({getState:()=>state,adopt:adoptState,canAdopt:()=>!$('storyDialog').open,onStatus:cloudStatus,askConflict});cloud.init();
+cloud=createCloudSync({getState:()=>state,adopt:adoptState,canAdopt:()=>!$('storyDialog').open,onStatus:cloudStatus,askConflict});cloud.init().catch(()=>cloudStatus('local'));
 if(recovered)toast('your last good save has been restored.');if(!storageAvailable)toast('browser saving is unavailable. keep a copy from settings.');

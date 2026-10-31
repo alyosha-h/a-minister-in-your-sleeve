@@ -1,10 +1,14 @@
 import { validateState } from './game.js';
 
-// Cloud save: one private document per signed-in viewer, under the
-// platform's per-user subtree (data/users/<id>/...), which nobody else —
-// the artifact's owner included — can read or write.
-// The browser save stays the source of truth while playing; the cloud copy
-// is pulled on open / return-to-tab and pushed shortly after real changes.
+// Optional cloud save: one private document per signed-in viewer, under the
+// Claude artifact platform's per-user subtree (data/users/<id>/...), which
+// nobody else — the artifact's owner included — can read or write.
+// The browser save (localStorage, see app.js) is always the source of truth.
+// Outside that platform (no window.claude.use) this whole module is inert:
+// it reports 'local' once and every method becomes a no-op. Any unexpected
+// platform error also drops back to local rather than surfacing to the page.
+// When running, the cloud copy is pulled on open / return-to-tab and pushed
+// shortly after real changes.
 
 const APP = 'a-minister-in-your-sleeve';
 const META_KEY = 'sleeve-and-lantern.cloud';
@@ -27,17 +31,23 @@ export function createCloudSync({ getState, adopt, canAdopt, onStatus, askConfli
   const dirty = () => fingerprint(getState()) !== meta.fp;
 
   async function init() {
-    if (!window.claude?.use) { onStatus('local'); return; }
+    if (typeof window.claude?.use !== 'function') { onStatus('local'); return; }
     onStatus('connecting');
-    let db, user;
-    try { [db, user] = await Promise.all([claude.use('db'), claude.use('user')]); } catch { db = null; }
-    const id = db && user ? await user.id().catch(() => null) : null;
-    if (!id) { onStatus('local'); return; }
-    try { doc = db.doc('data/users/' + id + '/courtyard'); } catch { onStatus('local'); return; }
+    try {
+      const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+      const id = await user?.id?.();
+      if (!id || typeof db?.doc !== 'function') throw 0;
+      doc = db.doc('data/users/' + id + '/courtyard');
+    } catch { doc = null; onStatus('local'); return; }
     await pull();
   }
 
   async function pull() {
+    try { await pullOnce(); }
+    catch { ready = false; pulling = false; onStatus('offline'); } // never let a sync problem break the game
+  }
+
+  async function pullOnce() {
     if (!doc || pulling) return;
     if (!canAdopt()) { deferred = true; return; }
     pulling = true; deferred = false; onStatus('syncing');
