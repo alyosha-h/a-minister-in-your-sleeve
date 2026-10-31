@@ -7,7 +7,7 @@ export const CHAPTERS = [
 export const REQUESTS = [
   {id:'company',title:'stay a little while',quote:'“this paragraph refuses to finish itself. perhaps it needs an audience.”',description:'share a conversation while he puts his thoughts in order.',actions:['talk'],cta:'sit with him',action:'talk'},
   {id:'warmth',title:'something warm, please',quote:'“an urgent matter. the kitchen seems to be rather far away.”',description:'offer him a bun, dumplings, or a warm cup of tea.',actions:['feed','tea'],cta:'bring a warm bite',action:'feed'},
-  {id:'page',title:'the missing page',quote:'“the conclusion of my memorial has vanished. i am certain it was an excellent conclusion.”',description:'look beside the tea tray, under his book, and near the inkstone.',actions:['find'],cta:'help him look',action:'search'},
+  {id:'page',title:'the missing page',quote:'“the conclusion of my memorial has vanished. i am certain it was an excellent conclusion.”',description:'search his desk with him. he tucks things away in different places, and anything you’ve furnished him with is fair game.',actions:['find'],cta:'help him look',action:'search'},
   {id:'match',title:'an impartial opponent',quote:'“i require someone clever enough to present a challenge. naturally, i thought of you.”',description:'play either scattered memorial or tea for two.',actions:['game'],cta:'play together',action:'games'},
   {id:'view',title:'a better view',quote:'“from here, the garden is mostly table. might i borrow your hand?”',description:'pick him up and let him see the courtyard from your palm.',actions:['pickup'],cta:'offer your hand',action:'pickup'},
   {id:'ink',title:'ink and sleeves',quote:'“the papers have organised a rebellion. i shall need assistance.”',description:'tidy his desk and rescue a little space for the teacups.',actions:['tidy'],cta:'tidy together',action:'tidy'},
@@ -26,17 +26,6 @@ export const ITEMS = [
   {id:'chime',kind:'furnishing',name:'a wind chime',price:32,icon:'chime',description:'one soft note when the garden stirs.',reaction:'“listen. even the wind has decided to speak more gently here.”'}
 ];
 export const RIBBONS = [{id:'rose',name:'rose silk',color:'#d995b5'},{id:'blue',name:'blue silk',color:'#8aaed7'},{id:'gold',name:'gold silk',color:'#d5b56e'}];
-export const MEMORIALS = [
-  {topic:'the village canal',parts:['the canal gate has broken, leaving two villages without water.','i inspected the bank; new timbers would allow repairs within three days.','i therefore request timber and twelve workers to begin the repairs.']},
-  {topic:'the school library',parts:['the village school has more pupils than books.','the old county collection contains forty copies suitable for their lessons.','i ask that these copies be sent to the school before the autumn term.']},
-  {topic:'a troublesome bridge',parts:['the bridge near the market is unsafe after the recent rain.','a local carpenter can replace its damaged planks by the end of the week.','i request permission to close the crossing while the work is done.']},
-  {topic:'a particularly small minister',parts:['an official of some importance has become inconveniently small.','careful observation shows that warm meals and good company improve his condition.','i request that the present arrangements continue indefinitely.']}
-];
-export const TEA_CLUES = [
-  {line:'“something fragrant, please. jasmine, perhaps. i like it gently brewed.”',leaf:'jasmine',steep:'brief'},
-  {line:'“the lotus scent reminds me of the garden. let the leaves rest a little longer today.”',leaf:'lotus',steep:'rested'},
-  {line:'“roasted rice, and a patient steep. the sort of cup you can take your time over.”',leaf:'rice',steep:'rested'}
-];
 export const LETTERS = {
   tea:'i have put the second cup beside mine. this is a practical arrangement: it will save me the trouble of finding it every time you visit.\n\ni thought you should know that the place by the window is still the best one.\n\n— lin yan',
   rain:'the umbrella has dried. my sleeve, eventually, has done the same.\n\ni am told there may be rain again this week. i offer this information without any particular motive.\n\nif you happen to be nearby, you know where to find me.\n\n— lin yan',
