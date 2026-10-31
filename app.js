@@ -1,7 +1,9 @@
-import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue, MEND_GOAL } from './game.js';
+import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue, MEND_GOAL, orchidThirsty, checkinDue, aboutDue, answerCheckin, answerAbout, pendingFollowUp, followUp, finishDate } from './game.js';
+import { SPOTS, chooseActivity, activityById } from './life.js';
+import { DATES } from './dates.js';
 import { TREATS } from './catalog.js';
 import { CHAPTERS, RIBBONS } from './catalog.js';
-import { allConversations, chapterStories } from './more-content.js';
+import { allConversations, chapterStories, CHECKIN, ABOUT_YOU } from './more-content.js';
 import { spriteFrameStyle, MOOD_FRAMES } from './sprites.js';
 import { createPhaseTwoUI } from './phase-two-ui.js';
 import { createCloudSync } from './cloud.js';
@@ -117,7 +119,7 @@ function render(){
   for(const [k,v]of Object.entries(state.needs)){const n=Math.round(v);$(k+'Value').textContent=n;$(k+'Bar').style.width=n+'%';$(k+'Meter').setAttribute('aria-valuenow',n);$(k+'Meter').closest('.need').classList.toggle('low',v<LOW);}
   const mood=moodOf(state);$('sceneFrame').dataset.mood=mood;
   const upcoming=nextChapter(state),ready=CHAPTERS.some(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});
-  $('momentButton').hidden=!momentDue(state);
+  $('momentButton').hidden=!momentDue(state);$('dateButton').hidden=!state.chapters.jade.complete;
   document.querySelectorAll('.treat-button').forEach(b=>{const n=state.pantry[b.dataset.food||b.dataset.tea]||0;b.hidden=!n;b.querySelector('small').textContent='×'+n;});
   $('bondSummary').textContent=upcoming?state.bond+' / '+upcoming.bond:state.bond+' bond';$('lanternNavDot').hidden=!ready;
   $('tab-lantern').setAttribute('aria-label',ready?'lantern, encounter ready':'lantern');
@@ -138,6 +140,8 @@ function idleSpeech(){
   if(state.asleep){speak('“mm… the memorial can wait.”','an important minister, taking a very important nap.');return;}
   const mood=moodOf(state);
   if(moodLines[mood]&&Math.random()<(mood==='flourishing'?.4:.7)){speak(moodLines[mood][Math.floor(Math.random()*moodLines[mood].length)],moodStatus[mood]+'.');return;}
+  if(doing&&Math.random()<.35){speak(doing.lines[Math.floor(Math.random()*doing.lines.length)],doing.caption);return;}
+  const told=aboutCallbacks();if(told.length&&Math.random()<.15){speak(told[Math.floor(Math.random()*told.length)],'he remembers what you tell him.');return;}
   if(Math.random()<.3){const now=Date.now(),pool=weatherOf(dateKey(now))==='rain'?rainLines:periodLines[periodOf(now)];speak(pool[Math.floor(Math.random()*pool.length)],'a familiar little presence, glad you’re here.');return;}
   let lines;
   const nick=state.memories.nickname;
@@ -152,14 +156,51 @@ function idleSpeech(){
   else lines=['“a respectable residence. a little short on staff.”','“the hat is an emblem of office. please be gentle.”','“i oversee three departments. i can manage one bun.”','“you may sit closer. if you wish.”'];
   if(state.memories.name)lines.push('“'+state.memories.name+'? nothing urgent. i was just glad you were here.”');
   if(state.memories.lastTea)lines.push('“shall we share another cup? i remember the last one rather fondly.”');
-  speak(lines[Math.floor(Math.random()*lines.length)],'a familiar little presence, glad you’re here.');
+  speak(lines[Math.floor(Math.random()*lines.length)],doing?.caption||'a familiar little presence, glad you’re here.');
 }
+// things you've told him, brought up again; a favourite time of day only when it's that time
+function aboutCallbacks(){
+  const told=state.memories.you.about,period=periodOf(Date.now());
+  return ABOUT_YOU.flatMap(q=>{const a=q.answers.find(x=>x.id===told[q.id]);return a?.callback&&(!a.period||a.period===period)?[a.callback]:[];});
+}
+// he asked not to tease if you asked him not to; otherwise he answers in your own style
+function voice(){const style=styleOf(state);return style==='teasing'&&state.memories.you.about.teasing==='no'?'gentle':style;}
+
+// ---- the living courtyard: he keeps himself busy, and walks rather than teleports ----
+let doing=null,noticed={at:0,count:0};
+function lifeContext(){
+  const now=Date.now();
+  return {period:periodOf(now),rain:weatherOf(dateKey(now))==='rain',placed:state.placed,orchidThirsty:orchidThirsty(state),energy:state.needs.energy,
+    moments:state.moments.seen,chapters:Object.fromEntries(CHAPTERS.map(c=>[c.id,chapterRecord(state,c.id).complete]))};
+}
+function walkTo(spotId){
+  const spot=SPOTS[spotId]||SPOTS.center,area=$('characterArea');if(area.dataset.spot===spotId)return;
+  area.dataset.spot=spotId;area.style.left=spot.left+'%';area.style.bottom=spot.bottom+'%';area.style.setProperty('--spot-scale',spot.scale);
+  area.dataset.walking='1';clearTimeout(walkTo.timer);walkTo.timer=setTimeout(()=>delete area.dataset.walking,2400);
+}
+function takeUp(activity){doing=activity;if(!state.asleep)walkTo(activity.spot);$('activityLabel').textContent=activity.caption;}
+function wander(force=false){
+  if(busy||state.asleep||document.querySelector('dialog[open]')||(!force&&Math.random()<.4))return;
+  takeUp(chooseActivity(lifeContext(),doing?.id));
+}
+const KETTLE={id:'kettle',spot:'tea',frame:4,caption:'putting the kettle on, for you.',lines:['“the water is nearly ready. sit. that is not a request.”']};
+// a day you told him about gets followed up the next time you come by
+function offerFollowUp(){
+  if(document.querySelector('dialog[open]')||busy)return;
+  const f=pendingFollowUp(state);if(!f)return;
+  if(f.id==='tired'){takeUp(KETTLE);speak(f.follow,KETTLE.caption);$('offerButton').hidden=false;return;}
+  state=followUp(state,false).state;save();speak(f.follow,'he remembers what you tell him.');
+}
+$('offerButton').onclick=()=>{
+  $('offerButton').hidden=true;if(!pendingFollowUp(state))return;commitResult(followUp(state,true));ping('tea');
+  speak('“there. one cup, poured properly, by me. drink it while it is hot, and tell me nothing at all unless you want to.”','a cup he poured for you.');
+};
 function setAnimation(mode,duration=1550){
   clearTimeout(animationTimer);busy=true;animation={mode,start:performance.now()};
   $('characterArea').className='character-area is-'+({feed:'feeding',tea:'drinking',pet:'petting',talk:'talking',rest:'resting',tidy:'tidying',pickup:'held'}[mode]||mode);render();
   animationTimer=setTimeout(()=>{busy=false;animation={mode:state.asleep?'sleep':'idle',start:performance.now()};$('characterArea').className='character-area';render();},duration);
 }
-const frames={feed:[2,3],tea:[4,5],pet:[6,7],talk:[8,9],rest:[10,11],sleep:[11,15],tidy:[12],pickup:[7,9]};
+const frames={hat:[13],feed:[2,3],tea:[4,5],pet:[6,7],talk:[8,9],rest:[10,11],sleep:[11,15],tidy:[12],pickup:[7,9]};
 let previousFrame='';
 // his resting pose follows his mood; the plain idle keeps its blink
 function idleFrame(mood,time,still){
@@ -168,11 +209,12 @@ function idleFrame(mood,time,still){
   if(mood==='restless')return 13;
   if(mood==='wistful')return 7;
   if(mood==='flourishing'&&!still&&time%11000>9200)return 14;
+  if(doing&&doing.frame!==0)return doing.frame;
   return !still&&time%6400<170?1:0;
 }
 function animate(time){
   const noMotion=state.settings.reducedMotion||matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let frame;if(animation.mode==='idle')frame=idleFrame(moodOf(state),time,noMotion);else{const list=frames[animation.mode]||[0];frame=list[noMotion?0:Math.floor(Math.max(0,time-animation.start)/(animation.mode==='sleep'?2400:650))%list.length];}
+  let frame;if(animation.wakeUntil&&time<animation.wakeUntil)frame=10;else if(animation.mode==='idle')frame=idleFrame(moodOf(state),time,noMotion);else{const list=frames[animation.mode]||[0];frame=list[noMotion?0:Math.floor(Math.max(0,time-animation.start)/(animation.mode==='sleep'?2400:650))%list.length];}
   const key=state.outfit+':'+frame;if(key!==previousFrame){Object.assign($('characterSprite').style,spriteFrameStyle(frame,state.outfit));previousFrame=key;}
   requestAnimationFrame(animate);
 }
@@ -190,7 +232,10 @@ function commitResult(result){
 }
 function doCare(action,item=null,allowSheet=false){
   if(busy||(!allowSheet&&document.querySelector('dialog[open]')))return null;
-  closeTrays();const r=care(state,action,Date.now(),item);commitResult(r);setAnimation(action,action==='rest'?1900:1550);ping(action);
+  closeTrays();const wasAsleep=state.asleep;const r=care(state,action,Date.now(),item);commitResult(r);setAnimation(action,action==='rest'?1900:1550);ping(action);
+  // a sleeping minister yawns awake before anything else happens
+  if(wasAsleep&&action!=='rest')animation.wakeUntil=animation.start+800;
+  if($('characterArea').dataset.spot==='garden')walkTo('center');doing=null;
   if(action==='feed')speak(item==='dumplings'?'“an excellent policy. more dumplings, fewer meetings.”':'“this is an appropriate size. for a banquet.”','a small bite. a very satisfied minister.');
   if(action==='tea')speak(item==='lotus'?'“lotus tea. you remembered what the garden smells like.”':item==='rice'?'“a very comforting cup. perhaps the letters can wait.”':'“leave the paperwork. just for one cup.”','both hands around a warm little cup.');
   if(action==='pet'){speak(state.chapters.game.complete?'“you may continue. i have cleared my schedule.”':'“i am allowing this as a diplomatic courtesy.”','he leans into your hand. purely diplomatic.');$('hearts').innerHTML='<span>♥</span><span>♥</span><span>♥</span>';$('petHint').hidden=true;setTimeout(()=>$('hearts').replaceChildren(),2300);}
@@ -207,8 +252,21 @@ function chooseConversation(){
   const stage=CHAPTERS.filter(c=>chapterRecord(state,c.id).complete).length,eligible=allConversations.map((c,i)=>({c,i})).filter(x=>(x.c.minStage||0)<=stage);
   return eligible.find(x=>!state.memories.recentChats.includes(x.i))||eligible[(state.day-1)%eligible.length];
 }
+function openQuestion(title,intro,answers,answer){
+  $('talkDialog').querySelector('h2').textContent=title;$('talkIntro').textContent=intro;$('talkChoices').replaceChildren();
+  $('talkReward').textContent=state.talked?'he’ll remember what you tell him.':'your first conversation today · +15 bond';
+  answers.forEach(a=>{const b=document.createElement('button');b.textContent=a.label;b.onclick=()=>{
+    if(isTalking)return;isTalking=true;let r;try{r=answer(a);}catch(e){toast(e.message);return;}commitResult(r);
+    $('talkIntro').textContent=a.response;$('talkDialog').querySelector('h2').textContent='he’ll remember.';$('talkChoices').replaceChildren();
+    const done=document.createElement('button');done.textContent='stay a moment, then return';done.onclick=()=>$('talkDialog').close();$('talkChoices').append(done);
+    $('talkReward').textContent=r.reward?'+'+r.reward+' bond · +'+r.copper+' copper':'he’ll remember what you told him.';animation={mode:'talk',start:performance.now()};ping();done.focus();
+  };$('talkChoices').append(b);});showSheet('talkDialog');
+}
 function openTalk(){
-  closeTrays();isTalking=false;const selected=chooseConversation(),dialogue=selected.c;
+  closeTrays();isTalking=false;
+  if(checkinDue(state)){openQuestion('how are you, really?',CHECKIN.intro,CHECKIN.answers,a=>answerCheckin(state,a.id));return;}
+  const q=aboutDue(state);if(q){openQuestion('a question, for the record.',q.intro,q.answers,a=>answerAbout(state,q.id,a.id));return;}
+  const selected=chooseConversation(),dialogue=selected.c;
   $('talkDialog').querySelector('h2').textContent='what’s on his mind?';$('talkIntro').textContent=dialogue.intro;$('talkChoices').replaceChildren();
   $('talkReward').textContent=state.talked?'the pleasure of your company is always welcome.':'your first conversation today · +15 bond';
   dialogue.choices.forEach(choice=>{const b=document.createElement('button');b.textContent=choice.label;b.onclick=()=>{
@@ -218,17 +276,26 @@ function openTalk(){
     $('talkReward').textContent=r.reward?'+'+r.reward+' bond · +'+r.copper+' copper':'some things don’t need a reward.';animation={mode:'talk',start:performance.now()};ping();done.focus();
   };$('talkChoices').append(b);});showSheet('talkDialog');
 }
-$('talkDialog').addEventListener('close',()=>{if(isTalking)speak({teasing:'“you are very impertinent. do sit closer.”',quiet:'he says nothing, but he doesn’t move away either.',gentle:'“thank you for staying a little while.”'}[styleOf(state)],'some company, and a little less distance.');animation={mode:state.asleep?'sleep':'idle',start:performance.now()};});
+$('talkDialog').addEventListener('close',()=>{if(isTalking)speak({teasing:'“you are very impertinent. do sit closer.”',quiet:'he says nothing, but he doesn’t move away either.',gentle:'“thank you for staying a little while.”'}[voice()],'some company, and a little less distance.');animation={mode:state.asleep?'sleep':'idle',start:performance.now()};});
 function openStory(id=null){
   const meta=CHAPTERS.find(c=>c.id===(id||selectedChapter))||CHAPTERS[0],record=chapterRecord(state,meta.id);
   if(!record.unlocked){toast(meta.bond+' bond, day '+meta.day+', and the previous chapter will bring this evening closer.');return;}
   if(busy)return;selectedChapter=meta.id;closeTrays();const book=chapterStories[meta.id];
   // a first visit keeps the tone it began with; replays follow how you are with him now
-  storySession={id:meta.id,cursor:record.complete?0:Math.min(record.cursor,book.length-1),choices:{...record.choices},replay:record.complete,tone:(!record.complete&&record.tone)||styleOf(state)};
+  storySession={id:meta.id,book,cursor:record.complete?0:Math.min(record.cursor,book.length-1),choices:{...record.choices},replay:record.complete,tone:(!record.complete&&record.tone)||styleOf(state)};
   if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),meta.id,storySession.tone);save();}
   $('storyDialog').classList.remove('art-only');$('viewArtButton').textContent='view art';$('viewArtButton').setAttribute('aria-pressed','false');
   $('storyDialog').setAttribute('aria-label',meta.title);$('storyTitle').innerHTML='<svg><use href="#i-lantern"/></svg> '+meta.number+' · '+meta.title;
   $('storyArt').style.backgroundImage='url("./assets/'+meta.art+'")';$('storyArt').setAttribute('aria-label',meta.title+' · lin yan at his full adult height');
+  renderStory();showSheet('storyDialog');ping('lantern');
+}
+// an evening at his true height, repeatable once the jade is whole
+function openDate(id){
+  const date=DATES.find(d=>d.id===id);if(!date||busy)return;closeTrays();
+  storySession={id:date.id,book:date.nodes,cursor:0,choices:{},replay:true,date:true,tone:styleOf(state)};
+  $('storyDialog').classList.remove('art-only');$('viewArtButton').textContent='view art';$('viewArtButton').setAttribute('aria-pressed','false');
+  $('storyDialog').setAttribute('aria-label',date.title);$('storyTitle').innerHTML='<svg><use href="#i-heart"/></svg> an evening · '+date.title;
+  $('storyArt').style.backgroundImage='url("./assets/'+date.art+'")';$('storyArt').setAttribute('aria-label',date.title+' · lin yan at his full height');
   renderStory();showSheet('storyDialog');ping('lantern');
 }
 function storyText(text){
@@ -236,16 +303,22 @@ function storyText(text){
   return text.replaceAll('{{ribbon}}',ribbon.name).replaceAll('{{name}}',state.memories.name||'my guest');
 }
 function renderStory(){
-  const book=chapterStories[storySession.id],node=book[storySession.cursor];$('storyDialog').classList.toggle('has-choices',Boolean(node.choice));$('storySpeaker').textContent=node.speaker;
+  const book=storySession.book,node=book[storySession.cursor];$('storyDialog').classList.toggle('has-choices',Boolean(node.choice));$('storySpeaker').textContent=node.speaker;
   $('storyText').textContent=storyText(node.branch?node.variants[storySession.choices[node.branch]??0]||node.variants[0]:node.tones?.[storySession.tone]||node.text);
-  $('storyArt').classList.toggle('before-reveal',storySession.cursor<2);$('storyChoices').replaceChildren();$('storyNext').disabled=Boolean(node.choice);
+  $('storyArt').classList.toggle('before-reveal',!storySession.date&&storySession.cursor<2);$('storyChoices').replaceChildren();$('storyNext').disabled=Boolean(node.choice);
   $('storyNext').innerHTML=node.ending?'keep this moment <svg><use href="#i-arrow"/></svg>':'continue <svg><use href="#i-arrow"/></svg>';
-  $('storyProgress').textContent=(storySession.replay?'a memory · ':'')+String(storySession.cursor+1).padStart(2,'0')+' / '+book.length;
+  $('storyProgress').textContent=(storySession.date?'an evening · ':storySession.replay?'a memory · ':'')+String(storySession.cursor+1).padStart(2,'0')+' / '+book.length;
   if(node.choice)node.options.forEach((label,i)=>{const b=document.createElement('button');b.textContent=label;b.onclick=()=>{storySession.choices[node.choice]=i;advanceStory();};$('storyChoices').append(b);});
   $('storyDialog').querySelector('.story-reading').scrollTop=0;
 }
 function advanceStory(){
-  if(!storySession)return;const node=chapterStories[storySession.id][storySession.cursor];
+  if(!storySession)return;const node=storySession.book[storySession.cursor];
+  if(node.ending&&storySession.date){
+    const pick=storySession.book.find(n=>n.choice),style=pick?.styles[storySession.choices[pick.choice]??0];
+    const r=commitResult(finishDate(state,style));$('storyDialog').close();render();
+    speak(['“same time tomorrow?”','“that was a very good evening. i have made a note.”','“small again, for now. i shall be tall again whenever you ask.”'][Math.floor(Math.random()*3)],'small again, by his own choosing.');
+    toast(r.reward?'an evening together · +'+r.reward+' bond':'another evening together');ping('lantern');return;
+  }
   if(node.ending){
     const meta=CHAPTERS.find(c=>c.id===storySession.id),replay=storySession.replay;
     if(!replay){commitResult({state:completeChapter(state,Date.now(),meta.id)});selectedChapter=(nextChapter(state)||meta).id;}
@@ -255,11 +328,26 @@ function advanceStory(){
   storySession.cursor++;if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),storySession.id,storySession.tone);save();}renderStory();
 }
 $('storyDialog').addEventListener('close',()=>{if(storySession&&!storySession.replay)chapterRecord(state,storySession.id).inProgress=false;state.lastSeen=Date.now();save();storySession=null;render();cloud?.resume();});
-$('storyDialog').addEventListener('keydown',e=>{if(!storySession)return;const node=chapterStories[storySession.id][storySession.cursor];if((e.key==='ArrowRight'||(e.key===' '&&e.target===$('storyDialog')))&&!node.choice){e.preventDefault();advanceStory();}});
+$('storyDialog').addEventListener('keydown',e=>{if(!storySession)return;const node=storySession.book[storySession.cursor];if((e.key==='ArrowRight'||(e.key===' '&&e.target===$('storyDialog')))&&!node.choice){e.preventDefault();advanceStory();}});
 
 document.querySelectorAll('.care-action').forEach(b=>b.onclick=()=>{const a=b.dataset.action;if(a==='feed'||a==='tea')toggleTray(a);else if(a==='talk')openTalk();else if(a==='more')phaseTwo.openActivity();else doCare(a);});
 document.querySelectorAll('[data-food]').forEach(b=>b.onclick=()=>doCare('feed',b.dataset.food));document.querySelectorAll('[data-tea]').forEach(b=>b.onclick=()=>doCare('tea',b.dataset.tea));document.querySelectorAll('.tray-close').forEach(b=>b.onclick=closeTrays);
-$('characterButton').onclick=()=>doCare('pet');$('chapterButton').onclick=()=>openStory();
+$('characterButton').onclick=e=>{
+  const box=$('characterButton').getBoundingClientRect();
+  if(e.detail>0&&e.clientY-box.top<box.height*.3&&!busy&&!state.asleep){
+    speak(['“the hat is an emblem of office. please stop using it as a handle.”','“that is the hat. i am the one underneath it.”','“careful. the wings are load-bearing.”','“you may pet the minister. the hat is a separate department.”'][Math.floor(Math.random()*4)],'he straightens his hat with enormous dignity.');
+    setAnimation('hat',900);return;
+  }
+  doCare('pet');
+};
+// he notices you hovering, and eventually says so
+$('sceneFrame').addEventListener('pointermove',e=>{
+  if(e.pointerType!=='mouse'||busy||state.asleep)return;const box=$('characterArea').getBoundingClientRect(),now=performance.now();
+  if(Math.hypot(e.clientX-(box.left+box.width/2),e.clientY-(box.top+box.height/2))>box.width*.6||now-noticed.at<5000)return;
+  noticed.count=now-noticed.at<30000?noticed.count+1:1;noticed.at=now;$('characterArea').dataset.noticed='1';setTimeout(()=>delete $('characterArea').dataset.noticed,700);
+  if(noticed.count===3)speak('“yes? i am right here. you may stop hovering and simply say hello.”');
+});
+$('dateButton').onclick=()=>phaseTwo.openDates();$('chapterButton').onclick=()=>openStory();
 $('sceneLantern').onclick=()=>{const ready=CHAPTERS.find(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});if(ready)openStory(ready.id);else selectPage('lantern');};
 $('storyNext').onclick=advanceStory;$('exitStoryButton').onclick=()=>$('storyDialog').close();
 $('viewArtButton').onclick=()=>{const v=$('storyDialog').classList.toggle('art-only');$('viewArtButton').textContent=v?'read on':'view art';$('viewArtButton').setAttribute('aria-pressed',String(v));};
@@ -280,9 +368,10 @@ $('importButton').onclick=()=>$('importFile').click();
 $('importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>150000)throw new Error('that file is too large for a courtyard save.');const data=JSON.parse(await file.text());if(data.app!=='a-minister-in-your-sleeve')throw new Error('please choose an exported courtyard save.');const candidate=rollDay(elapsedCare(validateState(data.state))).state;if(!confirm('restore day '+candidate.day+' with '+candidate.bond+' bond? this replaces progress on this device.'))return;for(const c of CHAPTERS)chapterRecord(candidate,c.id).inProgress=false;state=candidate;selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;save();render();animation={mode:state.asleep?'sleep':'idle',start:performance.now()};$('settingsMessage').textContent='your courtyard is restored. he’s glad you’re back.';idleSpeech();}catch(error){$('settingsMessage').textContent=error instanceof SyntaxError?'that file could not be read. try an exported courtyard save.':error.message;}e.target.value='';};
 
 document.addEventListener('visibilitychange',()=>{if(document.hidden){save();cloud?.flush();}else if(!$('storyDialog').open){state=elapsedCare(state);save();render();checkDay();cloud?.pull();}});window.addEventListener('pagehide',()=>{save();cloud?.flush();});
-setInterval(()=>{if(!document.hidden&&!document.querySelector('dialog[open]')&&!busy){state=elapsedCare(state);save();render();checkDay();}},60000);setInterval(idleSpeech,24000);
-phaseTwo=createPhaseTwoUI({state:()=>state,commit:commitResult,care:doCare,careInSheet:a=>doCare(a,null,true),speak,toast,ping,selectPage,page:()=>activePage,showSheet,replaceSheet,openTalk,openStory,openTray:toggleTray});
+setInterval(()=>{if(!document.hidden&&!document.querySelector('dialog[open]')&&!busy){state=elapsedCare(state);save();render();checkDay();}},60000);setInterval(idleSpeech,24000);setInterval(()=>{if(!document.hidden){wander();offerFollowUp();}},55000);
+phaseTwo=createPhaseTwoUI({openDate,state:()=>state,commit:commitResult,care:doCare,careInSheet:a=>doCare(a,null,true),speak,toast,ping,selectPage,page:()=>activePage,showSheet,replaceSheet,openTalk,openStory,openTray:toggleTray});
 const initial=pageFromLocation();history.replaceState({page:initial},'','#'+initial);selectPage(initial,false);save();render();requestAnimationFrame(animate);
-if(welcomeGap>=2)welcome(welcomeGap);else if(state.asleep||state.chapter.complete||moodLines[moodOf(state)])idleSpeech();
+wander(true);
+if(welcomeGap>=2)welcome(welcomeGap);else if(pendingFollowUp(state))offerFollowUp();else if(state.asleep||state.chapter.complete||moodLines[moodOf(state)])idleSpeech();
 cloud=createCloudSync({getState:()=>state,adopt:adoptState,canAdopt:()=>!$('storyDialog').open,onStatus:cloudStatus,askConflict});cloud.init().catch(()=>cloudStatus('local'));
 if(recovered)toast('your last good save has been restored.');if(!storageAvailable)toast('browser saving is unavailable. keep a copy from settings.');

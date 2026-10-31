@@ -1,7 +1,8 @@
 import { CHAPTERS, ITEMS, RIBBONS, LETTERS, POSTSCRIPTS, TREATS } from './catalog.js';
 import { gameTier, memorialPuzzle, clerkRank, LEAVES, STEEPS, TEA_WISHES, SEARCH_SPOTS, searchSpots } from './minigames.js';
 import { MOMENTS } from './moments.js';
-import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
+import { DATES } from './dates.js';
+import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
 import { spriteFrameStyle } from './sprites.js';
 
 const $=id=>document.getElementById(id);
@@ -108,7 +109,7 @@ export function createPhaseTwoUI(ctx){
     ctx.commit(r);ctx.ping('lantern');showResult(kind,r,r.verdict==='perfect');activity.newNote=r.state.memories.teaNotes.length>notes;renderActivity();
   }
   function renderActivity(){
-    const root=$('activityContent'),s=ctx.state();$('activityBack').hidden=['menu','held','letter','moment'].includes(activity.view);
+    const root=$('activityContent'),s=ctx.state();$('activityBack').hidden=['menu','held','letter','moment','dates'].includes(activity.view);
     $('activityEyebrow').textContent=activity.view==='letter'?'a note in his own hand':'a little time together';
     if(activity.view==='menu'){
       $('activityTitle').textContent='little things, together.';
@@ -162,6 +163,12 @@ export function createPhaseTwoUI(ctx){
       const extra=activity.kind==='tea'&&activity.newNote?'<p class="dialog-footnote">noted in your journal: what he likes '+esc(w.note)+'.</p>':activity.kind==='memorial'?'<p class="dialog-footnote">your standing: '+esc(clerkRank(ctx.state().memories.memorialPerfects))+'</p>':'';
       root.innerHTML='<div class="game-result-icon">'+icon(activity.kind==='tea'?'tea':activity.kind==='search'?'journal':'scroll')+'</div><p class="game-intro">'+esc(line)+'</p>'+extra+'<div class="earned-reward">'+(activity.result.reward?'+'+activity.result.reward+' bond · +'+activity.result.copper+' copper':'another pleasant moment together')+'</div><button id="resultDone" class="primary-button">a moment well spent</button>';
       $('resultDone').onclick=()=>$('activityDialog').close();
+    }else if(activity.view==='dates'){
+      // after the ending: he can be tall whenever you ask
+      $('activityTitle').textContent='an evening at his true height.';$('activityEyebrow').textContent='small by choice, tall on request';
+      const rewarded=s.memories.dateKey===dateKey(Date.now());
+      root.innerHTML='<div class="activity-menu">'+DATES.map(d=>'<button data-date="'+d.id+'">'+icon('heart')+'<span><strong>'+esc(d.title)+'</strong></span>'+icon('arrow')+'</button>').join('')+'</div><p class="dialog-footnote">'+(rewarded?'you’ve already had tonight’s evening. another is always welcome.':'tonight’s first evening together · +5 bond and +3 copper.')+'</p>';
+      document.querySelectorAll('[data-date]').forEach(b=>b.onclick=()=>ctx.replaceSheet('activityDialog',()=>ctx.openDate(b.dataset.date)));
     }else if(activity.view==='moment'){
       const m=MOMENTS.find(x=>x.id===activity.id);$('activityTitle').textContent=m.title;$('activityEyebrow').textContent=activity.reread?'a small moment, kept':'a small moment';
       root.innerHTML='<p class="letter-prose">'+esc(m.text)+'</p>'+(activity.reply!=null?'<p class="letter-prose moment-reply">'+esc(m.options[activity.reply].response)+'</p><div class="earned-reward">'+(activity.result?.reward?'+'+activity.result.reward+' bond · +'+activity.result.copper+' copper':'kept in your journal')+'</div><button id="resultDone" class="primary-button">keep this one</button>':activity.reread?'<button id="resultDone" class="primary-button">fold it away</button>':'<div class="dialog-choices">'+m.options.map((o,i)=>'<button data-reply="'+i+'">'+esc(o.label)+'</button>').join('')+'</div>');
@@ -186,6 +193,7 @@ export function createPhaseTwoUI(ctx){
     render(){renderDecor();if(ctx.page()==='room')renderRoom();if(ctx.page()==='journal')renderJournal();},
     onPage(page){if(page==='room')renderRoom();if(page==='journal')renderJournal();},
     openActivity,openJournal,runRequest,renderAlbum,
-    openMoment:openMomentSheet
+    openMoment:openMomentSheet,
+    openDates(){activity={view:'dates'};renderActivity();ctx.showSheet('activityDialog');}
   };
 }

@@ -1,5 +1,6 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS, TREATS } from './catalog.js';
 import { MOMENTS } from './moments.js';
+import { CHECKIN, ABOUT_YOU } from './more-content.js';
 import { TEA_WISHES, teaWishKey, judgeTea, searchSpots, pageSpot } from './minigames.js';
 
 export const SAVE_KEY = 'sleeve-and-lantern.v1';
@@ -38,7 +39,7 @@ export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
     claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
     chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter(),lamp:blankChapter(),lotus:blankChapter(),beside:blankChapter(),jade:blankChapter()},talisman:{mend:0,key:null,today:0},pantry:{},orchidKey:null,request:requestForDay(1),
-    owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0,pace:null,nickname:null},
+    owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0,pace:null,nickname:null,you:{day:null,about:{},aboutKey:null},datesDone:0,dateKey:null},
     settings:{sound:false,reducedMotion:false},lastSeen:now};
 }
 
@@ -80,6 +81,37 @@ export function shareMoment(input,id,optionIndex,now=Date.now()){
   if(!m||!option||momentDue(input,now)?.id!==id)throw new Error('That moment isn’t ready yet.');
   const s=elapsedCare(input,now);s.moments.seen.push(id);s.moments.key=dateKey(now);nudge(s,option.style,2);mend(s,1);
   return result(s,{reward:6,copper:4},{reward:0,copper:0,requestCompleted:false});
+}
+// once a day he asks how yours went; on a later visit (a new day, or a new part of this one) he follows up
+export function checkinDue(s,now=Date.now()){return s.day>=2&&s.memories.you.day?.key!==dateKey(now);}
+export function aboutDue(s,now=Date.now()){
+  if(s.day<3||checkinDue(s,now)||s.memories.you.aboutKey===dateKey(now))return null;return ABOUT_YOU.find(q=>!(q.id in s.memories.you.about))||null;
+}
+export function answerCheckin(input,answerId,now=Date.now()){
+  const a=CHECKIN.answers.find(x=>x.id===answerId);if(!a||!checkinDue(input,now))throw new Error('he has already asked today.');
+  const r=conversation(input,a.style,now,null);r.state.memories.you.day={answer:a.id,key:dateKey(now),period:periodOf(now),followed:false};return r;
+}
+export function answerAbout(input,questionId,answerId,now=Date.now()){
+  const q=ABOUT_YOU.find(x=>x.id===questionId),a=q?.answers.find(x=>x.id===answerId);if(!a||aboutDue(input,now)?.id!==questionId)throw new Error('that question can wait.');
+  const r=conversation(input,a.style,now,null);r.state.memories.you.about[q.id]=a.id;r.state.memories.you.aboutKey=dateKey(now);return r;
+}
+export function pendingFollowUp(s,now=Date.now()){
+  const d=s.memories.you.day;return d&&!d.followed&&(d.key!==dateKey(now)||d.period!==periodOf(now))?CHECKIN.answers.find(a=>a.id===d.answer):null;
+}
+// a long day earns you a cup he poured himself; the rest are simply remembered
+export function followUp(input,accepted=false,now=Date.now()){
+  const f=pendingFollowUp(input,now);if(!f)throw new Error('nothing to follow up.');
+  const s=elapsedCare(input,now);s.memories.you.day.followed=true;
+  if(!accepted)return {state:s,reward:0,copper:0};
+  s.needs.mood+=8;settle(s);s.bond+=3;s.copper+=1;return result(s,{reward:3,copper:1},{reward:0,copper:0,requestCompleted:false});
+}
+// evenings at his true height, once the jade is whole: the first each real day is rewarded
+export function finishDate(input,style,now=Date.now()){
+  if(!chapterRecord(input,'jade').complete)throw new Error('the jade is not yet whole.');
+  const s=elapsedCare(input,now),first=s.memories.dateKey!==dateKey(now);s.memories.datesDone++;s.memories.dateKey=dateKey(now);
+  s.needs.mood+=12;s.needs.comfort+=8;settle(s);nudge(s,style);
+  if(!first)return result(s,{reward:0,copper:0},{reward:0,copper:0,requestCompleted:false});
+  s.bond+=5;s.copper+=3;return result(s,{reward:5,copper:3},{reward:0,copper:0,requestCompleted:false});
 }
 export function tooTiredToPlay(s) {return s.asleep||s.needs.energy<25;}
 export function relationshipLabel(s) {
@@ -123,6 +155,11 @@ export function validateState(input) {
     s.memories.recentActions=(Array.isArray(m.recentActions)?m.recentActions:[]).filter(a=>['feed','tea','pet','rest','tidy','pickup','game'].includes(a)).slice(-8);
     s.memories.recentChats=(Array.isArray(m.recentChats)?m.recentChats:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<100).slice(-12);
     for(const k of ['tidyCount','holdCount','requestsDone','memorialPerfects','teaPerfects','gamesPlayed'])s.memories[k]=Number.isFinite(m[k])?Math.floor(clamp(m[k],0,1000000)):0;
+    // what you've told him about yourself, and whether he has followed up on it yet
+    const you=m.you||{},d=you.day;
+    s.memories.you={day:d&&CHECKIN.answers.some(a=>a.id===d.answer)&&KEY.test(d.key)?{answer:d.answer,key:d.key,period:typeof d.period==='string'?d.period:'afternoon',followed:d.followed===true}:null,
+      about:Object.fromEntries(ABOUT_YOU.filter(q=>q.answers.some(a=>a.id===you.about?.[q.id])).map(q=>[q.id,you.about[q.id]])),aboutKey:KEY.test(you.aboutKey)?you.aboutKey:null};
+    s.memories.datesDone=Number.isFinite(m.datesDone)?Math.floor(clamp(m.datesDone,0,1000000)):0;s.memories.dateKey=KEY.test(m.dateKey)?m.dateKey:null;
     s.memories.pace=PACES.includes(m.pace)?m.pace:null;s.memories.nickname=NICKNAMES.includes(m.nickname)?m.nickname:null;
     s.memories.teaNotes=[...new Set((Array.isArray(m.teaNotes)?m.teaNotes:[]).filter(k=>k in TEA_WISHES))];
     s.memories.recipes=[...new Set((Array.isArray(m.recipes)?m.recipes:[]).filter(k=>['jasmine','lotus','rice'].includes(k)))];

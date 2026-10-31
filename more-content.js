@@ -311,3 +311,35 @@ const toneVariants = {
 };
 for (const [id, beats] of Object.entries(toneVariants))
   for (const [i, tones] of Object.entries(beats)) chapterStories[id][i].tones = tones;
+
+// Once a day he asks how yours went, and remembers. `follow` is what he says next time.
+export const CHECKIN = {
+  intro: '“how was your day?” he sets down his brush, which means he actually wants to know.',
+  answers: [
+    { id:'tired', label:'long. i’m tired.', style:'gentle', response:'“then you are not to do anything else today. sit. i shall manage the tea, and the conversation.”', follow:'“you said it had been a long day. i have already put the kettle on.”' },
+    { id:'good', label:'genuinely good, actually.', style:'teasing', response:'“genuinely good. how suspicious.” he leans in. “tell me everything, and leave out nothing flattering.”', follow:'“was today as good as the one you told me about? i have been hoping so. i have been hoping quite hard.”' },
+    { id:'quiet', label:'quiet. not much happened.', style:'quiet', response:'“quiet days are underrated.” he pushes a cushion toward your hand. “we could have another one here, if you like.”', follow:'“another quiet day? i saved you one. the courtyard has been very cooperative.”' },
+    { id:'lonely', label:'a bit lonely, honestly.', style:'gentle', response:'he is still for a moment. then he moves to the very edge of the table, as close to your hand as he can get.\n\n“not here,” he says. “not while i am around.”', follow:'“you said you were feeling lonely. i have cleared my afternoon. all of it. for no particular reason.”' },
+    { id:'stressed', label:'stressful. too much at once.', style:'quiet', response:'“then we shall do one thing at a time. this cup of tea. then the next thing.” he pours. “i am told this works. i have never tried it. let us find out together.”', follow:'“how is the too-much? smaller, i hope. i have been doing one thing at a time, in solidarity.”' }
+  ]
+};
+// Things he asks once, over time, and brings up afterwards.
+export const ABOUT_YOU = [
+  { id:'drink', intro:'“i realise i have never asked. what do you drink, when i am not the one pouring?”', answers:[
+    { id:'tea', label:'tea, always.', style:'gentle', response:'“good. correct. i knew there was a reason.”', callback:'“i have set aside the good leaves. for you, not me. mostly.”' },
+    { id:'coffee', label:'coffee. sorry.', style:'teasing', response:'he looks genuinely wounded. “i shall… research it,” he says, with tremendous dignity.', callback:'“i asked the kitchen about this coffee. they made a face. i am considering it anyway.”' },
+    { id:'any', label:'whatever’s nearest.', style:'quiet', response:'“a practical answer.” he nudges the nearest cup toward you. “then this one is yours.”', callback:'“i poured you whatever was nearest. you seemed the type to approve.”' } ] },
+  { id:'time', intro:'“when are you happiest? the time of day, i mean. i am collecting facts about you. it is very scholarly.”', answers:[
+    { id:'morning', label:'mornings.', style:'gentle', response:'“mornings. all that light and nothing yet gone wrong. i see it.”', callback:'“it is morning. your favourite. i noticed. i have been noticing.”', period:'morning' },
+    { id:'night', label:'late at night.', style:'quiet', response:'“late at night,” he repeats. “when everything is quiet enough to hear yourself. yes.”', callback:'“it is late. your favourite hour. i saved it for you.”', period:'night' },
+    { id:'between', label:'the in-between hours.', style:'teasing', response:'“the in-between hours. very evasive. i respect it.”', callback:'“it is one of your in-between hours. i have not worked out which. i am enjoying it anyway.”', period:'afternoon' } ] },
+  { id:'work', intro:'“what do you do, when you are not here? i should know. i tell you about canals constantly.”', answers:[
+    { id:'work', label:'i work. a lot.', style:'gentle', response:'“then here is the one place nobody will ask you for anything.” he considers. “except tea. and company. and possibly dumplings.”', callback:'“how was work? did anyone deserve a strongly worded memorial? i can draft one.”' },
+    { id:'study', label:'i study.', style:'teasing', response:'“ah. examinations.” he shudders theatrically. “i was insufferable at them. i can help. i shall try to be less insufferable.”', callback:'“how are the studies? quiz me on something. no, quiz yourself. i shall supervise.”' },
+    { id:'make', label:'i make things.', style:'quiet', response:'his eyes light up. “then you understand the poem. the one line that will not come.”', callback:'“have you made anything lately? i would like to see. i am an excellent audience.”' },
+    { id:'complicated', label:'it’s complicated.', style:'quiet', response:'“then it can stay complicated,” he says. “you can tell me as much or as little as you like.”', callback:'“still complicated? that is allowed. the tea does not mind either way.”' } ] },
+  { id:'teasing', intro:'“a question of protocol. do you mind being teased? i ask because i intend to, and i would rather it landed well.”', answers:[
+    { id:'yes', label:'tease away.', style:'teasing', response:'“excellent.” he cracks his knuckles, which, at his size, is very quiet. “you will regret this.”', callback:null },
+    { id:'gently', label:'gently, please.', style:'gentle', response:'“gently,” he agrees. “a feather of a tease. barely a tease at all.”', callback:null },
+    { id:'no', label:'i’d rather you didn’t.', style:'quiet', response:'“then i won’t,” he says simply, and you can tell he means it. “thank you for telling me.”', callback:null } ] }
+];
