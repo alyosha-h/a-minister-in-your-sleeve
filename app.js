@@ -1,4 +1,4 @@
-import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf } from './game.js';
+import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf, momentDue } from './game.js';
 import { CHAPTERS, RIBBONS } from './catalog.js';
 import { allConversations, chapterStories } from './more-content.js';
 import { spriteFrameStyle, MOOD_FRAMES } from './sprites.js';
@@ -96,14 +96,14 @@ function renderLantern(){
   const meta=CHAPTERS.find(c=>c.id===selectedChapter)||CHAPTERS[0],record=chapterRecord(state,meta.id),index=CHAPTERS.indexOf(meta),previous=index?CHAPTERS[index-1]:null;
   $('bondValue').textContent=state.bond+' / '+meta.bond;
   $('bondBar').style.width=Math.min(100,state.bond/meta.bond*100)+'%';
-  $('bondDescription').textContent=record.complete?'a memory you can return to.':record.unlocked?'the lantern holds another evening together.':previous&&!chapterRecord(state,previous.id).complete?'first, share “'+previous.title+'”.':'small kindnesses bring this evening closer.';
+  $('bondDescription').textContent=record.complete?'a memory you can return to.':record.unlocked?'the lantern holds another evening together.':previous&&!chapterRecord(state,previous.id).complete?'first, share “'+previous.title+'”.':state.bond>=meta.bond?'some evenings can’t be hurried. this one waits for day '+meta.day+'.':'small kindnesses bring this evening closer.';
   $('chapterTitle').textContent=meta.title;$('chapterNumber').textContent='a lanternlit encounter · '+meta.number;$('coverMark').textContent=meta.number;
   $('chapterCover').style.backgroundImage='linear-gradient(180deg,#33243c20,transparent 50%,#30203c22),url("./assets/'+meta.art+'")';
   $('chapterCover').setAttribute('aria-label',meta.title+' · illustrated portrait');
   $('chapterButton').disabled=!record.unlocked;
   $('chapterButton').querySelector('span').textContent=record.complete?'revisit this memory':record.unlocked?record.cursor>0?'continue your visit':'follow the lantern':'gathering light';
   $('chapterDescription').textContent=record.complete?meta.keepsake+' · kept in your journal':record.unlocked?'his world is waiting. come a little closer.':'a little care might bring his world a little closer.';
-  $('chapterNote').textContent=record.complete?'replay anytime · your choices are safely kept':record.unlocked?'ready · he’ll meet your '+((!record.complete&&record.tone)||styleOf(state))+' company in kind':meta.bond+' bond'+(previous?' · previous chapter first':'');
+  $('chapterNote').textContent=record.complete?'replay anytime · your choices are safely kept':record.unlocked?'ready · he’ll meet your '+((!record.complete&&record.tone)||styleOf(state))+' company in kind':meta.bond+' bond · from day '+meta.day+(previous&&!chapterRecord(state,previous.id).complete?' · previous chapter first':'');
   $('chapterInvitation').classList.toggle('ready',record.unlocked);
   $('chapterTabs').innerHTML=CHAPTERS.map(c=>'<button data-chapter="'+c.id+'" aria-label="chapter '+c.number+': '+c.title+'" aria-pressed="'+(c.id===meta.id)+'"><span>'+c.number+'</span><small>'+ (chapterRecord(state,c.id).complete?'✓':chapterRecord(state,c.id).unlocked?'✦':'·')+'</small></button>').join('');
   document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{selectedChapter=b.dataset.chapter;renderLantern();});
@@ -116,6 +116,7 @@ function render(){
   for(const [k,v]of Object.entries(state.needs)){const n=Math.round(v);$(k+'Value').textContent=n;$(k+'Bar').style.width=n+'%';$(k+'Meter').setAttribute('aria-valuenow',n);$(k+'Meter').closest('.need').classList.toggle('low',v<LOW);}
   const mood=moodOf(state);$('sceneFrame').dataset.mood=mood;
   const upcoming=nextChapter(state),ready=CHAPTERS.some(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});
+  $('momentButton').hidden=!momentDue(state);
   $('bondSummary').textContent=upcoming?state.bond+' / '+upcoming.bond:state.bond+' bond';$('lanternNavDot').hidden=!ready;
   $('tab-lantern').setAttribute('aria-label',ready?'lantern, encounter ready':'lantern');
   $('sceneFrame').classList.toggle('lantern-ready',ready);$('sceneFrame').classList.toggle('is-asleep',state.asleep);
@@ -211,7 +212,7 @@ function openTalk(){
 $('talkDialog').addEventListener('close',()=>{if(isTalking)speak({teasing:'“you are very impertinent. do sit closer.”',quiet:'he says nothing, but he doesn’t move away either.',gentle:'“thank you for staying a little while.”'}[styleOf(state)],'some company, and a little less distance.');animation={mode:state.asleep?'sleep':'idle',start:performance.now()};});
 function openStory(id=null){
   const meta=CHAPTERS.find(c=>c.id===(id||selectedChapter))||CHAPTERS[0],record=chapterRecord(state,meta.id);
-  if(!record.unlocked){toast(meta.bond+' bond and the previous chapter will bring this evening closer.');return;}
+  if(!record.unlocked){toast(meta.bond+' bond, day '+meta.day+', and the previous chapter will bring this evening closer.');return;}
   if(busy)return;selectedChapter=meta.id;closeTrays();const book=chapterStories[meta.id];
   // a first visit keeps the tone it began with; replays follow how you are with him now
   storySession={id:meta.id,cursor:record.complete?0:Math.min(record.cursor,book.length-1),choices:{...record.choices},replay:record.complete,tone:(!record.complete&&record.tone)||styleOf(state)};
@@ -263,7 +264,7 @@ function welcome(gap){
 }
 $('newDayButton').onclick=()=>{state=beginDay(state);save();animation={mode:'idle',start:performance.now()};render();selectPage('care');speak(state.memories.name?'“good morning, '+state.memories.name+'. i was just thinking about breakfast.”':'“a new day. shall we see what it brings?”','another small day, together.');ping();};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
-$('homeButton').onclick=()=>selectPage('care');$('bondShortcut').onclick=()=>selectPage('lantern');$('helpButton').onclick=()=>showSheet('helpDialog');
+$('momentButton').onclick=()=>phaseTwo.openMoment();$('homeButton').onclick=()=>selectPage('care');$('bondShortcut').onclick=()=>selectPage('lantern');$('helpButton').onclick=()=>showSheet('helpDialog');
 $('soundButton').onclick=()=>{state.settings.sound=!state.settings.sound;save();render();ping();};$('soundSetting').onchange=e=>{state.settings.sound=e.target.checked;save();render();ping();};$('motionSetting').onchange=e=>{state.settings.reducedMotion=e.target.checked;save();render();};
 $('exportButton').onclick=()=>{save();const blob=new Blob([JSON.stringify({app:'a-minister-in-your-sleeve',savedAt:new Date().toISOString(),state},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minister-in-your-sleeve-day-'+state.day+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);$('settingsMessage').textContent='your copy is ready. keep it somewhere safe.';};
 $('importButton').onclick=()=>$('importFile').click();

@@ -1,4 +1,5 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS } from './catalog.js';
+import { MOMENTS } from './moments.js';
 
 export const SAVE_KEY = 'sleeve-and-lantern.v1';
 export const CATEGORIES = ['nourishment','affection','comfort','rest'];
@@ -31,7 +32,7 @@ const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,
 
 export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
-    claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],preference:'gentle',chapter:blankChapter(),
+    claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
     chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter()},request:requestForDay(1),
     owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[]},
     settings:{sound:false,reducedMotion:false},lastSeen:now};
@@ -39,7 +40,8 @@ export function freshState(now=Date.now()) {
 
 export function chapterRecord(s,id='tea') {return id==='tea'?s.chapter:s.chapters[id];}
 export function refreshUnlocks(s) {
-  CHAPTERS.forEach((c,i)=>{const r=chapterRecord(s,c.id);if(s.bond>=c.bond&&(!i||chapterRecord(s,CHAPTERS[i-1].id).complete))r.unlocked=true;});
+  // chapters ask for both bond and days together, so the arc can't be finished in a sitting
+  CHAPTERS.forEach((c,i)=>{const r=chapterRecord(s,c.id);if(s.bond>=c.bond&&s.day>=c.day&&(!i||chapterRecord(s,CHAPTERS[i-1].id).complete))r.unlocked=true;});
   return s;
 }
 export function nextChapter(s) {return CHAPTERS.find(c=>!chapterRecord(s,c.id).complete)||null;}
@@ -65,6 +67,16 @@ export function styleOf(s) {
 function nudge(s,style,n=1){if(STYLES.includes(style))s.affinity[style]+=n;}
 // care counts once per kind per day, so endless headpats don't drown out what you say
 function careNudge(s,action){if(s.nudged.includes(action))return;s.nudged.push(action);nudge(s,CARE_STYLE[action]);}
+// one small scene per real day, the earliest he's ready to share
+export function momentDue(s,now=Date.now()) {
+  if(s.moments.key===dateKey(now))return null;return MOMENTS.find(m=>!s.moments.seen.includes(m.id)&&s.bond>=m.bond)||null;
+}
+export function shareMoment(input,id,optionIndex,now=Date.now()){
+  const m=MOMENTS.find(x=>x.id===id),option=m?.options[optionIndex];
+  if(!m||!option||momentDue(input,now)?.id!==id)throw new Error('That moment isn’t ready yet.');
+  const s=elapsedCare(input,now);s.moments.seen.push(id);s.moments.key=dateKey(now);nudge(s,option.style,2);
+  return result(s,{reward:6,copper:4},{reward:0,copper:0,requestCompleted:false});
+}
 export function tooTiredToPlay(s) {return s.asleep||s.needs.energy<25;}
 export function relationshipLabel(s) {
   const n=CHAPTERS.filter(c=>chapterRecord(s,c.id).complete).length;
@@ -90,6 +102,7 @@ export function validateState(input) {
   s.asleep=input.asleep===true;s.claimed=[...new Set(input.claimed.filter(c=>CATEGORIES.includes(c)))];s.talked=input.talked===true;
   s.preference=STYLES.includes(input.preference)?input.preference:'gentle';
   // older saves only knew your latest conversation; let it seed the running tally
+  s.moments={seen:[...new Set((Array.isArray(input.moments?.seen)?input.moments.seen:[]).filter(id=>MOMENTS.some(m=>m.id===id)))],key:KEY.test(input.moments?.key)?input.moments.key:null};
   s.nudged=(Array.isArray(input.nudged)?input.nudged:[]).filter(a=>a in CARE_STYLE);
   s.affinity=Object.fromEntries(STYLES.map(k=>[k,Number.isFinite(input.affinity?.[k])?Math.floor(clamp(input.affinity[k],0,1000000)):k===s.preference?TALK_WEIGHT:0]));s.chapter=cleanChapter(input.chapter,CHAPTERS[0]);
   if(input.schema===1&&input.chapter.complete===true&&s.bond>=20){s.chapter.unlocked=true;s.chapter.complete=true;}
