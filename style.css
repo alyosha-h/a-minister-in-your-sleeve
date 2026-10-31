@@ -555,3 +555,11 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .moment-list small{font-family:inherit;font-size:9px;color:#b19eaf;white-space:nowrap}
 .moment-list .unread{color:#b19eaf;font-style:italic;border-style:dashed}
 .moment-reply{margin-top:14px;padding-top:12px;border-top:1px solid #ddcbdc;color:#5d4a66}
+.tea-notes{margin:-6px 0 14px;font-size:11px;color:#817887}
+.tea-notes summary{cursor:pointer;color:#a489a9}
+.tea-notes ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px}
+.tea-notes li{display:flex;justify-content:space-between;gap:10px}
+.tea-notes li span{font-style:italic;color:#a49ba7}
+.search-locations.many{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.search-locations.many button{min-height:52px;padding:9px 10px;gap:8px;font-size:11px;text-align:left}
+.search-locations.many svg{width:19px;height:19px;flex:none}
