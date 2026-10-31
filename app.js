@@ -140,7 +140,11 @@ function idleSpeech(){
   if(moodLines[mood]&&Math.random()<(mood==='flourishing'?.4:.7)){speak(moodLines[mood][Math.floor(Math.random()*moodLines[mood].length)],moodStatus[mood]+'.');return;}
   if(Math.random()<.3){const now=Date.now(),pool=weatherOf(dateKey(now))==='rain'?rainLines:periodLines[periodOf(now)];speak(pool[Math.floor(Math.random()*pool.length)],'a familiar little presence, glad you’re here.');return;}
   let lines;
+  const nick=state.memories.nickname;
   if(state.chapters.jade.complete)lines=['“the ministry had me all morning. this is much better.”','“small by choice. it is a very different thing.”','“i wrote another line in the record today. it was about you. it usually is.”'];
+  else if(state.chapters.beside.complete)lines=['“there you are, '+nick+'. i have been saving you the window.”','“the steward asks after you. constantly. it is unbearable. i love it.”','“two cups, every day now. i have stopped counting them.”','“i used the seal again today. on a letter to you. you will receive it shortly. it says hello.”'];
+  else if(state.chapters.lotus.complete)lines=[{kiss:'“i keep thinking about the pavilion. this is not a complaint.”',hand:'“your hand is very nearby. i mention it only as a matter of logistics.”',slow:'“no hurry. i have decided i like the slow way. you get to keep noticing things.”'}[state.memories.pace||'hand'],'“i walked out to the pavilion today. the lanterns are still there.”','“you’re here. good. i missed you. a plain statement of fact.”'];
+  else if(state.chapters.lamp.complete)lines=['“you look tired. sit down. today i am in charge of the tea.”','“how was your day? the true version, please. not the polite one.”','“the poem is finished. i keep rereading it anyway.”'];
   else if(state.chapters.game.complete)lines=['“a rematch? i have saved you a very good seat.”','“you may sit closer. i find it improves my concentration.”','“the white stone is still yours. so is the afternoon.”'];
   else if(state.chapters.ribbon.complete)lines=['“the ribbon? perfectly serviceable. i see no reason to change it.”','“a quiet moment? i have one here, just for you.”'];
   else if(state.chapters.rain.complete)lines=['“if it rains, we have a perfectly good umbrella.”','“a damp sleeve is a small price for such good company.”'];
@@ -245,7 +249,7 @@ function advanceStory(){
   if(node.ending){
     const meta=CHAPTERS.find(c=>c.id===storySession.id),replay=storySession.replay;
     if(!replay){commitResult({state:completeChapter(state,Date.now(),meta.id)});selectedChapter=(nextChapter(state)||meta).id;}
-    $('storyDialog').close();render();speak(meta.id==='jade'?'“good evening. i saved you a seat.”':meta.id==='ribbon'?'“perfectly serviceable. and i like the way you tied it.”':meta.id==='rain'?'“if it rains, you know where to find me.”':meta.id==='game'?'“a rematch? whenever you like.”':'“your cup is still here. i thought we might keep it that way.”','another small memory, kept close.');
+    $('storyDialog').close();render();speak(meta.id==='jade'?'“good evening. i saved you a seat.”':meta.id==='beside'?'“welcome home. i mean it.”':meta.id==='lotus'?'“i missed you. that is a plain statement of fact.”':meta.id==='lamp'?'“you look tired. sit down. today i am in charge of the tea.”':meta.id==='ribbon'?'“perfectly serviceable. and i like the way you tied it.”':meta.id==='rain'?'“if it rains, you know where to find me.”':meta.id==='game'?'“a rematch? whenever you like.”':'“your cup is still here. i thought we might keep it that way.”','another small memory, kept close.');
     toast('a memory to keep · '+meta.keepsake);ping('lantern');return;
   }
   storySession.cursor++;if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),storySession.id,storySession.tone);save();}renderStory();
@@ -261,7 +265,7 @@ $('storyNext').onclick=advanceStory;$('exitStoryButton').onclick=()=>$('storyDia
 $('viewArtButton').onclick=()=>{const v=$('storyDialog').classList.toggle('art-only');$('viewArtButton').textContent=v?'read on':'view art';$('viewArtButton').setAttribute('aria-pressed',String(v));};
 function checkDay(){
   const r=rollDay(state);if(r.state===state)return;state=r.state;save();render();if(r.gap>=2)welcome(r.gap);
-  else if(r.rolled){speak({gentle:'“good morning. did you sleep? properly, i mean.”',teasing:'“a new day. i have taken the liberty of starting without you.”',quiet:'he looks up from his brush and makes room for you without a word.'}[styleOf(state)],'another small day, together.');ping();}
+  else if(r.rolled){speak(state.memories.nickname?'“good morning, '+state.memories.nickname+'. the tea is already on.”':{gentle:'“good morning. did you sleep? properly, i mean.”',teasing:'“a new day. i have taken the liberty of starting without you.”',quiet:'he looks up from his brush and makes room for you without a word.'}[styleOf(state)],'another small day, together.');ping();}
 }
 function welcome(gap){
   const lines=awayLines(gap);speak(lines[Math.floor(Math.random()*lines.length)],'glad you’re here. no explanations needed.');

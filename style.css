@@ -341,7 +341,7 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .lantern-heading>.text-button{font-size:10px;flex-shrink:0}
 .lantern-heading>.text-button svg{width:15px;height:15px}
 .lantern-panel .bond-section{padding-top:10px;padding-bottom:10px}
-.chapter-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;flex-shrink:0;padding:0 2px 11px}
+.chapter-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;flex-shrink:0;padding:0 2px 11px}
 .chapter-tabs button{min-height:35px;padding:5px 9px;background:#eee6ef55;border:1px solid #e0d4df;border-radius:7px;color:#a590a5;font-size:11px;display:flex;justify-content:center;gap:8px;align-items:center}
 .chapter-tabs button[aria-pressed=true]{color:#765982;border-color:#bda5c3;background:#e6d7e9a1}
 .chapter-tabs small{font-size:10px}

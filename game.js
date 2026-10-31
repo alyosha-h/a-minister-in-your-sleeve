@@ -10,6 +10,7 @@ export const LOW = 35, FLOURISH = 70, ATTUNE_CAP = 4;
 export const STYLES = ['gentle','teasing','quiet'];
 // the talisman mends a little on good days: a fulfilled request, a flourishing day, a perfect game, a shared moment
 export const MEND_GOAL = 40, MEND_DAILY = 4;
+export const PACES = ['kiss','hand','slow'], NICKNAMES = ['little lantern','trouble','dearest'];
 // how everyday care colours the way he knows you; conversations count for more
 const CARE_STYLE = {feed:'gentle',pet:'gentle',pickup:'gentle',tea:'quiet',rest:'quiet',tidy:'teasing',game:'teasing'};
 const TALK_WEIGHT = 3;
@@ -36,8 +37,8 @@ const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,
 export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
     claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
-    chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter(),jade:blankChapter()},talisman:{mend:0,key:null,today:0},pantry:{},orchidKey:null,request:requestForDay(1),
-    owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0},
+    chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter(),lamp:blankChapter(),lotus:blankChapter(),beside:blankChapter(),jade:blankChapter()},talisman:{mend:0,key:null,today:0},pantry:{},orchidKey:null,request:requestForDay(1),
+    owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0,pace:null,nickname:null},
     settings:{sound:false,reducedMotion:false},lastSeen:now};
 }
 
@@ -83,7 +84,7 @@ export function shareMoment(input,id,optionIndex,now=Date.now()){
 export function tooTiredToPlay(s) {return s.asleep||s.needs.energy<25;}
 export function relationshipLabel(s) {
   const n=CHAPTERS.filter(c=>chapterRecord(s,c.id).complete).length;
-  return ['an unexpected guest','familiar company','trusted company','private confidants','something unspoken','something spoken, at last'][n];
+  return ['an unexpected guest','familiar company','trusted company','private confidants','something unspoken','mutual longing','something spoken','lovers','a shared home'][n];
 }
 function cleanChapter(input,meta) {
   const r=blankChapter();if(!input||typeof input!=='object')return r;
@@ -122,6 +123,7 @@ export function validateState(input) {
     s.memories.recentActions=(Array.isArray(m.recentActions)?m.recentActions:[]).filter(a=>['feed','tea','pet','rest','tidy','pickup','game'].includes(a)).slice(-8);
     s.memories.recentChats=(Array.isArray(m.recentChats)?m.recentChats:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<100).slice(-12);
     for(const k of ['tidyCount','holdCount','requestsDone','memorialPerfects','teaPerfects','gamesPlayed'])s.memories[k]=Number.isFinite(m[k])?Math.floor(clamp(m[k],0,1000000)):0;
+    s.memories.pace=PACES.includes(m.pace)?m.pace:null;s.memories.nickname=NICKNAMES.includes(m.nickname)?m.nickname:null;
     s.memories.teaNotes=[...new Set((Array.isArray(m.teaNotes)?m.teaNotes:[]).filter(k=>k in TEA_WISHES))];
     s.memories.recipes=[...new Set((Array.isArray(m.recipes)?m.recipes:[]).filter(k=>['jasmine','lotus','rice'].includes(k)))];
   }else s.request=requestForDay(s.day);
@@ -130,6 +132,8 @@ export function validateState(input) {
   s.orchidKey=KEY.test(input.orchidKey)?input.orchidKey:null;
   s.settings.sound=input.settings?.sound===true;s.settings.reducedMotion=input.settings?.reducedMotion===true;s.lastSeen=Math.max(0,input.lastSeen);
   if(s.chapters.ribbon.complete&&!s.memories.ribbon)s.memories.ribbon=RIBBONS[s.chapters.ribbon.choices.color??0].id;
+  if(s.chapters.lotus.complete&&!s.memories.pace)s.memories.pace=PACES[s.chapters.lotus.choices.pace??1];
+  if(s.chapters.beside.complete&&!s.memories.nickname)s.memories.nickname=NICKNAMES[s.chapters.beside.choices.name??2];
   return refreshUnlocks(s);
 }
 export function elapsedCare(input,now=Date.now()) {
@@ -265,7 +269,11 @@ export function completeChapter(input,now=Date.now(),id='tea'){
   const r=chapterRecord(input,id);if(!r?.unlocked)throw new Error('The lantern is still gathering light.');
   if(r.complete)return structuredClone(input);
   const s=structuredClone(input),record=chapterRecord(s,id);record.complete=true;record.inProgress=false;s.lastSeen=now;
-  if(id==='ribbon')s.memories.ribbon=RIBBONS[record.choices.color??0].id;return refreshUnlocks(s);
+  if(id==='ribbon')s.memories.ribbon=RIBBONS[record.choices.color??0].id;
+  // the pavilion and the seal leave something he keeps referring back to
+  if(id==='lotus')s.memories.pace=PACES[record.choices.pace??1];
+  if(id==='beside')s.memories.nickname=NICKNAMES[record.choices.name??2];
+  return refreshUnlocks(s);
 }
 export function purchase(input,id){
   const item=ITEMS.find(i=>i.id===id);if(!item)throw new Error('That item is not in the household shop.');if(input.owned.includes(id))throw new Error('This is already yours.');if(input.copper<item.price)throw new Error('a little more copper, and it’s yours.');
