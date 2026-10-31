@@ -538,3 +538,10 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
   .album-card strong{font-size:18px}
   .tea-options button{font-size:10px}
 }
+
+.affinity{display:grid;gap:8px;margin:6px 0 4px}
+.affinity-row{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:10px;font-size:11px;color:#817887}
+.affinity-row .need-track>span{background:#c59eae}
+.affinity-row.leading{color:#5d4a66;font-weight:600}
+.affinity-row.leading .need-track>span{background:#9b5f72}
+.affinity-note{font-size:12px;color:#817887;font-style:italic;margin:4px 0 12px}

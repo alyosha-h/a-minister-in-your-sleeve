@@ -1,4 +1,4 @@
-import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS } from './game.js';
+import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS, styleOf } from './game.js';
 import { CHAPTERS, RIBBONS } from './catalog.js';
 import { allConversations, chapterStories } from './more-content.js';
 import { spriteFrameStyle, MOOD_FRAMES } from './sprites.js';
@@ -103,7 +103,7 @@ function renderLantern(){
   $('chapterButton').disabled=!record.unlocked;
   $('chapterButton').querySelector('span').textContent=record.complete?'revisit this memory':record.unlocked?record.cursor>0?'continue your visit':'follow the lantern':'gathering light';
   $('chapterDescription').textContent=record.complete?meta.keepsake+' · kept in your journal':record.unlocked?'his world is waiting. come a little closer.':'a little care might bring his world a little closer.';
-  $('chapterNote').textContent=record.complete?'replay anytime · your choices are safely kept':record.unlocked?'a full-size encounter is ready':meta.bond+' bond'+(previous?' · previous chapter first':'');
+  $('chapterNote').textContent=record.complete?'replay anytime · your choices are safely kept':record.unlocked?'ready · he’ll meet your '+((!record.complete&&record.tone)||styleOf(state))+' company in kind':meta.bond+' bond'+(previous?' · previous chapter first':'');
   $('chapterInvitation').classList.toggle('ready',record.unlocked);
   $('chapterTabs').innerHTML=CHAPTERS.map(c=>'<button data-chapter="'+c.id+'" aria-label="chapter '+c.number+': '+c.title+'" aria-pressed="'+(c.id===meta.id)+'"><span>'+c.number+'</span><small>'+ (chapterRecord(state,c.id).complete?'✓':chapterRecord(state,c.id).unlocked?'✦':'·')+'</small></button>').join('');
   document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{selectedChapter=b.dataset.chapter;renderLantern();});
@@ -208,13 +208,14 @@ function openTalk(){
     $('talkReward').textContent=r.reward?'+'+r.reward+' bond · +'+r.copper+' copper':'some things don’t need a reward.';animation={mode:'talk',start:performance.now()};ping();done.focus();
   };$('talkChoices').append(b);});showSheet('talkDialog');
 }
-$('talkDialog').addEventListener('close',()=>{if(isTalking)speak(state.preference==='teasing'?'“you are very impertinent. do sit closer.”':'“thank you for staying a little while.”','some company, and a little less distance.');animation={mode:state.asleep?'sleep':'idle',start:performance.now()};});
+$('talkDialog').addEventListener('close',()=>{if(isTalking)speak({teasing:'“you are very impertinent. do sit closer.”',quiet:'he says nothing, but he doesn’t move away either.',gentle:'“thank you for staying a little while.”'}[styleOf(state)],'some company, and a little less distance.');animation={mode:state.asleep?'sleep':'idle',start:performance.now()};});
 function openStory(id=null){
   const meta=CHAPTERS.find(c=>c.id===(id||selectedChapter))||CHAPTERS[0],record=chapterRecord(state,meta.id);
   if(!record.unlocked){toast(meta.bond+' bond and the previous chapter will bring this evening closer.');return;}
   if(busy)return;selectedChapter=meta.id;closeTrays();const book=chapterStories[meta.id];
-  storySession={id:meta.id,cursor:record.complete?0:Math.min(record.cursor,book.length-1),choices:{...record.choices},replay:record.complete};
-  if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),meta.id);save();}
+  // a first visit keeps the tone it began with; replays follow how you are with him now
+  storySession={id:meta.id,cursor:record.complete?0:Math.min(record.cursor,book.length-1),choices:{...record.choices},replay:record.complete,tone:(!record.complete&&record.tone)||styleOf(state)};
+  if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),meta.id,storySession.tone);save();}
   $('storyDialog').classList.remove('art-only');$('viewArtButton').textContent='view art';$('viewArtButton').setAttribute('aria-pressed','false');
   $('storyDialog').setAttribute('aria-label',meta.title);$('storyTitle').innerHTML='<svg><use href="#i-lantern"/></svg> '+meta.number+' · '+meta.title;
   $('storyArt').style.backgroundImage='url("./assets/'+meta.art+'")';$('storyArt').setAttribute('aria-label',meta.title+' · lin yan at his full adult height');
@@ -226,7 +227,7 @@ function storyText(text){
 }
 function renderStory(){
   const book=chapterStories[storySession.id],node=book[storySession.cursor];$('storyDialog').classList.toggle('has-choices',Boolean(node.choice));$('storySpeaker').textContent=node.speaker;
-  $('storyText').textContent=storyText(node.branch?node.variants[storySession.choices[node.branch]??0]||node.variants[0]:node.text);
+  $('storyText').textContent=storyText(node.branch?node.variants[storySession.choices[node.branch]??0]||node.variants[0]:node.tones?.[storySession.tone]||node.text);
   $('storyArt').classList.toggle('before-reveal',storySession.cursor<2);$('storyChoices').replaceChildren();$('storyNext').disabled=Boolean(node.choice);
   $('storyNext').innerHTML=node.ending?'keep this moment <svg><use href="#i-arrow"/></svg>':'continue <svg><use href="#i-arrow"/></svg>';
   $('storyProgress').textContent=(storySession.replay?'a memory · ':'')+String(storySession.cursor+1).padStart(2,'0')+' / '+book.length;
@@ -241,7 +242,7 @@ function advanceStory(){
     $('storyDialog').close();render();speak(meta.id==='ribbon'?'“perfectly serviceable. and i like the way you tied it.”':meta.id==='rain'?'“if it rains, you know where to find me.”':meta.id==='game'?'“a rematch? whenever you like.”':'“your cup is still here. i thought we might keep it that way.”','another small memory, kept close.');
     toast('a memory to keep · '+meta.keepsake);ping('lantern');return;
   }
-  storySession.cursor++;if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),storySession.id);save();}renderStory();
+  storySession.cursor++;if(!storySession.replay){state=checkpoint(state,storySession.cursor,storySession.choices,Date.now(),storySession.id,storySession.tone);save();}renderStory();
 }
 $('storyDialog').addEventListener('close',()=>{if(storySession&&!storySession.replay)chapterRecord(state,storySession.id).inProgress=false;state.lastSeen=Date.now();save();storySession=null;render();cloud?.resume();});
 $('storyDialog').addEventListener('keydown',e=>{if(!storySession)return;const node=chapterStories[storySession.id][storySession.cursor];if((e.key==='ArrowRight'||(e.key===' '&&e.target===$('storyDialog')))&&!node.choice){e.preventDefault();advanceStory();}});
@@ -254,7 +255,7 @@ $('storyNext').onclick=advanceStory;$('exitStoryButton').onclick=()=>$('storyDia
 $('viewArtButton').onclick=()=>{const v=$('storyDialog').classList.toggle('art-only');$('viewArtButton').textContent=v?'read on':'view art';$('viewArtButton').setAttribute('aria-pressed',String(v));};
 function checkDay(){
   const r=rollDay(state);if(r.state===state)return;state=r.state;save();render();if(r.gap>=2)welcome(r.gap);
-  else if(r.rolled){speak('“a new day. i have taken the liberty of starting without you.”','another small day, together.');ping();}
+  else if(r.rolled){speak({gentle:'“good morning. did you sleep? properly, i mean.”',teasing:'“a new day. i have taken the liberty of starting without you.”',quiet:'he looks up from his brush and makes room for you without a word.'}[styleOf(state)],'another small day, together.');ping();}
 }
 function welcome(gap){
   const lines=awayLines(gap);speak(lines[Math.floor(Math.random()*lines.length)],'glad you’re here. no explanations needed.');
