@@ -1,5 +1,6 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS } from './catalog.js';
 import { MOMENTS } from './moments.js';
+import { TEA_WISHES, teaWishKey, judgeTea, searchSpots, pageSpot } from './minigames.js';
 
 export const SAVE_KEY = 'sleeve-and-lantern.v1';
 export const CATEGORIES = ['nourishment','affection','comfort','rest'];
@@ -28,13 +29,13 @@ export function weatherOf(key) {
 }
 const daysBetween=(a,b)=>Math.round((Date.parse(b+'T12:00:00Z')-Date.parse(a+'T12:00:00Z'))/86400000);
 const KEY = /^\d{4}-\d{2}-\d{2}$/;
-const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,searched:[]});
+const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,searched:[],spot:null});
 
 export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
     claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
     chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter()},request:requestForDay(1),
-    owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[]},
+    owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0},
     settings:{sound:false,reducedMotion:false},lastSeen:now};
 }
 
@@ -113,12 +114,13 @@ export function validateState(input) {
     if(s.owned.includes(input.outfit)&&ITEMS.some(i=>i.id===input.outfit&&i.kind==='outfit'))s.outfit=input.outfit;
     s.placed=[...new Set((Array.isArray(input.placed)?input.placed:[]).filter(id=>s.owned.includes(id)&&ITEMS.some(i=>i.id===id&&i.kind==='furnishing')))];
     const expected=requestForDay(s.day);s.request=expected;
-    if(input.request?.id===expected.id){s.request.done=input.request.done===true;s.request.searched=[...new Set((Array.isArray(input.request.searched)?input.request.searched:[]).filter(i=>[0,1,2].includes(i)))];}
+    if(input.request?.id===expected.id){s.request.done=input.request.done===true;s.request.searched=[...new Set((Array.isArray(input.request.searched)?input.request.searched:[]).filter(i=>typeof i==='string'))];if(typeof input.request.spot==='string')s.request.spot=input.request.spot;}
     const m=input.memories||{};s.memories.name=typeof m.name==='string'?m.name.replace(/[\u0000-\u001f\u007f]/g,'').trim().slice(0,24):'';
     s.memories.lastTea=['jasmine','lotus','rice'].includes(m.lastTea)?m.lastTea:null;s.memories.ribbon=RIBBONS.some(r=>r.id===m.ribbon)?m.ribbon:null;
     s.memories.recentActions=(Array.isArray(m.recentActions)?m.recentActions:[]).filter(a=>['feed','tea','pet','rest','tidy','pickup','game'].includes(a)).slice(-8);
     s.memories.recentChats=(Array.isArray(m.recentChats)?m.recentChats:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<100).slice(-12);
-    for(const k of ['tidyCount','holdCount','requestsDone'])s.memories[k]=Number.isFinite(m[k])?Math.floor(clamp(m[k],0,1000000)):0;
+    for(const k of ['tidyCount','holdCount','requestsDone','memorialPerfects','teaPerfects','gamesPlayed'])s.memories[k]=Number.isFinite(m[k])?Math.floor(clamp(m[k],0,1000000)):0;
+    s.memories.teaNotes=[...new Set((Array.isArray(m.teaNotes)?m.teaNotes:[]).filter(k=>k in TEA_WISHES))];
     s.memories.recipes=[...new Set((Array.isArray(m.recipes)?m.recipes:[]).filter(k=>['jasmine','lotus','rice'].includes(k)))];
   }else s.request=requestForDay(s.day);
   s.settings.sound=input.settings?.sound===true;s.settings.reducedMotion=input.settings?.reducedMotion===true;s.lastSeen=Math.max(0,input.lastSeen);
@@ -184,19 +186,32 @@ export function conversation(input,preference,now=Date.now(),chatIndex=null){
   if(Number.isInteger(chatIndex))s.memories.recentChats=[...s.memories.recentChats.filter(i=>i!==chatIndex),chatIndex].slice(-12);
   return result(s,{reward,copper},finishRequest(s,'talk'),tuned,ritual(s,'talk',now));
 }
-export function finishGame(input,kind,now=Date.now(),tea=null){
+export function currentTeaWish(s,now=Date.now()){return teaWishKey(moodOf(elapsedCare(s,now),now),periodOf(now));}
+// tea is {leaf,steep}; he judges it against what he wanted right now. memorials report perfect from the table.
+export function finishGame(input,kind,now=Date.now(),tea=null,perfect=false){
   if(!['memorial','tea'].includes(kind))throw new Error('Unknown game.');
   if(tooTiredToPlay(elapsedCare(input,now)))throw new Error('he is too sleepy to play just now.');
+  const wish=kind==='tea'?currentTeaWish(input,now):null;
   const s=elapsedCare(input,now),tuned=attune(s,'game');s.asleep=false;s.needs.mood+=15;s.needs.energy-=12;s.needs.fullness-=6;settle(s);careNudge(s,'game');const base=categoryReward(s,'affection');
   if(!s.played){s.played=true;s.bond+=10;s.copper+=8;base.reward+=10;base.copper+=8;}
-  if(kind==='tea'&&['jasmine','lotus','rice'].includes(tea)){s.memories.lastTea=tea;if(!s.memories.recipes.includes(tea))s.memories.recipes.push(tea);}
-  s.memories.recentActions=[...s.memories.recentActions,'game'].slice(-8);return result(s,base,finishRequest(s,'game'),tuned);
+  let verdict=perfect===true?'perfect':'done';
+  if(kind==='tea'){
+    const leaf=['jasmine','lotus','rice'].includes(tea?.leaf)?tea.leaf:null;verdict=leaf?judgeTea(wish,leaf,tea.steep):'other';
+    if(leaf){s.memories.lastTea=leaf;if(!s.memories.recipes.includes(leaf))s.memories.recipes.push(leaf);}
+    if(verdict==='perfect'){s.memories.teaPerfects++;if(!s.memories.teaNotes.includes(wish))s.memories.teaNotes.push(wish);}
+  }else if(verdict==='perfect')s.memories.memorialPerfects++;
+  // getting it exactly right is worth a little extra
+  if(verdict==='perfect'){s.copper+=2;base.copper+=2;}
+  s.memories.gamesPlayed++;s.memories.recentActions=[...s.memories.recentActions,'game'].slice(-8);
+  return {...result(s,base,finishRequest(s,'game'),tuned),verdict,wish};
 }
-export function searchPage(input,location,now=Date.now()){
-  const s=elapsedCare(input,now);
-  if(s.request.id!=='page'||s.request.done||![0,1,2].includes(location))return {state:s,reward:0,copper:0,requestCompleted:false,found:s.request.done};
-  if(!s.request.searched.includes(location))s.request.searched.push(location);const found=location===(s.day+1)%3;
-  if(!found)return {state:s,reward:0,copper:0,requestCompleted:false,found:false};
+export function searchPage(input,spot,now=Date.now()){
+  const s=elapsedCare(input,now),spots=searchSpots(s.placed).map(x=>x.id);
+  if(s.request.id!=='page'||s.request.done||!spots.includes(spot))return {state:s,reward:0,copper:0,requestCompleted:false,found:s.request.done};
+  // the hiding place is settled on the first look, so moving furniture can't move the page
+  s.request.spot??=pageSpot(s.placed,s.day);if(!spots.includes(s.request.spot))s.request.spot=spots[0];
+  if(!s.request.searched.includes(spot))s.request.searched.push(spot);
+  if(spot!==s.request.spot)return {state:s,reward:0,copper:0,requestCompleted:false,found:false};
   s.tidied=true;s.memories.tidyCount++;s.needs.comfort=clamp(s.needs.comfort+20);return {...result(s,categoryReward(s,'comfort'),finishRequest(s,'find')),found:true};
 }
 // the manual skip ahead is a catch-up: once per real day, after a full day's care
