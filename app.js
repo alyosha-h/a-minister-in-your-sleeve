@@ -128,7 +128,7 @@ function render(){
   $('sceneLantern').title=ready?'an evening is waiting':'your time together';
   $('keepsake').hidden=!state.chapter.complete;$('newDayButton').hidden=!canBeginDay(state);$('sceneFrame').classList.toggle('day-ready',canBeginDay(state));
   $('sceneStatus').textContent=state.asleep?'dreaming, probably of dumplings':moodStatus[mood]||relationshipLabel(state);
-  document.body.classList.toggle('reduced-motion',state.settings.reducedMotion);
+  document.body.classList.toggle('reduced-motion',state.settings.reducedMotion);applyTheme();
   $('soundButton').setAttribute('aria-pressed',String(state.settings.sound));$('soundButton').setAttribute('aria-label','turn sound '+(state.settings.sound?'off':'on'));
   $('soundSetting').checked=state.settings.sound;$('motionSetting').checked=state.settings.reducedMotion;
   document.querySelectorAll('.care-action').forEach(b=>b.disabled=busy);$('characterButton').disabled=busy;$('paperClutter').disabled=busy;
@@ -362,6 +362,15 @@ function welcome(gap){
 $('newDayButton').onclick=()=>{state=beginDay(state);save();animation={mode:'idle',start:performance.now()};render();selectPage('care');speak(state.memories.name?'“good morning, '+state.memories.name+'. i was just thinking about breakfast.”':'“a new day. shall we see what it brings?”','another small day, together.');ping();};
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$(b.dataset.close).close());
 $('momentButton').onclick=()=>phaseTwo.openMoment();$('homeButton').onclick=()=>selectPage('care');$('bondShortcut').onclick=()=>selectPage('lantern');$('helpButton').onclick=()=>showSheet('helpDialog');
+// light, dark, or whatever the device prefers; the browser chrome follows along
+const darkQuery=matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  const t=state.settings.theme,dark=t==='dark'||(t==='system'&&darkQuery.matches);
+  document.documentElement.dataset.theme=dark?'dark':'light';document.querySelector('meta[name="theme-color"]').content=dark?'#27212d':'#f5f1e8';
+  document.querySelectorAll('[data-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===t)));
+}
+darkQuery.addEventListener('change',applyTheme);
+document.querySelectorAll('[data-theme-choice]').forEach(b=>b.onclick=()=>{state.settings.theme=b.dataset.themeChoice;save();render();});
 $('soundButton').onclick=()=>{state.settings.sound=!state.settings.sound;save();render();ping();};$('soundSetting').onchange=e=>{state.settings.sound=e.target.checked;save();render();ping();};$('motionSetting').onchange=e=>{state.settings.reducedMotion=e.target.checked;save();render();};
 $('exportButton').onclick=()=>{save();const blob=new Blob([JSON.stringify({app:'a-minister-in-your-sleeve',savedAt:new Date().toISOString(),state},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minister-in-your-sleeve-day-'+state.day+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);$('settingsMessage').textContent='your copy is ready. keep it somewhere safe.';};
 $('importButton').onclick=()=>$('importFile').click();
