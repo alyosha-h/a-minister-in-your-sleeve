@@ -6,7 +6,7 @@ import { CHAPTERS, RIBBONS } from './catalog.js';
 import { allConversations, chapterStories, CHECKIN, ABOUT_YOU } from './more-content.js';
 import { spriteFrameStyle, MOOD_FRAMES } from './sprites.js';
 import { createPhaseTwoUI } from './phase-two-ui.js';
-import { createCloudSync } from './cloud.js';
+import { createCloudSync, validCode } from './cloud.js';
 
 const $=id=>document.getElementById(id),backupKey=SAVE_KEY+'.backup';
 let storageAvailable=true,recovered=false,state=load(),welcomeGap=0;
@@ -51,10 +51,9 @@ function adoptState(candidate){
   state=candidate;selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;save();render();
   animation={mode:state.asleep?'sleep':'idle',start:performance.now()};idleSpeech();return state;
 }
-const cloudMessages={local:'cloud save isn’t available in this view, so progress stays in this browser.',connecting:'checking your cloud save…',syncing:'syncing to your claude account…',synced:'safely kept in your claude account.',restored:'picked up from your claude account.',offline:'couldn’t reach the cloud just now. progress is safe here and will sync on your next action.',full:'the cloud save is full. progress is still kept in this browser.',waiting:'two different saves were found. reopen him to choose which to keep.'};
+const cloudMessages={connecting:'checking your cloud save…',syncing:'syncing to the cloud…',synced:'safely kept in the cloud.',restored:'picked up from the cloud.',offline:'kept safe in this browser. it’ll sync once the cloud is in reach.',waiting:'two different saves were found. reopen him to choose which to keep.'};
 function cloudStatus(status){
-  // Standalone (no cloud platform): the settings copy already explains browser saving.
-  $('cloudStatus').hidden=status==='local';$('cloudStatus').textContent=cloudMessages[status]||'';$('cloudStatus').dataset.status=status;
+  $('cloudStatus').hidden=false;$('cloudStatus').textContent=cloudMessages[status]||'';$('cloudStatus').dataset.status=status;
   if(status==='restored')toast('welcome back. your courtyard followed you here.');
 }
 function askConflict(local,remote,savedAt){
@@ -374,6 +373,14 @@ $('soundButton').onclick=()=>{state.settings.sound=!state.settings.sound;save();
 $('exportButton').onclick=()=>{save();const blob=new Blob([JSON.stringify({app:'a-minister-in-your-sleeve',savedAt:new Date().toISOString(),state},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='minister-in-your-sleeve-day-'+state.day+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);$('settingsMessage').textContent='your copy is ready. keep it somewhere safe.';};
 $('importButton').onclick=()=>$('importFile').click();
 $('importFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>150000)throw new Error('that file is too large for a courtyard save.');const data=JSON.parse(await file.text());if(data.app!=='a-minister-in-your-sleeve')throw new Error('please choose an exported courtyard save.');const candidate=rollDay(elapsedCare(validateState(data.state))).state;if(!confirm('restore day '+candidate.day+' with '+candidate.bond+' bond? this replaces progress on this device.'))return;for(const c of CHAPTERS)chapterRecord(candidate,c.id).inProgress=false;state=candidate;selectedChapter=(nextChapter(state)||CHAPTERS.at(-1)).id;save();render();animation={mode:state.asleep?'sleep':'idle',start:performance.now()};$('settingsMessage').textContent='your courtyard is restored. he’s glad you’re back.';idleSpeech();}catch(error){$('settingsMessage').textContent=error instanceof SyntaxError?'that file could not be read. try an exported courtyard save.':error.message;}e.target.value='';};
+$('syncCodeForm').onsubmit=async e=>{e.preventDefault();const input=$('syncCodeInput'),code=input.value.trim();if(!code)return;
+  if(!validCode(code)){$('settingsMessage').textContent='a sync code is 6 to 64 letters, numbers, or dashes.';return;}
+  $('syncCodeButton').disabled=true;$('settingsMessage').textContent='looking for that courtyard…';
+  try{const result=await cloud.useCode(code,remote=>confirm('restore day '+remote.day+' with '+remote.bond+' bond from that code? this replaces progress on this device.'));
+    $('settingsMessage').textContent={same:'that’s already your code.',kept:'nothing changed. he’s staying right here.',adopted:'your courtyard is restored. he’s glad you’re back.',claimed:'nothing was saved under that code yet, so your courtyard will keep there from now on.'}[result];
+    if(result!=='kept')input.value='';$('syncCode').textContent=cloud.code;
+  }catch{$('settingsMessage').textContent='couldn’t reach that save just now. your courtyard here is untouched.';}
+  $('syncCodeButton').disabled=false;};
 
 document.addEventListener('visibilitychange',()=>{if(document.hidden){save();cloud?.flush();}else if(!$('storyDialog').open){state=elapsedCare(state);save();render();checkDay();cloud?.pull();}});window.addEventListener('pagehide',()=>{save();cloud?.flush();});
 setInterval(()=>{if(!document.hidden&&!document.querySelector('dialog[open]')&&!busy){state=elapsedCare(state);save();render();checkDay();}},60000);setInterval(idleSpeech,24000);setInterval(()=>{if(!document.hidden){wander();offerFollowUp();}},55000);
@@ -381,5 +388,5 @@ phaseTwo=createPhaseTwoUI({openDate,state:()=>state,commit:commitResult,care:doC
 const initial=pageFromLocation();history.replaceState({page:initial},'','#'+initial);selectPage(initial,false);save();render();requestAnimationFrame(animate);
 wander(true);
 if(welcomeGap>=2)welcome(welcomeGap);else if(pendingFollowUp(state))offerFollowUp();else if(state.asleep||state.chapter.complete||moodLines[moodOf(state)])idleSpeech();
-cloud=createCloudSync({getState:()=>state,adopt:adoptState,canAdopt:()=>!$('storyDialog').open,onStatus:cloudStatus,askConflict});cloud.init().catch(()=>cloudStatus('local'));
+cloud=createCloudSync({getState:()=>state,adopt:adoptState,canAdopt:()=>!$('storyDialog').open,onStatus:cloudStatus,askConflict});$('syncCode').textContent=cloud.code;cloud.init().catch(()=>cloudStatus('offline'));
 if(recovered)toast('your last good save has been restored.');if(!storageAvailable)toast('browser saving is unavailable. keep a copy from settings.');

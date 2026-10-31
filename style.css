@@ -469,6 +469,12 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .album-card.locked .album-art{filter:saturate(.3);opacity:.45}
 .album-card.locked strong{color:#b49bb5}
 .album-card.locked{border-color:#e5d8e2}
+.sync-code{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px}
+.sync-label{color:#978797}
+.sync-code code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:.04em;user-select:all;word-break:break-all}
+.sync-form{display:flex;gap:10px;margin-top:12px}
+.sync-form input{flex:1;min-width:0;font:inherit;font-size:12px;padding:10px 12px;border:1px solid #d5c6d8;border-radius:5px;background:transparent;color:inherit}
+.sync-form button{background:none;border:1px solid #d5c6d8;border-radius:5px;font-size:12px;padding:10px 14px;min-height:42px}
 .cloud-status{font-size:11px;line-height:1.5;color:#8f9a86;margin-top:8px}
 .cloud-status:before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:7px;vertical-align:middle}
 .cloud-status[data-status=offline],.cloud-status[data-status=full],.cloud-status[data-status=waiting]{color:#b18a61}
