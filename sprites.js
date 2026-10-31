@@ -10,7 +10,22 @@ const SLEEP_WINDOW = {
   clip: 'polygon(11.4286% 0,100% 0,100% 100%,0 100%,0 36%,11.4286% 36%)'
 };
 
+// Mood poses live on their own even strip per outfit: stuffed, peckish, drowsy.
+export const MOOD_FRAMES = { stuffed: 16, peckish: 17, drowsy: 18 };
+const MOOD_STRIP = { width: 939, height: 330, cell: 313 };
+const sheetName = outfit => outfit === 'leisure' ? 'leisure' : outfit === 'travel' ? 'travel' : 'minister';
+
 export function spriteFrameStyle(frame, outfit = 'official') {
+  if (frame >= 16) {
+    const { width, height, cell } = MOOD_STRIP, left = (frame - 16) * cell;
+    return {
+      backgroundImage: 'url("./assets/' + sheetName(outfit) + '-moods.webp")',
+      width: '100%', height: '100%', left: '0%',
+      backgroundSize: (width / cell * 100) + '% 100%',
+      backgroundPosition: (left / (width - cell) * 100) + '% 0%',
+      clipPath: 'none'
+    };
+  }
   const [top, height] = ROW_WINDOWS[Math.floor(frame / 4)];
   let view = { left: (frame % 4) * CELL_WIDTH, top, width: CELL_WIDTH, height, clip: 'none' };
   if (frame === 10) {
@@ -29,7 +44,7 @@ export function spriteFrameStyle(frame, outfit = 'official') {
   const sleeping = frame === 11 || frame === 15 || frame === 12;
   const width = sleeping ? view.width / CELL_WIDTH * 100 : 100;
   return {
-    backgroundImage: 'url("./assets/' + (outfit === 'leisure' ? 'leisure-sprites.webp' : outfit === 'travel' ? 'travel-sprites.webp' : 'minister-sprites.webp') + '")',
+    backgroundImage: 'url("./assets/' + sheetName(outfit) + '-sprites.webp")',
     width: width + '%',
     height: (sleeping ? view.height / CELL_WIDTH * 100 : 100) + '%',
     left: (100 - width) / 2 + '%',

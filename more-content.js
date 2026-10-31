@@ -114,3 +114,50 @@ export const chapterStories = {
     {speaker:'lin yan',text:'“a rematch?”\n\nhe smiles before you can answer. “whenever you like. i am in no hurry to finish playing with you.”',ending:true}
   ]
 };
+
+// How the evening sounds depends on how you've usually spent time with him.
+// The written text is the gentle version; these replace it for teasing and quiet company.
+const toneVariants = {
+  tea: {
+    6: {
+      teasing: '“sit. before you say something clever about my height again.”\n\nhe pats the cushion with great dignity, then spoils it by smiling. “there is something i have been meaning to do properly. i would prefer an audience that is not laughing.”',
+      quiet: 'he doesn’t say anything at first. he only looks at the cushion, then at you, and waits.\n\nwhen you sit, he lets out a breath. “good,” he says. “there is something i have been meaning to do properly.”'
+    },
+    16: {
+      teasing: '“next time, i shall have something better prepared.”\n\nhe is still holding you when you reach the light. “and you will be on your best behaviour. no remarks about saucers.” a pause. “a few remarks. i have grown used to them.”',
+      quiet: '“next time,” he begins, and then doesn’t finish.\n\nhe is still holding you when you reach the light. it seems to be the whole of what he meant to say, and you find you understood it anyway.'
+    }
+  },
+  rain: {
+    7: {
+      teasing: '“a colleague once wrote me six pages arguing that rain is an administrative inconvenience.”\n\n“and you’re about to tell me he was wrong.”\n\n“i was about to tell you he never had to share an umbrella with someone who steps in every puddle on purpose.” he tilts the canopy to cover you anyway.',
+      quiet: 'for a while neither of you says anything. the rain does the talking: on the paper, in the leaves, on the stones ahead.\n\n“i used to dislike this sound,” he says eventually. “i think i was only ever listening to it alone.”'
+    },
+    15: {
+      teasing: '“next time,” he says, “i shall consult the sky before making recommendations.”\n\n“you’ll do no such thing.”\n\n“no,” he admits, as the lantern begins to glow. “i shall consult you, and you will tell me to bring the umbrella, and i will forget. deliberately.”',
+      quiet: 'he shakes the last drops from the canopy and doesn’t open the door just yet.\n\n“thank you for the walk,” he says, as the lantern begins to glow. it is a very ordinary thing to say. he says it as if it isn’t.'
+    }
+  },
+  ribbon: {
+    3: {
+      teasing: '“gently, if you please. i have seen how you fold napkins.”\n\nyou tug one strand, very lightly, on purpose. he makes an outraged little sound that turns, halfway through, into a laugh.',
+      quiet: 'he doesn’t give any instructions. he only bows his head a little, so the untidy lock is easier to reach.\n\nit is a small thing. it feels like being trusted with something much larger.'
+    },
+    14: {
+      teasing: '“you must tell me if the knot comes loose again.”\n\n“it won’t. i tied it.”\n\n“then you must tell me if you would like to tie it anyway.” he lifts his chin. “i am a reasonable man. i accept invented emergencies.”',
+      quiet: 'he touches the knot once, as if checking it is still there.\n\n“you could retie it,” he says. “sometimes. if it ever needed it.” the way he says it, it needn’t need it at all.'
+    }
+  },
+  game: {
+    1: {
+      teasing: '“nothing terribly serious. i have done quite enough serious thinking today.”\n\nhe waits until you sit opposite him. “i should warn you, i was provincial champion. of a very small province. in a very poor year.”',
+      quiet: '“nothing serious,” he says. “i only wanted something for our hands to do while we sat here.”\n\nhe sets the bowl of black stones on your side, and the evening settles around the board.'
+    },
+    15: {
+      teasing: '“you need not return it.”\n\nhe glances at the gathering lantern light. “consider it a deposit. i expect a rematch, and i expect you to lose with considerably less grace than i did.”',
+      quiet: '“keep it,” he says.\n\nthe lantern begins to gather its light. he doesn’t look at it. he looks at your closed hand, and then at you, as if memorising the shape of the evening.'
+    }
+  }
+};
+for (const [id, beats] of Object.entries(toneVariants))
+  for (const [i, tones] of Object.entries(beats)) chapterStories[id][i].tones = tones;

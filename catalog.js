@@ -1,8 +1,8 @@
 export const CHAPTERS = [
-  { id:'tea', number:'01', title:'tea at his true height', bond:20, art:'tea-at-true-height.webp', keepsake:'a second cup', icon:'tea', letter:'your place is still set', choices:{thanks:3,hand:2} },
-  { id:'rain', number:'02', title:'beneath one umbrella', bond:70, art:'beneath-one-umbrella.webp', keepsake:'a pressed wisteria petal', icon:'leaf', letter:'regarding the weather', choices:{shelter:3,goodbye:2} },
-  { id:'ribbon', number:'03', title:'the ribbon at his nape', bond:150, art:'ribbon-at-his-nape.webp', keepsake:'the ribbon you chose', icon:'ribbon', letter:'a very minor matter of appearance', choices:{color:3,comfort:3} },
-  { id:'game', number:'04', title:'a game he intends to lose', bond:260, art:'game-he-intends-to-lose.webp', keepsake:'a white game stone', icon:'stone', letter:'an invitation to a rematch', choices:{bluff:3,touch:2} }
+  { id:'tea', number:'01', title:'tea at his true height', bond:20, day:1, art:'tea-at-true-height.webp', keepsake:'a second cup', icon:'tea', letter:'your place is still set', choices:{thanks:3,hand:2} },
+  { id:'rain', number:'02', title:'beneath one umbrella', bond:220, day:4, art:'beneath-one-umbrella.webp', keepsake:'a pressed wisteria petal', icon:'leaf', letter:'regarding the weather', choices:{shelter:3,goodbye:2} },
+  { id:'ribbon', number:'03', title:'the ribbon at his nape', bond:540, day:9, art:'ribbon-at-his-nape.webp', keepsake:'the ribbon you chose', icon:'ribbon', letter:'a very minor matter of appearance', choices:{color:3,comfort:3} },
+  { id:'game', number:'04', title:'a game he intends to lose', bond:950, day:15, art:'game-he-intends-to-lose.webp', keepsake:'a white game stone', icon:'stone', letter:'an invitation to a rematch', choices:{bluff:3,touch:2} }
 ];
 export const REQUESTS = [
   {id:'company',title:'stay a little while',quote:'“this paragraph refuses to finish itself. perhaps it needs an audience.”',description:'share a conversation while he puts his thoughts in order.',actions:['talk'],cta:'sit with him',action:'talk'},
@@ -42,4 +42,11 @@ export const LETTERS = {
   rain:'the umbrella has dried. my sleeve, eventually, has done the same.\n\ni am told there may be rain again this week. i offer this information without any particular motive.\n\nif you happen to be nearby, you know where to find me.\n\n— lin yan',
   ribbon:'the ribbon has proved entirely suitable. it stays where it is put, does not catch on my collar, and has attracted no comment from anyone whose opinion matters.\n\ni have kept it on today.\n\n— lin yan',
   game:'i have reviewed the final position. several alternative moves were available. i have decided not to explain them in writing.\n\na rematch would be the sensible way to settle the matter. same table. same company.\n\nthere is no need to return the white stone.\n\n— lin yan'
+};
+// a line at the foot of each letter, in the voice of how you've been with him
+export const POSTSCRIPTS = {
+  tea:{gentle:'p.s. you were kind to me when i was small and difficult. i noticed. i keep noticing.',teasing:'p.s. if you mention the saucer to anyone, i shall deny it with great dignity.',quiet:'p.s. the window seat. whenever you like. you needn’t say anything.'},
+  rain:{gentle:'p.s. my sleeve asks me to tell you it regrets nothing.',teasing:'p.s. you stepped in at least four puddles on purpose. i counted.',quiet:'p.s. it rained again last night. i listened for a while. it was better than it used to be.'},
+  ribbon:{gentle:'p.s. you were very careful. i could tell.',teasing:'p.s. a colleague asked about the ribbon. i told him it was a matter of state. he has stopped asking.',quiet:'p.s. i retied it myself this morning. it was not as good.'},
+  game:{gentle:'p.s. you were a kind opponent. i intend to be a kinder one.',teasing:'p.s. i let you win. you let me let you. we are both very generous people.',quiet:'p.s. i have set up the board again. i have not made a move. it seemed like yours to make.'}
 };

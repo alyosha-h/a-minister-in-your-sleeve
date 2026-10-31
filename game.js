@@ -1,10 +1,15 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS } from './catalog.js';
+import { MOMENTS } from './moments.js';
 
 export const SAVE_KEY = 'sleeve-and-lantern.v1';
 export const CATEGORIES = ['nourishment','affection','comfort','rest'];
 const clamp = (v,lo=0,hi=100)=>Math.min(hi,Math.max(lo,v));
 const blankChapter = ()=>({unlocked:false,complete:false,cursor:0,choices:{},inProgress:false});
 export const LOW = 35, FLOURISH = 70, ATTUNE_CAP = 4;
+export const STYLES = ['gentle','teasing','quiet'];
+// how everyday care colours the way he knows you; conversations count for more
+const CARE_STYLE = {feed:'gentle',pet:'gentle',pickup:'gentle',tea:'quiet',rest:'quiet',tidy:'teasing',game:'teasing'};
+const TALK_WEIGHT = 3;
 // which need each kind of care answers; reading the lowest one right earns a small bonus
 const REMEDIES = {feed:['fullness'],tea:['comfort','energy'],pet:['mood'],pickup:['mood'],talk:['mood'],game:['mood'],tidy:['comfort'],rest:['energy']};
 const STUFFED_MS = 30*60000;
@@ -27,7 +32,7 @@ const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,
 
 export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
-    claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},preference:'gentle',chapter:blankChapter(),
+    claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),manualKey:null,rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
     chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter()},request:requestForDay(1),
     owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[]},
     settings:{sound:false,reducedMotion:false},lastSeen:now};
@@ -35,7 +40,8 @@ export function freshState(now=Date.now()) {
 
 export function chapterRecord(s,id='tea') {return id==='tea'?s.chapter:s.chapters[id];}
 export function refreshUnlocks(s) {
-  CHAPTERS.forEach((c,i)=>{const r=chapterRecord(s,c.id);if(s.bond>=c.bond&&(!i||chapterRecord(s,CHAPTERS[i-1].id).complete))r.unlocked=true;});
+  // chapters ask for both bond and days together, so the arc can't be finished in a sitting
+  CHAPTERS.forEach((c,i)=>{const r=chapterRecord(s,c.id);if(s.bond>=c.bond&&s.day>=c.day&&(!i||chapterRecord(s,CHAPTERS[i-1].id).complete))r.unlocked=true;});
   return s;
 }
 export function nextChapter(s) {return CHAPTERS.find(c=>!chapterRecord(s,c.id).complete)||null;}
@@ -54,6 +60,23 @@ export function moodOf(s,now=Date.now()) {
   if(want&&s.needs[want]<LOW)return {fullness:'peckish',energy:'drowsy',comfort:'restless',mood:'wistful'}[want];
   return Object.values(s.needs).every(v=>v>=FLOURISH)?'flourishing':'content';
 }
+// the way you've mostly spent time with him; ties go to your latest conversation
+export function styleOf(s) {
+  const best=Math.max(...STYLES.map(k=>s.affinity[k]));return best>0&&s.affinity[s.preference]!==best?STYLES.find(k=>s.affinity[k]===best):s.preference;
+}
+function nudge(s,style,n=1){if(STYLES.includes(style))s.affinity[style]+=n;}
+// care counts once per kind per day, so endless headpats don't drown out what you say
+function careNudge(s,action){if(s.nudged.includes(action))return;s.nudged.push(action);nudge(s,CARE_STYLE[action]);}
+// one small scene per real day, the earliest he's ready to share
+export function momentDue(s,now=Date.now()) {
+  if(s.moments.key===dateKey(now))return null;return MOMENTS.find(m=>!s.moments.seen.includes(m.id)&&s.bond>=m.bond)||null;
+}
+export function shareMoment(input,id,optionIndex,now=Date.now()){
+  const m=MOMENTS.find(x=>x.id===id),option=m?.options[optionIndex];
+  if(!m||!option||momentDue(input,now)?.id!==id)throw new Error('That moment isn’t ready yet.');
+  const s=elapsedCare(input,now);s.moments.seen.push(id);s.moments.key=dateKey(now);nudge(s,option.style,2);
+  return result(s,{reward:6,copper:4},{reward:0,copper:0,requestCompleted:false});
+}
 export function tooTiredToPlay(s) {return s.asleep||s.needs.energy<25;}
 export function relationshipLabel(s) {
   const n=CHAPTERS.filter(c=>chapterRecord(s,c.id).complete).length;
@@ -64,6 +87,7 @@ function cleanChapter(input,meta) {
   r.unlocked=input.unlocked===true;r.complete=input.complete===true&&r.unlocked;
   r.cursor=Number.isInteger(input.cursor)?clamp(input.cursor,0,99):0;
   r.inProgress=input.inProgress===true&&r.unlocked&&!r.complete;
+  if(STYLES.includes(input.tone))r.tone=input.tone;
   for(const [key,count]of Object.entries(meta.choices)){const v=input.choices?.[key];if(Number.isInteger(v)&&v>=0&&v<count)r.choices[key]=v;}
   return r;
 }
@@ -76,7 +100,11 @@ export function validateState(input) {
   s.dayKey=KEY.test(input.dayKey)?input.dayKey:dateKey();s.manualKey=KEY.test(input.manualKey)?input.manualKey:null;
   if(KEY.test(input.rituals?.key))s.rituals={key:input.rituals.key,done:(Array.isArray(input.rituals.done)?input.rituals.done:[]).filter(p=>p in RITUALS)};
   s.asleep=input.asleep===true;s.claimed=[...new Set(input.claimed.filter(c=>CATEGORIES.includes(c)))];s.talked=input.talked===true;
-  s.preference=['gentle','teasing','quiet'].includes(input.preference)?input.preference:'gentle';s.chapter=cleanChapter(input.chapter,CHAPTERS[0]);
+  s.preference=STYLES.includes(input.preference)?input.preference:'gentle';
+  // older saves only knew your latest conversation; let it seed the running tally
+  s.moments={seen:[...new Set((Array.isArray(input.moments?.seen)?input.moments.seen:[]).filter(id=>MOMENTS.some(m=>m.id===id)))],key:KEY.test(input.moments?.key)?input.moments.key:null};
+  s.nudged=(Array.isArray(input.nudged)?input.nudged:[]).filter(a=>a in CARE_STYLE);
+  s.affinity=Object.fromEntries(STYLES.map(k=>[k,Number.isFinite(input.affinity?.[k])?Math.floor(clamp(input.affinity[k],0,1000000)):k===s.preference?TALK_WEIGHT:0]));s.chapter=cleanChapter(input.chapter,CHAPTERS[0]);
   if(input.schema===1&&input.chapter.complete===true&&s.bond>=20){s.chapter.unlocked=true;s.chapter.complete=true;}
   if(input.schema===2){
     for(const c of CHAPTERS.slice(1))s.chapters[c.id]=cleanChapter(input.chapters?.[c.id],c);
@@ -147,19 +175,19 @@ export function care(input,action,now=Date.now(),item=null){
   if(action==='pickup'){s.needs.mood+=18;s.needs.comfort+=7;category='affection';s.memories.holdCount++;}
   if(action==='tidy'){s.needs.comfort+=25;s.needs.energy-=6;s.tidied=true;s.memories.tidyCount++;category='comfort';}
   if(action==='rest'){s.needs.energy+=40;s.needs.comfort+=12;s.needs.fullness-=10;s.stuffedAt=null;category='rest';}
-  settle(s);s.memories.recentActions=[...s.memories.recentActions,action].slice(-8);
+  settle(s);careNudge(s,action);s.memories.recentActions=[...s.memories.recentActions,action].slice(-8);
   return result(s,categoryReward(s,category),finishRequest(s,action),tuned,ritual(s,action,now));
 }
 export function conversation(input,preference,now=Date.now(),chatIndex=null){
   const s=elapsedCare(input,now),tuned=attune(s,'talk');s.asleep=false;const reward=s.talked?0:15,copper=s.talked?0:4;
-  s.bond+=reward;s.copper+=copper;s.talked=true;if(['gentle','teasing','quiet'].includes(preference))s.preference=preference;s.needs.mood+=10;s.needs.energy-=4;settle(s);
+  s.bond+=reward;s.copper+=copper;s.talked=true;if(STYLES.includes(preference)){s.preference=preference;nudge(s,preference,TALK_WEIGHT);}s.needs.mood+=10;s.needs.energy-=4;settle(s);
   if(Number.isInteger(chatIndex))s.memories.recentChats=[...s.memories.recentChats.filter(i=>i!==chatIndex),chatIndex].slice(-12);
   return result(s,{reward,copper},finishRequest(s,'talk'),tuned,ritual(s,'talk',now));
 }
 export function finishGame(input,kind,now=Date.now(),tea=null){
   if(!['memorial','tea'].includes(kind))throw new Error('Unknown game.');
   if(tooTiredToPlay(elapsedCare(input,now)))throw new Error('he is too sleepy to play just now.');
-  const s=elapsedCare(input,now),tuned=attune(s,'game');s.asleep=false;s.needs.mood+=15;s.needs.energy-=12;s.needs.fullness-=6;settle(s);const base=categoryReward(s,'affection');
+  const s=elapsedCare(input,now),tuned=attune(s,'game');s.asleep=false;s.needs.mood+=15;s.needs.energy-=12;s.needs.fullness-=6;settle(s);careNudge(s,'game');const base=categoryReward(s,'affection');
   if(!s.played){s.played=true;s.bond+=10;s.copper+=8;base.reward+=10;base.copper+=8;}
   if(kind==='tea'&&['jasmine','lotus','rice'].includes(tea)){s.memories.lastTea=tea;if(!s.memories.recipes.includes(tea))s.memories.recipes.push(tea);}
   s.memories.recentActions=[...s.memories.recentActions,'game'].slice(-8);return result(s,base,finishRequest(s,'game'),tuned);
@@ -174,7 +202,7 @@ export function searchPage(input,location,now=Date.now()){
 // the manual skip ahead is a catch-up: once per real day, after a full day's care
 export function canBeginDay(s,now=Date.now()){return s.claimed.length>=3&&(s.talked||s.request.done)&&s.manualKey!==dateKey(now);}
 function nextDay(s){
-  s.day++;s.claimed=[];s.talked=false;s.played=false;s.asleep=false;s.tidied=false;s.attuned=0;s.flourished=false;s.request=requestForDay(s.day);return s;
+  s.day++;s.claimed=[];s.talked=false;s.played=false;s.asleep=false;s.tidied=false;s.attuned=0;s.flourished=false;s.nudged=[];s.request=requestForDay(s.day);return s;
 }
 export function beginDay(input,now=Date.now()){
   if(!canBeginDay(input,now))throw new Error('Share three kinds of care and a conversation or request first, once per day.');
@@ -188,10 +216,10 @@ export function rollDay(input,now=Date.now()){
   if(!s.claimed.length&&!s.talked&&!s.request.done){s.attuned=0;s.flourished=false;return {state:s,rolled:false,gap};}
   return {state:nextDay(s),rolled:true,gap};
 }
-export function checkpoint(input,cursor,choices,now=Date.now(),id='tea'){
+export function checkpoint(input,cursor,choices,now=Date.now(),id='tea',tone=null){
   const meta=CHAPTERS.find(c=>c.id===id),r=chapterRecord(input,id);if(!meta||!r?.unlocked)throw new Error('The lantern is still gathering light.');
   if(r.complete)throw new Error('This memory is complete; replay choices stay separate.');
-  const s=structuredClone(input),record=chapterRecord(s,id);record.cursor=cursor;record.choices={...choices};record.inProgress=true;s.lastSeen=now;return s;
+  const s=structuredClone(input),record=chapterRecord(s,id);record.cursor=cursor;record.choices={...choices};record.inProgress=true;if(STYLES.includes(tone))record.tone=tone;s.lastSeen=now;return s;
 }
 export function completeChapter(input,now=Date.now(),id='tea'){
   const r=chapterRecord(input,id);if(!r?.unlocked)throw new Error('The lantern is still gathering light.');

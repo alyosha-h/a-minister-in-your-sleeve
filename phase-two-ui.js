@@ -1,5 +1,6 @@
-import { CHAPTERS, ITEMS, RIBBONS, MEMORIALS, TEA_CLUES, LETTERS } from './catalog.js';
-import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
+import { CHAPTERS, ITEMS, RIBBONS, MEMORIALS, TEA_CLUES, LETTERS, POSTSCRIPTS } from './catalog.js';
+import { MOMENTS } from './moments.js';
+import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
 import { spriteFrameStyle } from './sprites.js';
 
 const $=id=>document.getElementById(id);
@@ -10,7 +11,7 @@ const teaName=id=>({jasmine:'jasmine tea',lotus:'lotus tea',rice:'roasted rice t
 export function createPhaseTwoUI(ctx){
   const outfits=ITEMS.filter(i=>i.kind==='outfit');
   let roomView='outfits',journalView='today',outfitIndex=0,shownOutfit=null;
-  let activity={view:'menu'},draftPreference=null;
+  let activity={view:'menu'};
   // Browsing previews is free, but when what he's wearing changes (shop, import,
   // cloud restore), bring the wardrobe back to the outfit he actually has on.
   function followOutfit(){const id=ctx.state().outfit;if(id!==shownOutfit){shownOutfit=id;outfitIndex=Math.max(0,outfits.findIndex(i=>i.id===id));}}
@@ -47,14 +48,22 @@ export function createPhaseTwoUI(ctx){
     }else if(journalView==='keepsakes'){
       $('journalContent').innerHTML='<div class="keepsake-grid">'+CHAPTERS.map(c=>{const done=chapterRecord(s,c.id).complete;return '<button class="keepsake-card '+(done?'found':'unfound')+'" data-keepsake="'+c.id+'" '+(!done?'disabled':'')+'>'+icon(c.icon)+'<span>'+esc(done?c.keepsake:'an evening yet to come')+'</span><small>'+esc(done?c.title:c.bond+' bond · chapter '+c.number)+'</small></button>';}).join('')+'</div><div class="journal-facts"><span class="eyebrow">little discoveries</span><p>'+esc(s.memories.lastTea?'last shared: '+teaName(s.memories.lastTea):'a cup of tea is a good place to start.')+'</p><p>'+esc(s.memories.tidyCount?'he keeps an unfinished poem among the official papers.':'his desk contains considerably more poetry than he admits.')+'</p></div>';
       document.querySelectorAll('[data-keepsake]').forEach(b=>b.onclick=()=>openLetter(b.dataset.keepsake));
+      // small moments he has shared, kept to reread; the next unshared one is only hinted at
+      const seen=MOMENTS.filter(m=>s.moments.seen.includes(m.id)),next=MOMENTS.find(m=>!s.moments.seen.includes(m.id));
+      $('journalContent').insertAdjacentHTML('beforeend','<div class="journal-facts"><span class="eyebrow">small moments</span><div class="moment-list">'+seen.map(m=>'<button data-moment="'+m.id+'">'+esc(m.title)+'<small>reread</small></button>').join('')+(next?'<button class="unread" disabled>something not yet shared<small>'+(s.bond>=next.bond?'another day':next.bond+' bond')+'</small></button>':'')+'</div></div>');
+      document.querySelectorAll('[data-moment]').forEach(b=>b.onclick=()=>{activity={view:'moment',id:b.dataset.moment,reread:true};renderActivity();ctx.showSheet('activityDialog');});
     }else{
-      draftPreference=s.preference;
-      $('journalContent').innerHTML='<div class="relationship-card"><span class="eyebrow">your time together</span><h2>'+esc(relationshipLabel(s))+'</h2><p>'+esc(s.memories.ribbon?'he is still wearing the '+RIBBONS.find(r=>r.id===s.memories.ribbon).name+' you chose.':'he is learning the small things that make you, you.')+'</p></div><form id="playerMemoryForm" class="memory-form"><label for="playerName">what should he call you?</label><input id="playerName" maxlength="24" autocomplete="off" placeholder="a name, if you like" value="'+esc(s.memories.name)+'"><span class="memory-label">your kind of company</span><div class="preference-buttons">'+[['gentle','gentle'],['teasing','teasing'],['quiet','quiet']].map(([v,label])=>'<button type="button" data-preference="'+v+'" aria-pressed="'+(s.preference===v)+'">'+label+'</button>').join('')+'</div><button class="primary-button" type="submit">let him remember</button></form><p class="journal-note">he remembers your name, your way of spending time together, shared teas, and the ribbon you chose.</p>';
-      document.querySelectorAll('[data-preference]').forEach(b=>b.onclick=()=>{draftPreference=b.dataset.preference;document.querySelectorAll('[data-preference]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
-      $('playerMemoryForm').onsubmit=e=>{e.preventDefault();const next=rememberPlayer(ctx.state(),$('playerName').value,draftPreference);ctx.commit({state:next});renderJournal(true);ctx.toast(next.memories.name?'“'+next.memories.name+'. yes, i like the sound of that.”':'he’ll remember how you like to spend time together.');};
+      $('journalContent').innerHTML='<div class="relationship-card"><span class="eyebrow">your time together</span><h2>'+esc(relationshipLabel(s))+'</h2><p>'+esc(s.memories.ribbon?'he is still wearing the '+RIBBONS.find(r=>r.id===s.memories.ribbon).name+' you chose.':'he is learning the small things that make you, you.')+'</p></div><form id="playerMemoryForm" class="memory-form"><label for="playerName">what should he call you?</label><input id="playerName" maxlength="24" autocomplete="off" placeholder="a name, if you like" value="'+esc(s.memories.name)+'"><span class="memory-label">how he knows you</span>'+affinityHtml(s)+'<button class="primary-button" type="submit">let him remember</button></form><p class="journal-note">he remembers your name, your way of spending time together, shared teas, and the ribbon you chose.</p>';
+      $('playerMemoryForm').onsubmit=e=>{e.preventDefault();const next=rememberPlayer(ctx.state(),$('playerName').value);ctx.commit({state:next});renderJournal(true);ctx.toast(next.memories.name?'“'+next.memories.name+'. yes, i like the sound of that.”':'he’ll remember how you like to spend time together.');};
     }
   }
 
+  // the running tally of how you spend time with him, which shapes his chapters and letters
+  function affinityHtml(s){
+    const style=styleOf(s),total=STYLES.reduce((n,k)=>n+s.affinity[k],0)||1;
+    const blurb={gentle:'he leans into your kindness, and has stopped pretending not to.',teasing:'he keeps a reply ready for you. he enjoys needing one.',quiet:'he has learned that your silences are company, too.'}[style];
+    return '<div class="affinity" role="list">'+STYLES.map(k=>'<div class="affinity-row'+(k===style?' leading':'')+'" role="listitem"><span>'+k+'</span><span class="need-track" role="meter" aria-label="'+k+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(s.affinity[k]/total*100)+'"><span style="width:'+(s.affinity[k]/total*100)+'%"></span></span></div>').join('')+'</div><p class="affinity-note">'+esc(blurb)+'</p>';
+  }
   function renderDecor(){
     const s=ctx.state();$('roomDecor').innerHTML=s.placed.map(id=>{const i=ITEMS.find(x=>x.id===id);return '<button class="room-object object-'+id+'" data-object="'+id+'" aria-label="inspect '+esc(i.name)+'">'+icon(i.icon)+'</button>';}).join('');
     document.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{ctx.speak(ITEMS.find(i=>i.id===b.dataset.object).reaction,'a little corner that feels more like home.');ctx.ping('tea');});
@@ -83,7 +92,7 @@ export function createPhaseTwoUI(ctx){
   }
   function finish(kind,tea=null,perfect=false){const r=finishGame(ctx.state(),kind,Date.now(),tea);ctx.commit(r);ctx.ping('lantern');showResult(kind,r,perfect);}
   function renderActivity(){
-    const root=$('activityContent'),s=ctx.state();$('activityBack').hidden=['menu','held','letter'].includes(activity.view);
+    const root=$('activityContent'),s=ctx.state();$('activityBack').hidden=['menu','held','letter','moment'].includes(activity.view);
     $('activityEyebrow').textContent=activity.view==='letter'?'a note in his own hand':'a little time together';
     if(activity.view==='menu'){
       $('activityTitle').textContent='little things, together.';
@@ -127,8 +136,13 @@ export function createPhaseTwoUI(ctx){
       const line=activity.kind==='search'?'“my reputation is saved. i shall have to acknowledge your assistance.”':activity.kind==='tea'?activity.perfect?'“exactly what i had in mind. you have been paying attention.”':'“a different cup than i expected. i rather like your interpretation.”':'“clear, concise, and remarkably sensible. i should like you on my staff. very close to my desk.”';
       root.innerHTML='<div class="game-result-icon">'+icon(activity.kind==='tea'?'tea':activity.kind==='search'?'journal':'scroll')+'</div><p class="game-intro">'+esc(line)+'</p><div class="earned-reward">'+(activity.result.reward?'+'+activity.result.reward+' bond · +'+activity.result.copper+' copper':'another pleasant moment together')+'</div><button id="resultDone" class="primary-button">a moment well spent</button>';
       $('resultDone').onclick=()=>$('activityDialog').close();
+    }else if(activity.view==='moment'){
+      const m=MOMENTS.find(x=>x.id===activity.id);$('activityTitle').textContent=m.title;$('activityEyebrow').textContent=activity.reread?'a small moment, kept':'a small moment';
+      root.innerHTML='<p class="letter-prose">'+esc(m.text)+'</p>'+(activity.reply!=null?'<p class="letter-prose moment-reply">'+esc(m.options[activity.reply].response)+'</p><div class="earned-reward">'+(activity.result?.reward?'+'+activity.result.reward+' bond · +'+activity.result.copper+' copper':'kept in your journal')+'</div><button id="resultDone" class="primary-button">keep this one</button>':activity.reread?'<button id="resultDone" class="primary-button">fold it away</button>':'<div class="dialog-choices">'+m.options.map((o,i)=>'<button data-reply="'+i+'">'+esc(o.label)+'</button>').join('')+'</div>');
+      document.querySelectorAll('[data-reply]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.reply);let r;try{r=shareMoment(ctx.state(),m.id,i);}catch(e){ctx.toast(e.message);return;}ctx.commit(r);ctx.ping('tea');activity.reply=i;activity.result=r;renderActivity();});
+      if($('resultDone'))$('resultDone').onclick=()=>$('activityDialog').close();
     }else if(activity.view==='letter'){
-      const c=CHAPTERS.find(x=>x.id===activity.id);$('activityTitle').textContent=c.letter;root.innerHTML='<p class="letter-prose">'+esc(LETTERS[c.id])+'</p><p class="dialog-footnote">kept in your journal · '+esc(c.title)+'</p>';
+      const c=CHAPTERS.find(x=>x.id===activity.id);$('activityTitle').textContent=c.letter;root.innerHTML='<p class="letter-prose">'+esc(LETTERS[c.id]+'\n\n'+POSTSCRIPTS[c.id][styleOf(ctx.state())])+'</p><p class="dialog-footnote">kept in your journal · '+esc(c.title)+'</p>';
     }
   }
 
@@ -145,6 +159,7 @@ export function createPhaseTwoUI(ctx){
   return {
     render(){renderDecor();if(ctx.page()==='room')renderRoom();if(ctx.page()==='journal')renderJournal();},
     onPage(page){if(page==='room')renderRoom();if(page==='journal')renderJournal();},
-    openActivity,openJournal,runRequest,renderAlbum
+    openActivity,openJournal,runRequest,renderAlbum,
+    openMoment(){const m=momentDue(ctx.state());if(!m)return;activity={view:'moment',id:m.id};renderActivity();ctx.showSheet('activityDialog');}
   };
 }

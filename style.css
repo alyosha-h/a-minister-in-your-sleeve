@@ -187,6 +187,10 @@ body{margin:0;color:var(--ink);font-family:var(--sans);font-size:14px;background
 .pet-hint{position:absolute;z-index:6;left:50%;transform:translateX(-50%);letter-spacing:1px;color:#ffefd8c4;border-bottom:1px solid #fff1d547;padding-bottom:3px;pointer-events:none;bottom:9%;font-size:8px}
 .scene-bond-button{position:absolute;z-index:6;top:36px;left:12px;min-height:36px;padding:8px 11px;display:flex;align-items:center;gap:6px;background:#fff8ecdf;border:1px solid #fff5df90;border-radius:20px;color:#8b6d8d;box-shadow:0 3px 12px #48324710;font-size:10px}
 .scene-bond-button svg{width:13px;height:13px;stroke-width:1.2}
+.moment-button{top:80px;font-style:italic;animation:moment-glow 3.2s ease-in-out infinite}
+@keyframes moment-glow{50%{box-shadow:0 0 0 5px #fff5df40,0 3px 12px #48324720}}
+.reduced-motion .moment-button{animation:none}
+@media (prefers-reduced-motion:reduce){.moment-button{animation:none}}
 .care-tray{padding:2px 0 4px;border:0;border-radius:0;display:grid;z-index:20;position:static;order:initial;transform:none;left:auto;bottom:auto;width:100%;max-width:none;background:none;backdrop-filter:none;box-shadow:none;gap:2px;grid-template-columns:repeat(6,minmax(0,1fr))}
 .care-action{display:flex;align-items:center;flex-direction:column;background:none;border-radius:10px;transition:background .2s;color:#6f657c;min-height:59px;padding:5px 1px;gap:5px}
 .choice-tray p{font-family:var(--serif);margin-top:5px;color:#897a8c;font-size:17px}
@@ -321,6 +325,9 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 /* dusk and night have painted versions; the tint stays light so the art carries it */
 [data-period=evening] .scene-art{background-image:url('./assets/courtyard-dusk.webp')}
 [data-period=night] .scene-art{background-image:url('./assets/courtyard-night.webp')}
+.rainy[data-period=morning] .scene-art,.rainy[data-period=afternoon] .scene-art{background-image:url('./assets/courtyard-rain.webp');filter:none}
+.rainy[data-period=morning] .rain-effect,.rainy[data-period=afternoon] .rain-effect{opacity:.18}
+.rainy.is-asleep .scene-art{filter:brightness(.68) saturate(.76)}
 [data-period=night].is-asleep .scene-art{filter:brightness(.8) saturate(.85)}
 [data-period=night] .scene-lantern,[data-period=evening] .scene-lantern{filter:drop-shadow(0 0 10px #ffd59a)}
 .care-action.ritual small{color:#9b5f72}
@@ -535,3 +542,16 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
   .album-card strong{font-size:18px}
   .tea-options button{font-size:10px}
 }
+
+.affinity{display:grid;gap:8px;margin:6px 0 4px}
+.affinity-row{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:10px;font-size:11px;color:#817887}
+.affinity-row .need-track>span{background:#c59eae}
+.affinity-row.leading{color:#5d4a66;font-weight:600}
+.affinity-row.leading .need-track>span{background:#9b5f72}
+.affinity-note{font-size:12px;color:#817887;font-style:italic;margin:4px 0 12px}
+
+.moment-list{display:grid;gap:7px;margin-top:8px}
+.moment-list button{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:10px 12px;border:1px solid #ddcbdc;border-radius:10px;background:#fff8ef66;color:#5d4a66;font-family:var(--serif);font-size:16px;text-align:left}
+.moment-list small{font-family:inherit;font-size:9px;color:#b19eaf;white-space:nowrap}
+.moment-list .unread{color:#b19eaf;font-style:italic;border-style:dashed}
+.moment-reply{margin-top:14px;padding-top:12px;border-top:1px solid #ddcbdc;color:#5d4a66}
