@@ -1,7 +1,7 @@
 import { SAVE_KEY, freshState, validateState, elapsedCare, care, conversation, canBeginDay, beginDay, checkpoint, completeChapter, chapterRecord, nextChapter, relationshipLabel, moodOf, LOW, rollDay, periodOf, weatherOf, dateKey, ritualDue, RITUALS } from './game.js';
 import { CHAPTERS, RIBBONS } from './catalog.js';
 import { allConversations, chapterStories } from './more-content.js';
-import { spriteFrameStyle } from './sprites.js';
+import { spriteFrameStyle, MOOD_FRAMES } from './sprites.js';
 import { createPhaseTwoUI } from './phase-two-ui.js';
 import { createCloudSync } from './cloud.js';
 
@@ -153,9 +153,18 @@ function setAnimation(mode,duration=1550){
 }
 const frames={feed:[2,3],tea:[4,5],pet:[6,7],talk:[8,9],rest:[10,11],sleep:[11,15],tidy:[12],pickup:[7,9]};
 let previousFrame='';
+// his resting pose follows his mood; the plain idle keeps its blink
+function idleFrame(mood,time,still){
+  if(mood==='drowsy')return !still&&time%9000>7400?10:MOOD_FRAMES.drowsy;
+  if(MOOD_FRAMES[mood])return MOOD_FRAMES[mood];
+  if(mood==='restless')return 13;
+  if(mood==='wistful')return 7;
+  if(mood==='flourishing'&&!still&&time%11000>9200)return 14;
+  return !still&&time%6400<170?1:0;
+}
 function animate(time){
   const noMotion=state.settings.reducedMotion||matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let frame;if(animation.mode==='idle')frame=noMotion?0:time%6400<170?1:moodOf(state)==='drowsy'&&time%9000>7400?10:0;else{const list=frames[animation.mode]||[0];frame=list[noMotion?0:Math.floor(Math.max(0,time-animation.start)/(animation.mode==='sleep'?2400:650))%list.length];}
+  let frame;if(animation.mode==='idle')frame=idleFrame(moodOf(state),time,noMotion);else{const list=frames[animation.mode]||[0];frame=list[noMotion?0:Math.floor(Math.max(0,time-animation.start)/(animation.mode==='sleep'?2400:650))%list.length];}
   const key=state.outfit+':'+frame;if(key!==previousFrame){Object.assign($('characterSprite').style,spriteFrameStyle(frame,state.outfit));previousFrame=key;}
   requestAnimationFrame(animate);
 }

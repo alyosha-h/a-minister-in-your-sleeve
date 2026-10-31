@@ -321,6 +321,9 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 /* dusk and night have painted versions; the tint stays light so the art carries it */
 [data-period=evening] .scene-art{background-image:url('./assets/courtyard-dusk.webp')}
 [data-period=night] .scene-art{background-image:url('./assets/courtyard-night.webp')}
+.rainy[data-period=morning] .scene-art,.rainy[data-period=afternoon] .scene-art{background-image:url('./assets/courtyard-rain.webp');filter:none}
+.rainy[data-period=morning] .rain-effect,.rainy[data-period=afternoon] .rain-effect{opacity:.18}
+.rainy.is-asleep .scene-art{filter:brightness(.68) saturate(.76)}
 [data-period=night].is-asleep .scene-art{filter:brightness(.8) saturate(.85)}
 [data-period=night] .scene-lantern,[data-period=evening] .scene-lantern{filter:drop-shadow(0 0 10px #ffd59a)}
 .care-action.ritual small{color:#9b5f72}
