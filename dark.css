@@ -138,6 +138,9 @@
 :root[data-theme=dark] .album-card small{color:#cab8cb}
 :root[data-theme=dark] .album-card.locked strong{color:#cab8cb}
 :root[data-theme=dark] .album-card.locked{border-color:#332c39}
+:root[data-theme=dark] .sync-label{color:#afa2af}
+:root[data-theme=dark] .sync-form input{border:1px solid #3e3646}
+:root[data-theme=dark] .sync-form button{border:1px solid #3e3646}
 :root[data-theme=dark] .cloud-status{color:#a9b1a2}
 :root[data-theme=dark] .cloud-status[data-status=offline],:root[data-theme=dark] .cloud-status[data-status=full],:root[data-theme=dark] .cloud-status[data-status=waiting]{color:#c2a383}
 :root[data-theme=dark] .cloud-status[data-status=local]{color:#baafb9}

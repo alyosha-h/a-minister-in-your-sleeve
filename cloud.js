@@ -1,17 +1,25 @@
 import { validateState } from './game.js';
 
-// Optional cloud save: one private document per signed-in viewer, under the
-// Claude artifact platform's per-user subtree (data/users/<id>/...), which
-// nobody else — the artifact's owner included — can read or write.
+// Optional cloud save, kept on a small worker under a sync code. Anyone who
+// knows the code can read or replace that save, so the code is the key: a
+// random one is made on first run and shown in Settings, and typing it on
+// another device brings the courtyard along.
 // The browser save (localStorage, see app.js) is always the source of truth.
-// Outside that platform (no window.claude.use) this whole module is inert:
-// it reports 'local' once and every method becomes a no-op. Any unexpected
-// platform error also drops back to local rather than surfacing to the page.
-// When running, the cloud copy is pulled on open / return-to-tab and pushed
-// shortly after real changes.
+// Any network or worker problem quietly drops back to local-only; nothing here
+// is allowed to break the game. The cloud copy is pulled on open /
+// return-to-tab and pushed a few seconds after real changes.
 
 const APP = 'a-minister-in-your-sleeve';
+const ENDPOINT = 'https://minister-sleeve-saves.alex-c-hartke.workers.dev/save/';
 const META_KEY = 'sleeve-and-lantern.cloud';
+const CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789'; // no 0/o, 1/l/i
+const TIMEOUT = 8000;
+
+export const validCode = c => typeof c === 'string' && /^[A-Za-z0-9-]{6,64}$/.test(c);
+function newCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(10));
+  return 'sleeve-' + Array.from(bytes, b => CODE_CHARS[b % CODE_CHARS.length]).join('');
+}
 
 // Need decay and the last-seen clock change constantly without the player
 // doing anything; leave them out when deciding whether progress changed.
@@ -21,26 +29,42 @@ const summary = s => ({ day: s.day, bond: s.bond });
 
 function readMeta() { try { return JSON.parse(localStorage.getItem(META_KEY)) || {}; } catch { return {}; } }
 
+// Resolves to the save blob, null when the code has no save, and throws on
+// any network or worker trouble (including a reply that isn't a courtyard).
+async function fetchSave(code) {
+  const res = await fetch(ENDPOINT + encodeURIComponent(code), { cache: 'no-store', signal: AbortSignal.timeout(TIMEOUT) });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('worker ' + res.status);
+  const d = await res.json();
+  if (d?.app !== APP || !Number.isFinite(d.savedAt)) throw new Error('not a courtyard save');
+  return { savedAt: d.savedAt, state: validateState(d.state) };
+}
+
 export function createCloudSync({ getState, adopt, canAdopt, onStatus, askConflict }) {
   const meta = readMeta();
   meta.device ||= Math.random().toString(36).slice(2, 10);
+  if (!validCode(meta.code)) meta.code = newCode();
+  // meta.at: when progress last really changed on this device (the local savedAt).
+  // meta.syncedAt: the cloud copy's savedAt when this device last matched it.
   const writeMeta = () => { try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch {} };
+  // First run, or the save was wiped while the code stayed: nothing here is
+  // newer than the cloud, so a fresh courtyard counts as never changed.
+  const start = getState(), startFp = fingerprint(start);
+  if (meta.fp === undefined || (startFp !== meta.fp && looksFresh(start))) {
+    meta.fp = startFp; meta.at = looksFresh(start) ? 0 : Date.now(); meta.syncedAt = undefined;
+  }
   writeMeta();
 
-  let doc = null, ready = false, timer = null, writing = false, again = false, pulling = false, deferred = false;
-  const dirty = () => fingerprint(getState()) !== meta.fp;
+  let ready = false, timer = null, writing = false, again = false, pulling = false, deferred = false;
+  const dirty = () => (meta.at || 0) !== (meta.syncedAt || 0);
 
-  async function init() {
-    if (typeof window.claude?.use !== 'function') { onStatus('local'); return; }
-    onStatus('connecting');
-    try {
-      const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
-      const id = await user?.id?.();
-      if (!id || typeof db?.doc !== 'function') throw 0;
-      doc = db.doc('data/users/' + id + '/courtyard');
-    } catch { doc = null; onStatus('local'); return; }
-    await pull();
+  function noteChange() {
+    const fp = fingerprint(getState());
+    if (fp !== meta.fp) { meta.fp = fp; meta.at = Date.now(); writeMeta(); }
   }
+  function matched(savedAt) { meta.fp = fingerprint(getState()); meta.at = meta.syncedAt = savedAt; writeMeta(); }
+
+  async function init() { onStatus('connecting'); await pull(); }
 
   async function pull() {
     try { await pullOnce(); }
@@ -48,64 +72,90 @@ export function createCloudSync({ getState, adopt, canAdopt, onStatus, askConfli
   }
 
   async function pullOnce() {
-    if (!doc || pulling) return;
+    if (pulling) return;
     if (!canAdopt()) { deferred = true; return; }
     pulling = true; deferred = false; onStatus('syncing');
     try {
-      let snap;
-      try { snap = await doc.get(); } catch (e) { onStatus(e?.code === 'not_granted' || e?.code === 'revoked' ? 'local' : 'offline'); return; }
-      ready = true;
-      if (!snap.exists) { await push(); return; }
-      const d = snap.data();
       let remote;
-      try { if (d.app !== APP) throw 0; remote = validateState(JSON.parse(d.state)); }
-      catch { await push(); return; } // unreadable cloud copy: replace it with this device's
+      try { remote = await fetchSave(meta.code); }
+      catch { onStatus('offline'); return; } // unreachable, or a copy this version can't read: leave it be
+      ready = true;
+      noteChange();
+      if (!remote) { await push(); return; }
+      if (remote.savedAt === meta.syncedAt) { if (dirty()) await push(); else onStatus('synced'); return; } // nobody else wrote since
+      if (remote.savedAt <= (meta.at || 0)) { await push(); return; } // this device is newer
 
+      // The cloud copy is newer. Take it, unless this device also has
+      // progress the cloud never saw; then let the player choose.
       const local = getState();
-      if (fingerprint(remote) === fingerprint(local)) { meta.syncedAt = d.savedAt; meta.fp = fingerprint(local); writeMeta(); onStatus('synced'); return; }
-      if (d.savedAt === meta.syncedAt) { if (dirty()) await push(); else onStatus('synced'); return; } // nobody else wrote since
-
-      // Another device saved since this one last synced.
-      let choice = 'cloud';
-      const neverSynced = meta.fp === undefined;
-      if ((neverSynced && !looksFresh(local)) || (!neverSynced && dirty())) {
-        choice = await askConflict(summary(local), summary(remote), d.savedAt);
+      if (fingerprint(remote.state) === fingerprint(local)) { matched(remote.savedAt); onStatus('synced'); return; }
+      if (meta.at !== undefined && dirty() && !looksFresh(local)) {
+        const choice = await askConflict(summary(local), summary(remote.state), remote.savedAt);
         if (!choice) { ready = false; onStatus('waiting'); return; } // dismissed: ask again next time
+        if (choice === 'local') { await push(); return; }
       }
-      if (choice === 'cloud') {
-        if (!canAdopt()) { deferred = true; return; }
-        const adopted = adopt(remote);
-        meta.syncedAt = d.savedAt; meta.fp = fingerprint(adopted); writeMeta(); onStatus('restored');
-      } else await push();
+      if (!canAdopt()) { deferred = true; return; }
+      take(remote);
     } finally { pulling = false; }
   }
 
+  function take(remote) {
+    adopt(remote.state); // saves locally, which calls changed(); matched() below settles it
+    matched(remote.savedAt); clearTimeout(timer);
+    // rollDay/elapsedCare may have moved things on since that save; send that back up.
+    if (fingerprint(getState()) !== fingerprint(remote.state)) { meta.at = Date.now(); writeMeta(); schedule(); }
+    onStatus('restored');
+  }
+
   async function push() {
-    if (!doc || !ready) return;
+    if (!ready) return;
     clearTimeout(timer);
     if (writing) { again = true; return; }
     writing = true; onStatus('syncing');
-    const s = getState(), fp = fingerprint(s), savedAt = Date.now();
+    if (!meta.at) { meta.at = Date.now(); writeMeta(); }
+    const code = meta.code, s = getState(), savedAt = meta.at;
+    const body = JSON.stringify({ app: APP, schema: s.schema, savedAt, device: meta.device, day: s.day, bond: s.bond, state: s });
     try {
-      await doc.set({ app: APP, schema: s.schema, savedAt, device: meta.device, day: s.day, bond: s.bond, state: JSON.stringify(s) });
-      meta.syncedAt = savedAt; meta.fp = fp; writeMeta(); onStatus('synced');
-    } catch (e) {
-      if (e?.code === 'invalid_argument' || e?.code === 'not_granted' || e?.code === 'revoked') { ready = false; onStatus('local'); }
-      else onStatus(e?.code === 'quota_exceeded' ? 'full' : 'offline');
-    }
+      const res = await fetch(ENDPOINT + encodeURIComponent(code), {
+        method: 'PUT', headers: { 'content-type': 'application/json' }, body,
+        signal: AbortSignal.timeout(TIMEOUT), keepalive: body.length < 60000 // lets a push finish as the tab closes
+      });
+      if (!res.ok) throw new Error('worker ' + res.status);
+      if (code === meta.code) { meta.syncedAt = savedAt; writeMeta(); } // a change made meanwhile stays dirty
+      onStatus(dirty() ? 'syncing' : 'synced');
+    } catch { onStatus('offline'); }
     writing = false;
-    if (again) { again = false; if (dirty()) push(); }
+    if (again || dirty()) { again = false; if (dirty()) schedule(); }
   }
+
+  function schedule() { clearTimeout(timer); timer = setTimeout(() => { if (dirty()) push(); }, 2500); }
 
   return {
     init,
     pull,
+    get code() { return meta.code; },
     /** Call after every local save; writes a few seconds after the last real change. */
-    changed() { if (ready && dirty()) { clearTimeout(timer); timer = setTimeout(() => { if (dirty()) push(); }, 2500); } },
+    changed() { noteChange(); if (ready && dirty()) schedule(); },
     /** Write now if anything is waiting (leaving the tab). */
     flush() { if (ready && dirty()) push(); },
     /** A pull was postponed during a story scene; try it now. */
     resume() { if (deferred) pull(); },
-    get active() { return Boolean(doc); }
+    /**
+     * Switch to another sync code. Resolves to 'adopted' (its save replaced
+     * this one), 'claimed' (it was empty; this courtyard now saves there),
+     * 'kept' (the player said no), 'same', or throws when the cloud can't be reached.
+     */
+    async useCode(code, confirmReplace) {
+      code = code.trim();
+      if (!validCode(code)) throw new Error('invalid');
+      if (code === meta.code) return 'same';
+      const remote = await fetchSave(code);
+      if (remote && !confirmReplace(summary(remote.state))) return 'kept';
+      clearTimeout(timer);
+      meta.code = code; ready = true; writeMeta();
+      if (remote) { take(remote); return 'adopted'; }
+      meta.syncedAt = undefined; writeMeta(); await push();
+      return 'claimed';
+    }
   };
 }
