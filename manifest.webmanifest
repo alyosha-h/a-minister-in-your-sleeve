@@ -3,7 +3,7 @@
   "short_name": "minister",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f5f1e8",
+  "background_color": "#27212d",
   "theme_color": "#f5f1e8",
   "icons": [
     { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png" },

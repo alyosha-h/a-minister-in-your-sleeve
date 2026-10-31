@@ -1,19 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- the logo's lantern (i-lantern in index.html) on warm paper, with a little lamplight inside -->
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="52%" r="50%">
-      <stop offset="0" stop-color="#fbe7c4"/>
-      <stop offset=".55" stop-color="#f7eedd"/>
-      <stop offset="1" stop-color="#f5f1e8"/>
-    </radialGradient>
-    <radialGradient id="flame" cx="50%" cy="50%" r="50%">
-      <stop offset="0" stop-color="#f6c97f" stop-opacity=".75"/>
-      <stop offset="1" stop-color="#f6c97f" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" fill="url(#glow)"/>
-  <ellipse cx="256" cy="268" rx="96" ry="110" fill="url(#flame)"/>
-  <g transform="translate(256 256) scale(14) translate(-12 -12)" fill="none" stroke="#676084" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round">
+  <!-- the logo's lantern (i-lantern in index.html) in lavender on the dark-mode plum -->
+  <rect width="512" height="512" fill="#27212d"/>
+  <g transform="translate(256 256) scale(11.5) translate(-12 -12)" fill="none" stroke="#7f799b" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3h8M12 1v2M7 5h10c4 4 4 10 0 14H7C3 15 3 9 7 5ZM8 7c-1 4-1 6 0 10M16 7c1 4 1 6 0 10M12 5v14M8 21h8M12 21v2"/>
   </g>
 </svg>
