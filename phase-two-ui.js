@@ -60,7 +60,6 @@ export function createPhaseTwoUI(ctx){
     document.querySelectorAll('[data-object]').forEach(b=>b.onclick=()=>{ctx.speak(ITEMS.find(i=>i.id===b.dataset.object).reaction,'a little corner that feels more like home.');ctx.ping('tea');});
     $('paperClutter').hidden=s.tidied;
     const ribbon=RIBBONS.find(r=>r.id===s.memories.ribbon);$('ribbonTie').hidden=!ribbon||s.asleep;if(ribbon)$('ribbonTie').style.color=ribbon.color;
-    $('sceneFrame').classList.toggle('rainy',s.chapters.rain.complete&&s.day%3===0);
     $('requestSummary').textContent=s.request.done?'a small kindness, remembered':requestDefinition(s).title;
     $('requestShortcut').classList.toggle('request-done',s.request.done);
   }

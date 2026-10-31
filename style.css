@@ -315,6 +315,18 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .rain-effect{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;background-image:repeating-linear-gradient(107deg,transparent 0,transparent 57px,#e6dcf44d 59px,transparent 60px);background-size:120% 130%;transition:opacity 1s}
 .rainy .rain-effect{opacity:.35;animation:rainDrift 1.5s linear infinite}
 .rainy .scene-art{filter:brightness(.88) saturate(.9)}
+/* time of day: a tint over the courtyard art, so it stacks with rain and sleep */
+.scene-art::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity 2s,background 2s;pointer-events:none}
+[data-period=morning] .scene-art::after{opacity:1;background:linear-gradient(180deg,#fff6e026,#ffe9c41a 60%,transparent);mix-blend-mode:screen}
+[data-period=evening] .scene-art::after{opacity:1;background:linear-gradient(180deg,#5b3a6e40,#e3955a33 70%,#7a3f4a33);mix-blend-mode:multiply}
+[data-period=night] .scene-art::after{opacity:1;background:radial-gradient(circle at 88% 22%,#ffd59a40,transparent 22%),linear-gradient(180deg,#0e1442e6,#211f55cc 55%,#2c2147c4);mix-blend-mode:multiply}
+[data-period=night] .scene-art{filter:saturate(.7) brightness(.85)}
+[data-period=night].is-asleep .scene-art{filter:saturate(.6) brightness(.6)}
+[data-period=night] .scene-lantern,[data-period=evening] .scene-lantern{filter:drop-shadow(0 0 10px #ffd59a)}
+.care-action.ritual small{color:#9b5f72}
+.care-action.ritual svg{color:#9b5f72}
+.care-action.ritual{position:relative}
+.care-action.ritual::after{content:'';position:absolute;top:6px;right:calc(50% - 16px);width:5px;height:5px;border-radius:50%;background:#c27c92}
 .lantern-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .lantern-heading h1{font-size:31px}
 .text-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;background:none;padding:8px 3px;color:#927a99;font-size:11px}
