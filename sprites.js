@@ -29,7 +29,7 @@ export function spriteFrameStyle(frame, outfit = 'official') {
   const sleeping = frame === 11 || frame === 15 || frame === 12;
   const width = sleeping ? view.width / CELL_WIDTH * 100 : 100;
   return {
-    backgroundImage: 'url("./assets/' + (outfit === 'leisure' ? 'leisure-sprites.png' : outfit === 'travel' ? 'travel-sprites.png' : 'minister-sprites.png') + '")',
+    backgroundImage: 'url("./assets/' + (outfit === 'leisure' ? 'leisure-sprites.webp' : outfit === 'travel' ? 'travel-sprites.webp' : 'minister-sprites.webp') + '")',
     width: width + '%',
     height: (sleeping ? view.height / CELL_WIDTH * 100 : 100) + '%',
     left: (100 - width) / 2 + '%',
