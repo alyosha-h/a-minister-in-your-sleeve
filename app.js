@@ -122,9 +122,7 @@ function render(){
   document.querySelectorAll('.treat-button').forEach(b=>{const n=state.pantry[b.dataset.food||b.dataset.tea]||0;b.hidden=!n;b.querySelector('small').textContent='×'+n;});
   $('bondSummary').textContent=upcoming?state.bond+' / '+upcoming.bond:state.bond+' bond';$('lanternNavDot').hidden=!ready;
   $('tab-lantern').setAttribute('aria-label',ready?'lantern, encounter ready':'lantern');
-  $('sceneFrame').classList.toggle('lantern-ready',ready);$('sceneFrame').classList.toggle('is-asleep',state.asleep);
-  $('sceneLantern').setAttribute('aria-label',ready?'follow the lantern to his study':'visit the lantern and your memories');
-  $('sceneLantern').title=ready?'an evening is waiting':'your time together';
+  $('sceneFrame').classList.toggle('is-asleep',state.asleep);
   $('keepsake').hidden=!state.chapter.complete;
   $('sceneStatus').textContent=state.asleep?'dreaming, probably of dumplings':moodStatus[mood]||relationshipLabel(state);
   document.body.classList.toggle('reduced-motion',state.settings.reducedMotion);applyTheme();
@@ -347,7 +345,6 @@ $('sceneFrame').addEventListener('pointermove',e=>{
   if(noticed.count===3)speak('“yes? i am right here. you may stop hovering and simply say hello.”');
 });
 $('dateButton').onclick=()=>phaseTwo.openDates();$('chapterButton').onclick=()=>openStory();
-$('sceneLantern').onclick=()=>{const ready=CHAPTERS.find(c=>{const r=chapterRecord(state,c.id);return r.unlocked&&!r.complete;});if(ready)openStory(ready.id);else selectPage('lantern');};
 $('storyNext').onclick=advanceStory;$('exitStoryButton').onclick=()=>$('storyDialog').close();
 $('viewArtButton').onclick=()=>{const v=$('storyDialog').classList.toggle('art-only');$('viewArtButton').textContent=v?'read on':'view art';$('viewArtButton').setAttribute('aria-pressed',String(v));};
 function checkDay(){

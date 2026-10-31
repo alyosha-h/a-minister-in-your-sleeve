@@ -41,13 +41,6 @@ a{color:inherit}
 .scene-frame.is-asleep .scene-art{filter:brightness(.68) saturate(.76)}
 .scene-frame.is-asleep .scene-shade{background:linear-gradient(rgba(47,41,85,.14),rgba(55,43,77,.15))}
 .scene-topline>span:first-child{display:flex;gap:6px;align-items:center}
-.scene-lantern{position:absolute;top:20%;right:8%;z-index:3;width:46px;height:64px;padding:10px 8px;background:rgba(255,237,182,.22);color:#fff1bc;border:1px solid rgba(255,238,187,.55);border-radius:22px;box-shadow:0 0 15px rgba(255,229,160,.15);transition:all .5s}
-.scene-lantern svg{position:relative;width:28px;height:42px;stroke-width:1.2;filter:drop-shadow(0 0 4px #c19d62)}
-.lantern-halo{position:absolute;inset:-12px;border-radius:50%;pointer-events:none}
-.lantern-spark{position:absolute;right:-9px;top:-8px;font-size:18px;opacity:0}
-.lantern-ready .lantern-halo{animation:lanternGlow 3s ease-in-out infinite;background:radial-gradient(ellipse,#ffdd9b70,transparent 70%)}
-.lantern-ready .lantern-spark{opacity:1}
-.lantern-ready .scene-lantern{background:#fff3cd42;box-shadow:0 0 30px #ffda9255}
 .character-shadow{position:absolute;bottom:0;left:17%;width:66%;height:12px;background:radial-gradient(ellipse,rgba(45,27,43,.26),transparent 70%);border-radius:50%}
 .character-button{position:absolute;inset:0;background:none;padding:0;overflow:visible;border-radius:40%;transition:transform .2s;touch-action:manipulation}
 .character-button:active{transform:scale(.97)}
@@ -120,7 +113,6 @@ dialog::backdrop{background:#2d223d6b;backdrop-filter:blur(5px)}
 @keyframes breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.018)}}
 @keyframes nibble{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes happy{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg) translateY(-2px)}}
-@keyframes lanternGlow{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.15)}}
 @keyframes heartRise{0%{opacity:0;transform:translateY(0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translateY(-75px) rotate(12deg)}}
 @keyframes rewardFloat{0%{opacity:0;transform:translateY(8px)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-35px)}}
 @media(min-width:600px){
@@ -324,7 +316,6 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .rainy[data-period=morning] .rain-effect,.rainy[data-period=afternoon] .rain-effect{opacity:.18}
 .rainy.is-asleep .scene-art{filter:brightness(.68) saturate(.76)}
 [data-period=night].is-asleep .scene-art{filter:brightness(.8) saturate(.85)}
-[data-period=night] .scene-lantern,[data-period=evening] .scene-lantern{filter:drop-shadow(0 0 10px #ffd59a)}
 .care-action.ritual small{color:#9b5f72}
 .care-action.ritual svg{color:#9b5f72}
 .care-action.ritual{position:relative}
