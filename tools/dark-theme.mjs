@@ -8,7 +8,7 @@ const root = new URL('../', import.meta.url);
 const css = readFileSync(new URL('style.css', root), 'utf8');
 
 // anything drawn on top of the illustrated scene keeps its colours
-const OVER_ART = /scene-(art|shade|caption|topline)|caption-rule|rain-effect|data-period|story-art|chapter-cover|cover-mark|held-scene|held-minister|lantern-halo|lantern-spark|character|sprite|room-object|paper-clutter|\.keepsake(?![-\w])|pet-hint|ribbon-tie|outfit-character|outfit-flower|outfit-dot|dot-|request-shortcut|game-result-icon/;
+const OVER_ART = /scene-(art|shade|caption|topline)|caption-rule|rain-effect|data-period|story-art|chapter-cover|cover-mark|held-scene|held-minister|character|sprite|room-object|paper-clutter|\.keepsake(?![-\w])|pet-hint|ribbon-tie|outfit-character|outfit-flower|outfit-dot|dot-|request-shortcut|game-result-icon/;
 const COLOUR_PROPS = /^(--[\w-]+|background(-color|-image)?|color|border(-[\w-]+)?|outline(-color)?|fill|stroke|caret-color|accent-color|text-decoration-color)$/;
 
 function toHsl(r, g, b) {

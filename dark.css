@@ -8,8 +8,6 @@
 :root[data-theme=dark] .need:nth-child(3) .need-track>span{background:#b9c0b3}
 :root[data-theme=dark] .need:nth-child(4) .need-track>span{background:#d8bec9}
 :root[data-theme=dark] .need.low .need-label>span:first-child{color:#b07d8d}
-:root[data-theme=dark] .scene-lantern{background:rgba(54,42,65,.22);color:#33283f;border:1px solid rgba(52,40,63,.55)}
-:root[data-theme=dark] .lantern-ready .scene-lantern{background:#2e243842}
 :root[data-theme=dark] .speech-bubble:after{background:#211a28}
 :root[data-theme=dark] .speech-name{color:#b3a0b7}
 :root[data-theme=dark] .hearts span{color:#40334e}
