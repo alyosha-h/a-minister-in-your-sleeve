@@ -4,7 +4,8 @@ export const SPOTS = {
   center: { left: 50, bottom: 13, scale: 1 },
   tea:    { left: 29, bottom: 12, scale: 1 },
   desk:   { left: 71, bottom: 12, scale: 1 },
-  garden: { left: 54, bottom: 31, scale: .78 }   // the far edge of the table, looking out toward the moon gate
+  garden: { left: 54, bottom: 31, scale: .78 },  // the far edge of the table, looking out toward the moon gate
+  cushion: { left: 73, bottom: 25, scale: .9 }   // on the silk cushion, when he has one
 };
 
 export const ACTIVITIES = [
@@ -34,7 +35,7 @@ export const ACTIVITIES = [
   { id:'thirsty', spot:'tea', frame:13, caption:'frowning at a drooping orchid.', weight:6,
     when:c=>c.orchidThirsty,
     lines:['“the orchid is sulking. i suspect neglect. i suspect myself.”'] },
-  { id:'cushion', spot:'center', frame:11, caption:'napping on the silk cushion. officially, resting his eyes.', weight:3,
+  { id:'cushion', spot:'cushion', frame:11, caption:'napping on the silk cushion. officially, resting his eyes.', weight:3,
     when:c=>c.placed.includes('cushion')&&c.energy<60&&c.period!=='morning',
     lines:['“mm. five more minutes. the empire can manage.”'] },
   { id:'chime', spot:'garden', frame:0, caption:'listening to the wind chime.', weight:2,
