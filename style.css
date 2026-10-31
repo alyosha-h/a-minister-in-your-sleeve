@@ -341,7 +341,7 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .lantern-heading>.text-button{font-size:10px;flex-shrink:0}
 .lantern-heading>.text-button svg{width:15px;height:15px}
 .lantern-panel .bond-section{padding-top:10px;padding-bottom:10px}
-.chapter-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;flex-shrink:0;padding:0 2px 11px}
+.chapter-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;flex-shrink:0;padding:0 2px 11px}
 .chapter-tabs button{min-height:35px;padding:5px 9px;background:#eee6ef55;border:1px solid #e0d4df;border-radius:7px;color:#a590a5;font-size:11px;display:flex;justify-content:center;gap:8px;align-items:center}
 .chapter-tabs button[aria-pressed=true]{color:#765982;border-color:#bda5c3;background:#e6d7e9a1}
 .chapter-tabs small{font-size:10px}
@@ -563,3 +563,16 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .search-locations.many{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .search-locations.many button{min-height:52px;padding:9px 10px;gap:8px;font-size:11px;text-align:left}
 .search-locations.many svg{width:19px;height:19px;flex:none}
+.effect-note{font-size:10px;line-height:1.35;color:#9c8aa0;margin:-2px 0 6px;text-align:center}
+.room-object.thirsty{filter:saturate(.4);transform:rotate(-8deg);opacity:.75}
+.room-object.thirsty::after{content:'water?';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-style:italic;color:#fff7ed;text-shadow:0 1px 4px #4f3640;white-space:nowrap}
+.room-object.stirring svg{animation:chime-sway 1.6s ease-in-out infinite;transform-origin:50% 0}
+@keyframes chime-sway{25%{transform:rotate(9deg)}75%{transform:rotate(-9deg)}}
+.reduced-motion .room-object.stirring svg{animation:none}
+.treat-button small{opacity:.7;margin-left:3px}
+.jade-card{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:12px;border:1px solid #c9d8cc;border-radius:12px;background:#eef3ec88}
+.jade-card>svg{width:30px;height:30px;flex:none;stroke:#6f8f78;stroke-width:1.2;fill:none}
+.jade-card p{margin:3px 0 8px;font-size:12px;color:#6d6672}
+.jade-card .need-track>span{background:#7fa58a}
+.jade-card small{font-size:9px;color:#8a9b8e}
+.jade-card>div{flex:1}

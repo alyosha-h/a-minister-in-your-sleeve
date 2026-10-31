@@ -115,6 +115,35 @@ export const chapterStories = {
   ]
 };
 
+// The finale: the talisman mends, and for the first time in years he gets to choose.
+chapterStories.jade = [
+  {speaker:'the lantern',text:'the light opens onto his study at dusk. on the table, on its square of cloth, lies the jade disc.\n\nthe crack is gone.'},
+  {speaker:'lin yan',text:'“it finished mending this morning,” he says. “i watched the last of the line close. it took about as long as a cup of tea.”\n\nhe is standing by the window, at his full height, and he looks as if he has been waiting there for some time.'},
+  {speaker:'the jade made whole',text:'the talisman is warm when you touch it, like a hand that has just let go of yours. the carving you could never quite make out is clear now: two cups, side by side.'},
+  {speaker:'lin yan',text:'“my well-meaning colleague finally sent instructions.” he unfolds a letter, very small writing, very many apologies. “whole, it answers to whoever holds it. tall or small, as one pleases.”'},
+  {speaker:'you',text:'he turns the jade over in his fingers.\n\n“which means the ministry will expect me back at my desk, at my usual height. and it means,” he adds, more slowly, “that i get to choose.”'},
+  {speaker:'the study',text:'your cup sits on the table, chip turned toward the wall. the record of ordinary days lies beside it, closed. outside, the wisteria moves in the evening air.'},
+  {speaker:'lin yan',text:'“i have spent a long time being chosen for things. appointed. summoned. assigned.”\n\nhe sets the jade down between you. “this is the first thing in years that is mine to decide. i find i want to ask you first.”'},
+  {speaker:'you',text:'he waits. for once, he has not prepared a speech.',choice:'ask',options:['what do you want?','whatever you choose, i’m here.','say nothing. take his hand.']},
+  {speaker:'lin yan',branch:'ask',variants:[
+    '“what do i want.” he says it as though nobody has asked him in a very long time, which you suspect is true.\n\n“i want my work. i am good at it, and it matters.” he looks at you. “and i want the evenings. i want to know that the second cup is still out.”',
+    'he lets out a breath. “i know. that is rather the trouble.” he smiles. “it is very hard to leave somewhere that keeps a place for you.”\n\n“so i shan’t,” he says. “not entirely.”',
+    'your hand finds his. he looks down at it for a long moment, and his fingers close.\n\n“yes,” he says quietly, as if you had said a great deal. “that is what i thought too.”'
+  ]},
+  {speaker:'the study',text:'he picks up the jade and places it in your palm, then folds your fingers around it, the way he once folded them around a white stone.\n\n“you have kept me in your sleeve all this while. it seems only fair you keep this, too.”'},
+  {speaker:'lin yan',text:'“the ministry may have me in the mornings, at my usual height. the rest of the time…”\n\nhe glances toward the lantern, toward the courtyard somewhere beyond it. “i have grown very fond of the view from the tea tray.”'},
+  {speaker:'you',text:'the jade is warm in your hand. whatever you ask of it, he will be the one to answer.',choice:'stay',options:['then come back small. every evening.','stay tall a while longer. sit with me.']},
+  {speaker:'lin yan',branch:'stay',variants:[
+    '“every evening,” he agrees. “i shall be insufferable about it. i will expect dumplings.”\n\nhe is smiling so widely he has to look away. “i would not have it any other way.”',
+    'he sits. not across from you: beside you, close enough that his sleeve lies over your wrist.\n\n“a while longer,” he agrees. the lantern can wait. for once, everything can.'
+  ]},
+  {speaker:'lin yan',text:'“there is one more thing.” he opens the record of ordinary days to its last page, dips his brush, and writes a single careful line.\n\nhe turns the book so you can read it: today, i chose.'},
+  {speaker:'the lantern',text:'the light begins to gather at the door. he walks you to it with your hand in his, unhurried, the way people walk when they know they will be back.'},
+  {speaker:'lin yan',text:'“thank you,” he says at the threshold. “for the cushion. the tea. the patience.” a pause. “for asking.”\n\nhe lets go of your hand last.'},
+  {speaker:'home again',text:'the little courtyard returns. lin yan stands beside his cup, small again by his own choosing, the jade hanging from his belt on a length of {{ribbon}}.\n\nhe looks entirely at home.'},
+  {speaker:'lin yan',text:'“good evening,” he says, as if he had never been anywhere else.\n\n“i saved you a seat. i always will.”',ending:true}
+];
+
 // How the evening sounds depends on how you've usually spent time with him.
 // The written text is the gentle version; these replace it for teasing and quiet company.
 const toneVariants = {
@@ -146,6 +175,16 @@ const toneVariants = {
     14: {
       teasing: '“you must tell me if the knot comes loose again.”\n\n“it won’t. i tied it.”\n\n“then you must tell me if you would like to tie it anyway.” he lifts his chin. “i am a reasonable man. i accept invented emergencies.”',
       quiet: 'he touches the knot once, as if checking it is still there.\n\n“you could retie it,” he says. “sometimes. if it ever needed it.” the way he says it, it needn’t need it at all.'
+    }
+  },
+  jade: {
+    6: {
+      teasing: '“i have spent a long time being chosen for things. appointed. summoned. assigned. once, memorably, volunteered by a cat.”\n\nhe sets the jade down between you. “this is the first thing in years that is mine to decide. naturally, i want a second opinion.”',
+      quiet: 'he doesn’t explain at first. he only sets the jade down between you, and his hand stays near it, and near yours.\n\n“it is mine to decide,” he says eventually. “i wanted you here when i did.”'
+    },
+    15: {
+      teasing: '“thank you,” he says at the threshold. “for the cushion. the tea. the endless commentary.” a pause. “mostly the commentary.”\n\nhe lets go of your hand last, and makes a point of it.',
+      quiet: 'at the threshold he doesn’t say anything at all. he lifts your hand, the one holding the jade, and rests his forehead against your knuckles for a moment.\n\nthen he lets go, last.'
     }
   },
   game: {
