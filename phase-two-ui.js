@@ -2,8 +2,9 @@ import { CHAPTERS, ITEMS, RIBBONS, LETTERS, POSTSCRIPTS, TREATS } from './catalo
 import { gameTier, memorialPuzzle, clerkRank, LEAVES, STEEPS, TEA_WISHES, SEARCH_SPOTS, searchSpots } from './minigames.js';
 import { MOMENTS } from './moments.js';
 import { DATES } from './dates.js';
-import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
+import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, openPack, cardPool, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
 import { spriteFrameStyle } from './sprites.js';
+import { CARDS, RARITIES, PACK_PRICE, DUPLICATE_REFUND } from './cards.js';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -14,13 +15,97 @@ export function createPhaseTwoUI(ctx){
   const outfits=ITEMS.filter(i=>i.kind==='outfit');
   let roomView='outfits',journalView='today',outfitIndex=0,shownOutfit=null;
   let activity={view:'menu'};
+  let pack=null,cardFocus=null;
   // Browsing previews is free, but when what he's wearing changes (shop, import,
   // cloud restore), bring the wardrobe back to the outfit he actually has on.
   function followOutfit(){const id=ctx.state().outfit;if(id!==shownOutfit){shownOutfit=id;outfitIndex=Math.max(0,outfits.findIndex(i=>i.id===id));}}
   followOutfit();
 
+  // portrait cards: the art is either a sprite pose or a painted portrait of its own
+  const kebab=k=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());
+  function cardArt(card){
+    if(card.sprite){const st=spriteFrameStyle(card.sprite.frame,card.sprite.outfit);return '<span class="lc-pose"><span class="lc-sprite" style="'+esc(Object.entries(st).map(([k,v])=>kebab(k)+':'+v).join(';'))+'"></span></span>';}
+    return '<span class="lc-paint" style="background-image:url(\'./assets/'+card.art+'\')"></span>';
+  }
+  function cardFace(card,count=1){
+    return '<span class="lc-card lc-'+card.rarity+'"><span class="lc-art">'+cardArt(card)+'</span><span class="lc-foil"></span><span class="lc-glare"></span><span class="lc-label"><strong>'+esc(card.name)+'</strong><small>'+esc(RARITIES[card.rarity].name)+(count>1?' · ×'+count:'')+'</small></span></span>';
+  }
+  function lockedHint(s,card){
+    if(!card.chapter||chapterRecord(s,card.chapter).complete)return 'still out there';
+    const c=CHAPTERS.find(x=>x.id===card.chapter);return 'after evening '+c.number;
+  }
+  // tcg-style tilt: the card leans toward wherever you press, and the foil and glare follow your finger
+  const noMotion=()=>document.body.classList.contains('reduced-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tilted=(face,cls='')=>'<div class="tilt '+cls+'"><div class="tilt-inner">'+face+'</div></div>';
+  function attachTilt(el,{mouseOnly=false,max=16,onRelease}={}){
+    let down=null,last=null,raf=0;
+    const apply=()=>{raf=0;if(!last)return;const r=el.getBoundingClientRect(),px=Math.min(1,Math.max(0,(last.x-r.left)/r.width)),py=Math.min(1,Math.max(0,(last.y-r.top)/r.height));
+      el.style.setProperty('--ry',((px-.5)*2*max).toFixed(2)+'deg');el.style.setProperty('--rx',(-(py-.5)*2*max).toFixed(2)+'deg');
+      el.style.setProperty('--px',(px*100).toFixed(1)+'%');el.style.setProperty('--py',(py*100).toFixed(1)+'%');el.style.setProperty('--glare',(.3+Math.hypot(px-.5,py-.5)).toFixed(2));};
+    const reset=()=>{last=null;el.classList.remove('is-tilting');el.style.setProperty('--rx','0deg');el.style.setProperty('--ry','0deg');el.style.setProperty('--glare','0');};
+    const move=e=>{if(e.pointerType==='mouse'?false:(mouseOnly||!down))return;last={x:e.clientX,y:e.clientY};el.classList.add('is-tilting');if(!raf)raf=requestAnimationFrame(apply);};
+    el.addEventListener('pointerdown',e=>{if(mouseOnly&&e.pointerType!=='mouse')return;down={x:e.clientX,y:e.clientY,t:performance.now()};el.setPointerCapture?.(e.pointerId);move(e);});
+    el.addEventListener('pointermove',move);
+    el.addEventListener('pointerup',e=>{const d=down;down=null;const r=el.getBoundingClientRect();if(e.pointerType!=='mouse'||e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)reset();if(d&&onRelease)onRelease({dx:e.clientX-d.x,dy:e.clientY-d.y,dt:performance.now()-d.t});});
+    el.addEventListener('pointercancel',()=>{down=null;reset();});
+    el.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&!down)reset();});
+  }
+  const packFace='<div class="pack"><div class="pack-top"></div><div class="pack-body"><span class="pack-emblem">'+icon('lantern')+'</span><strong>portrait cards</strong><small>lin yan · three within</small></div><span class="pack-glow"></span><span class="pack-cut" id="packCut"><i id="packTrail"></i></span></div>';
+  function renderPack(root){
+    const card=pack.stage==='reveal'?CARDS.find(c=>c.id===pack.pulls[pack.index].id):null;
+    if(pack.stage==='sealed'||pack.stage==='tearing'){
+      root.innerHTML='<div class="pack-stage" data-stage="'+pack.stage+'"><p class="eyebrow pack-eyebrow">a fresh pack</p>'+tilted(packFace,'pack-wrap')+'<p class="pack-hint">swipe along the top to tear it open</p><button id="packTear" class="text-button">or just open it '+icon('arrow')+'</button></div>';
+      if(pack.stage==='tearing')return;
+      const wrap=root.querySelector('.pack-wrap'),cut=$('packCut'),trail=$('packTrail');attachTilt(wrap,{max:10});
+      let span=null;
+      cut.onpointerdown=e=>{e.stopPropagation();cut.setPointerCapture?.(e.pointerId);span={min:e.clientX,max:e.clientX};};
+      cut.onpointermove=e=>{if(!span)return;span.min=Math.min(span.min,e.clientX);span.max=Math.max(span.max,e.clientX);const r=cut.getBoundingClientRect();
+        trail.style.left=((span.min-r.left)/r.width*100)+'%';trail.style.width=((span.max-span.min)/r.width*100)+'%';if((span.max-span.min)/r.width>.62){span=null;tearPack();}};
+      cut.onpointerup=cut.onpointercancel=()=>{span=null;trail.style.width='0';};
+      $('packTear').onclick=tearPack;return;
+    }
+    if(pack.stage==='reveal'){
+      const p=pack.pulls[pack.index],left=pack.pulls.length-pack.index-1;
+      root.innerHTML='<div class="pack-stage" data-stage="reveal"><p class="eyebrow pack-eyebrow">card '+(pack.index+1)+' of '+pack.pulls.length+'</p><div class="reveal-wrap burst-'+card.rarity+'"><span class="reveal-burst"></span>'+(card.rarity!=='common'?'<span class="sparkles"><i></i><i></i><i></i><i></i><i></i></span>':'')+Array.from({length:left},(_,i)=>'<span class="stack-back" style="--n:'+(i+1)+'"><span class="lc-back">'+icon('lantern')+'</span></span>').join('')+tilted(cardFace(card)+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':''),'reveal-card')+'</div><p class="pack-line">'+esc(card.line)+'</p><p class="pack-hint">drag to tilt · swipe it away for the next</p><button id="revealNext" class="primary-button">'+(left?'next card':'see the haul')+'</button></div>';
+      const el=root.querySelector('.reveal-card');
+      const next=dir=>{if(el.dataset.gone)return;el.dataset.gone='1';el.classList.add(dir<0?'fly-left':'fly-right');setTimeout(()=>{if(!pack)return;pack.index++;if(pack.index>=pack.pulls.length)pack.stage='summary';renderRoom();},noMotion()?0:320);};
+      attachTilt(el,{onRelease:({dx,dy,dt})=>{if(Math.abs(dx)>80)next(Math.sign(dx));else if(Math.hypot(dx,dy)<8&&dt<350)next(1);}});
+      $('revealNext').onclick=()=>next(1);ctx.ping(card.rarity==='common'?'care':'lantern');return;
+    }
+    root.innerHTML='<div class="pack-view"><p class="eyebrow pack-eyebrow">a fine haul</p><div class="pack-row">'+pack.pulls.map(p=>{const c=CARDS.find(x=>x.id===p.id);return '<div class="haul-slot">'+tilted(cardFace(c),'haul-card')+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':'')+'</div>';}).join('')+'</div><p class="pack-line">“well. i suppose you will be wanting to look at those for a while.”</p><div class="pack-actions"><button id="packAgain" class="primary-button">another pack · '+PACK_PRICE+' copper</button><button id="packDone" class="text-button">back to the album '+icon('arrow')+'</button></div>'+(pack.refund?'<p class="shop-note">spares are sold back to the kitchen staff, who collect. +'+pack.refund+' copper.</p>':'')+'</div>';
+    root.querySelectorAll('.haul-card').forEach(el=>attachTilt(el,{mouseOnly:true,max:12}));
+    $('packAgain').onclick=buyPack;$('packDone').onclick=()=>{pack=null;renderRoom();};
+  }
+  function tearPack(){
+    if(!pack||pack.stage!=='sealed')return;const id=pack.id;pack.stage='tearing';ctx.ping('tea');
+    // animate in place rather than re-rendering, so the torn strip can fly off the pack you were touching
+    const stage=$('roomContent').querySelector('.pack-stage');if(stage)stage.dataset.stage='tearing';
+    setTimeout(()=>{if(pack?.id===id){pack.stage='reveal';pack.index=0;renderRoom();}},noMotion()?0:950);
+  }
+  function renderCards(s){
+    const root=$('roomContent');
+    // the minute tick re-renders the room: leave a pack or a held card alone mid-gesture
+    const key=pack?'pack'+pack.id+pack.stage+(pack.index||0):cardFocus?'focus'+cardFocus+s.cards[cardFocus]:'album';
+    if(key!=='album'&&root.dataset.view===key&&root.firstChild)return;root.dataset.view=key;
+    if(pack)return renderPack(root);
+    if(cardFocus){
+      const card=CARDS.find(c=>c.id===cardFocus);
+      root.innerHTML='<div class="pack-view card-focus">'+tilted(cardFace(card,s.cards[card.id]),'focus-card')+'<p class="pack-line">'+esc(card.line)+'</p><p class="pack-hint">drag to tilt him toward the light</p><button id="focusDone" class="text-button">back to the album '+icon('arrow')+'</button></div>';
+      attachTilt(root.querySelector('.focus-card'));
+      $('focusDone').onclick=()=>{cardFocus=null;renderRoom();};return;
+    }
+    const pool=cardPool(s),have=CARDS.filter(c=>s.cards[c.id]).length;
+    root.innerHTML='<div class="card-shop"><div><span class="eyebrow">portrait cards</span><p>'+have+' of '+CARDS.length+' collected · he “disapproves”.</p></div><button id="buyPack" class="primary-button">open a pack · '+PACK_PRICE+'</button></div><div class="card-album">'+CARDS.map(c=>s.cards[c.id]?'<button class="album-slot" data-card="'+c.id+'" aria-label="'+esc(c.name)+'">'+tilted(cardFace(c,s.cards[c.id]))+'</button>':'<span class="album-slot is-empty lc-'+c.rarity+'"><span>'+(pool.includes(c)?'?':icon('lantern'))+'</span><small>'+esc(lockedHint(s,c))+'</small></span>').join('')+'</div><p class="shop-note">three cards a pack. painted cards join the pool after each lantern evening, and the rarest come out after dark. spares sell back for a little copper.</p>';
+    $('buyPack').onclick=buyPack;
+    root.querySelectorAll('[data-card]').forEach(b=>{attachTilt(b.querySelector('.tilt'),{mouseOnly:true,max:14});b.onclick=()=>{cardFocus=b.dataset.card;renderRoom();};});
+  }
+  let packSeq=0;
+  function buyPack(){
+    try{const r=openPack(ctx.state());pack={id:++packSeq,pulls:r.pulls,refund:r.refund,stage:'sealed',index:0};ctx.commit({state:r.state});$('roomContent').scrollTop=0;ctx.speak('“you bought another one. i see. i am going to stand over here and not look.”','a small minister, very interested in the floor.');}catch(e){ctx.toast(e.message);}
+  }
+
   function renderRoom(){
-    followOutfit();const s=ctx.state();$('copperValue').textContent=s.copper;
+    followOutfit();const s=ctx.state();$('copperValue').textContent=s.copper;if(roomView!=='cards')delete $('roomContent').dataset.view;
     document.querySelectorAll('[data-room-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.roomView===roomView)));
     if(roomView==='outfits'){
       const item=outfits[outfitIndex],owned=s.owned.includes(item.id),wearing=s.outfit===item.id;
@@ -33,6 +118,8 @@ export function createPhaseTwoUI(ctx){
       let startX=0;
       $('roomContent').querySelector('.outfit-stage').onpointerdown=e=>{startX=e.clientX;};
       $('roomContent').querySelector('.outfit-stage').onpointerup=e=>{const d=e.clientX-startX;if(Math.abs(d)>45){outfitIndex=(outfitIndex+(d<0?1:-1)+outfits.length)%outfits.length;renderRoom();}};
+    }else if(roomView==='cards'){
+      renderCards(s);
     }else if(roomView==='pantry'){
       $('roomContent').innerHTML='<div class="furnishing-grid">'+TREATS.map(t=>'<article class="furnishing-card"><span class="prop-icon">'+icon(t.tray==='tea'?'tea':'bun')+'</span><h2>'+esc(t.name)+'</h2><p class="effect-note">'+esc(t.description)+'</p><button data-treat="'+t.id+'">'+t.price+' copper · buy'+(s.pantry[t.id]?' · '+s.pantry[t.id]+' kept':'')+'</button></article>').join('')+'</div><p class="shop-note">treats appear in the feed and tea trays. each is a big comfort, and a little extra bond.</p>';
       document.querySelectorAll('[data-treat]').forEach(b=>b.onclick=()=>{try{const next=buyTreat(ctx.state(),b.dataset.treat);ctx.commit({state:next});ctx.toast(TREATS.find(t=>t.id===b.dataset.treat).name+' · into the pantry');renderRoom();}catch(e){ctx.toast(e.message);}});
@@ -189,7 +276,7 @@ export function createPhaseTwoUI(ctx){
     document.querySelectorAll('[data-memory]').forEach(b=>b.onclick=()=>ctx.replaceSheet('albumDialog',()=>ctx.openStory(b.dataset.memory)));
   }
 
-  $('roomSegments').querySelectorAll('button').forEach(b=>b.onclick=()=>{roomView=b.dataset.roomView;renderRoom();});
+  $('roomSegments').querySelectorAll('button').forEach(b=>b.onclick=()=>{roomView=b.dataset.roomView;pack=null;cardFocus=null;renderRoom();});
   $('journalSegments').querySelectorAll('button').forEach(b=>b.onclick=()=>{journalView=b.dataset.journalView;renderJournal(true);});
   $('activityBack').onclick=()=>{activity={view:'menu'};renderActivity();};
   $('albumButton').onclick=()=>{renderAlbum();ctx.showSheet('albumDialog');};
