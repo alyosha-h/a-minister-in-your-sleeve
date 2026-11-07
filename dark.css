@@ -153,6 +153,19 @@
 :root[data-theme=dark] .jade-card .need-track>span{background:#9dbaa5}
 :root[data-theme=dark] .jade-card small{color:#a5b3a9}
 :root[data-theme=dark] .story-dialog::backdrop{background:#27212d}
+:root[data-theme=dark] .card-shop p{color:#a289a6}
+:root[data-theme=dark] .album-slot.is-empty{border:1px dashed #3e3646;background:#211a2933;color:#cebfcc}
+:root[data-theme=dark] .album-slot.is-empty.lc-rare{border-color:#e6d5b5}
+:root[data-theme=dark] .album-slot.is-empty.lc-lanternlit{border-color:#4a3e55;background:linear-gradient(160deg,#27202e33,#28203055)}
+:root[data-theme=dark] .lc-card{background:#221a29;border:2px solid #352e3b}
+:root[data-theme=dark] .lc-rare{border-color:#e0c996}
+:root[data-theme=dark] .lc-lanternlit{background:linear-gradient(#221a29,#221a29) padding-box,linear-gradient(135deg,#352b40,#3a2e46,#40334d,#3f314d,#352b40) border-box}
+:root[data-theme=dark] .lc-label{background:#221a29ee;border-top:1px solid #2f2835}
+:root[data-theme=dark] .lc-label strong{color:#886794}
+:root[data-theme=dark] .lc-label small{color:#c1acbc}
+:root[data-theme=dark] .lc-rare .lc-label small{color:#bd9b69}
+:root[data-theme=dark] .lc-lanternlit .lc-label small{color:#b18ec5}
+:root[data-theme=dark] .pack-line{color:#a289a6}
 
 /* selected tabs should look lifted, not pressed in */
 :root[data-theme=dark] .segmented button[aria-pressed=true]{background:#40364b;color:#efe5f3}

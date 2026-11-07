@@ -601,3 +601,54 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 [data-period=night] .keepsake-prop{filter:drop-shadow(0 3px 2px #10102055) brightness(.62) saturate(.72)}
 [data-period=night] .keepsake-lanterns,[data-period=evening] .keepsake-lanterns{filter:drop-shadow(0 0 8px #ffd59a) brightness(1)}
 .reduced-motion .keepsake-jade{animation:none}
+/* portrait cards */
+.card-shop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 10px}
+.card-shop p{font-family:var(--serif);font-size:16px;color:#8b6c90;margin-top:2px;line-height:1.15}
+.card-shop .primary-button{width:auto;flex:none;padding:10px 14px;min-height:42px;font-size:11px}
+.card-album{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.album-slot{display:block;padding:0;background:none;border-radius:10px;min-width:0;aspect-ratio:2/3;position:relative}
+.album-slot.is-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px dashed #d8c6d5;background:#fff9f033;color:#b8a2b5;text-align:center;padding:6px}
+.album-slot.is-empty>span{font:500 30px/1 var(--serif)}
+.album-slot.is-empty svg{width:22px;height:22px;stroke-width:1;opacity:.6}
+.album-slot.is-empty small{font-size:8px;letter-spacing:.6px;text-transform:uppercase;line-height:1.3}
+.album-slot.is-empty.lc-rare{border-color:#d9c08f}
+.album-slot.is-empty.lc-lanternlit{border-color:#c9a6d6;background:linear-gradient(160deg,#f7e8f433,#e8e2fa55)}
+.lc-card{position:absolute;inset:0;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;background:#fff8ef;border:2px solid #e3d5df;box-shadow:0 3px 10px #44274a14;text-align:left}
+.lc-rare{border-color:#d5b56e;box-shadow:0 3px 12px #ad875433}
+.lc-lanternlit{border-color:transparent;background:linear-gradient(#fff8ef,#fff8ef) padding-box,linear-gradient(135deg,#f3c3dd,#c9b6f2,#a9dcef,#f6dfa4,#f3c3dd) border-box;box-shadow:0 4px 16px #8b5fa455}
+.lc-art{position:relative;flex:1;overflow:hidden;background:radial-gradient(ellipse at 50% 70%,#f8ece4 10%,#e6dcec 80%)}
+.lc-pose{position:absolute;left:-4%;right:-4%;bottom:2%;aspect-ratio:1}
+.lc-pose .lc-sprite{position:absolute;bottom:0;background-repeat:no-repeat;filter:drop-shadow(0 3px 2px #372e4120)}
+.lc-paint{position:absolute;inset:0;background-repeat:no-repeat;background-size:cover;background-position:center 22%}
+.lc-foil{position:absolute;inset:0;pointer-events:none;border-radius:8px}
+.lc-rare .lc-foil{background:linear-gradient(115deg,transparent 35%,#fff5d866 48%,transparent 60%);background-size:250% 100%;animation:foilSweep 4.5s ease-in-out infinite}
+.lc-lanternlit .lc-foil{background:linear-gradient(115deg,#ff9ecf33,#a8c8ff33 25%,#9ff2e233 50%,#ffe39a33 75%,#ff9ecf33),linear-gradient(115deg,transparent 35%,#ffffff88 48%,transparent 60%);background-size:300% 300%,250% 100%;mix-blend-mode:color-dodge;animation:foilHolo 6s linear infinite,foilSweep 3.5s ease-in-out infinite}
+.lc-lanternlit .lc-art:after{content:'✦';position:absolute;top:5px;right:7px;color:#fff6e6;font-size:13px;text-shadow:0 0 6px #e7b7ff}
+.lc-label{display:block;padding:5px 7px 6px;background:#fff8efee;border-top:1px solid #eadfe6}
+.lc-label strong{display:block;font:500 12px/1.05 var(--serif);color:#6c5276;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-label small{display:block;font-size:7px;letter-spacing:.8px;text-transform:uppercase;color:#ab8fa4;margin-top:2px}
+.lc-rare .lc-label small{color:#a9824a}
+.lc-lanternlit .lc-label small{color:#9a6cb4}
+@keyframes foilSweep{0%,100%{background-position:120% 0}50%{background-position:-20% 0}}
+@keyframes foilHolo{from{background-position:0 0,120% 0}to{background-position:300% 300%,120% 0}}
+.pack-view{display:flex;flex-direction:column;align-items:center;gap:12px;padding:4px 0 8px}
+.pack-eyebrow{align-self:center}
+.pack-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:100%}
+.lc-flip{position:relative;aspect-ratio:2/3;padding:0;background:none;perspective:700px;border-radius:10px}
+.lc-flip>.lc-back,.lc-flip>.lc-card{backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .6s cubic-bezier(.3,.7,.3,1)}
+.lc-flip>.lc-card{transform:rotateY(180deg)}
+.lc-flip.is-flipped>.lc-card{transform:rotateY(0)}
+.lc-flip.is-flipped>.lc-back{transform:rotateY(-180deg)}
+.lc-back{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid #d5b56e;background:repeating-linear-gradient(45deg,#7d6596 0 6px,#735b8c 6px 12px);box-shadow:0 3px 10px #44274a22;color:#f3dca5}
+.lc-back svg{width:34px;height:34px;stroke-width:1.1}
+.lc-flip:not(.is-flipped):hover>.lc-back{transform:translateY(-3px)}
+.lc-dupe{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);white-space:nowrap;font-size:8px;letter-spacing:.6px;text-transform:uppercase;padding:3px 7px;border-radius:9px;background:#efe4ec;color:#8f7396}
+.pack-line{font-family:var(--serif);font-size:19px;line-height:1.28;color:#8b6c90;text-align:center;min-height:3.9em;margin:8px 6px 0}
+.pack-actions{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+.pack-actions .primary-button{width:100%}
+.focus-card{position:relative;width:min(62%,240px);aspect-ratio:2/3}
+.focus-card .lc-label strong{font-size:18px;white-space:normal}
+.focus-card .lc-label small{font-size:9px}
+.reduced-motion .lc-foil{animation:none!important}
+.reduced-motion .lc-flip>*{transition:none!important}
+@media (prefers-reduced-motion:reduce){.lc-foil{animation:none}.lc-flip>*{transition:none}}

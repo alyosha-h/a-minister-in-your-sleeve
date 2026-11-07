@@ -2,8 +2,9 @@ import { CHAPTERS, ITEMS, RIBBONS, LETTERS, POSTSCRIPTS, TREATS } from './catalo
 import { gameTier, memorialPuzzle, clerkRank, LEAVES, STEEPS, TEA_WISHES, SEARCH_SPOTS, searchSpots } from './minigames.js';
 import { MOMENTS } from './moments.js';
 import { DATES } from './dates.js';
-import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
+import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, openPack, cardPool, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
 import { spriteFrameStyle } from './sprites.js';
+import { CARDS, RARITIES, PACK_PRICE, DUPLICATE_REFUND } from './cards.js';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -14,10 +15,49 @@ export function createPhaseTwoUI(ctx){
   const outfits=ITEMS.filter(i=>i.kind==='outfit');
   let roomView='outfits',journalView='today',outfitIndex=0,shownOutfit=null;
   let activity={view:'menu'};
+  let pack=null,cardFocus=null;
   // Browsing previews is free, but when what he's wearing changes (shop, import,
   // cloud restore), bring the wardrobe back to the outfit he actually has on.
   function followOutfit(){const id=ctx.state().outfit;if(id!==shownOutfit){shownOutfit=id;outfitIndex=Math.max(0,outfits.findIndex(i=>i.id===id));}}
   followOutfit();
+
+  // portrait cards: the art is either a sprite pose, a close crop of a painted evening, or the whole painting
+  const kebab=k=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());
+  function cardArt(card){
+    if(card.sprite){const st=spriteFrameStyle(card.sprite.frame,card.sprite.outfit);return '<span class="lc-pose"><span class="lc-sprite" style="'+esc(Object.entries(st).map(([k,v])=>kebab(k)+':'+v).join(';'))+'"></span></span>';}
+    const art=CHAPTERS.find(c=>c.id===card.chapter).art;
+    if(card.crop)return '<span class="lc-paint" style="background-image:url(\'./assets/'+art+'\');background-size:'+card.crop.zoom*100+'% auto;background-position:'+card.crop.x+'% '+card.crop.y+'%"></span>';
+    return '<span class="lc-paint" style="background-image:url(\'./assets/'+art+'\')"></span>';
+  }
+  function cardFace(card,count=1){
+    return '<span class="lc-card lc-'+card.rarity+'"><span class="lc-art">'+cardArt(card)+'</span><span class="lc-foil"></span><span class="lc-label"><strong>'+esc(card.name)+'</strong><small>'+esc(RARITIES[card.rarity].name)+(count>1?' · ×'+count:'')+'</small></span></span>';
+  }
+  function lockedHint(s,card){
+    if(!card.chapter||chapterRecord(s,card.chapter).complete)return 'still out there';
+    const c=CHAPTERS.find(x=>x.id===card.chapter);return 'after evening '+c.number;
+  }
+  function renderCards(s){
+    const root=$('roomContent');
+    if(pack){
+      const all=pack.flipped.size===pack.pulls.length,last=pack.last!=null?CARDS.find(c=>c.id===pack.pulls[pack.last].id):null;
+      root.innerHTML='<div class="pack-view"><p class="eyebrow pack-eyebrow">'+(all?'a fine haul':'tap to turn them over')+'</p><div class="pack-row">'+pack.pulls.map((p,i)=>{const card=CARDS.find(c=>c.id===p.id);return '<button class="lc-flip '+(pack.flipped.has(i)?'is-flipped':'')+'" data-flip="'+i+'" aria-label="'+(pack.flipped.has(i)?esc(card.name):'turn over card '+(i+1))+'"><span class="lc-back"><svg aria-hidden="true"><use href="#i-lantern"/></svg></span>'+cardFace(card)+(p.duplicate&&pack.flipped.has(i)?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':'')+'</button>';}).join('')+'</div><p class="pack-line">'+(last?esc(last.line):'he is pretending not to watch you open it.')+'</p><div class="pack-actions"><button id="packAgain" class="primary-button" '+(!all?'disabled':'')+'>another pack · '+PACK_PRICE+' copper</button><button id="packDone" class="text-button">back to the album '+icon('arrow')+'</button></div>'+(all&&pack.refund?'<p class="shop-note">spares are sold back to the kitchen staff, who collect. +'+pack.refund+' copper.</p>':'')+'</div>';
+      root.querySelectorAll('[data-flip]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.flip);if(pack.flipped.has(i))return;pack.flipped.add(i);pack.last=i;const card=CARDS.find(c=>c.id===pack.pulls[i].id);ctx.ping(card.rarity==='common'?'care':'lantern');renderRoom();});
+      $('packAgain').onclick=buyPack;$('packDone').onclick=()=>{pack=null;renderRoom();};
+      return;
+    }
+    if(cardFocus){
+      const card=CARDS.find(c=>c.id===cardFocus);
+      root.innerHTML='<div class="pack-view card-focus"><div class="focus-card">'+cardFace(card,s.cards[card.id])+'</div><p class="pack-line">'+esc(card.line)+'</p><button id="focusDone" class="text-button">back to the album '+icon('arrow')+'</button></div>';
+      $('focusDone').onclick=()=>{cardFocus=null;renderRoom();};return;
+    }
+    const pool=cardPool(s),have=CARDS.filter(c=>s.cards[c.id]).length;
+    root.innerHTML='<div class="card-shop"><div><span class="eyebrow">portrait cards</span><p>'+have+' of '+CARDS.length+' collected · he “disapproves”.</p></div><button id="buyPack" class="primary-button">open a pack · '+PACK_PRICE+'</button></div><div class="card-album">'+CARDS.map(c=>s.cards[c.id]?'<button class="album-slot" data-card="'+c.id+'" aria-label="'+esc(c.name)+'">'+cardFace(c,s.cards[c.id])+'</button>':'<span class="album-slot is-empty lc-'+c.rarity+'"><span>'+(pool.includes(c)?'?':icon('lantern'))+'</span><small>'+esc(lockedHint(s,c))+'</small></span>').join('')+'</div><p class="shop-note">three cards a pack. painted cards join the pool after each lantern evening. spares sell back for a little copper.</p>';
+    $('buyPack').onclick=buyPack;
+    root.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>{cardFocus=b.dataset.card;renderRoom();});
+  }
+  function buyPack(){
+    try{const r=openPack(ctx.state());pack={pulls:r.pulls,refund:r.refund,flipped:new Set(),last:null};ctx.commit({state:r.state});$('roomContent').scrollTop=0;ctx.speak('“you bought another one. i see. i am going to stand over here and not look.”','a small minister, very interested in the floor.');}catch(e){ctx.toast(e.message);}
+  }
 
   function renderRoom(){
     followOutfit();const s=ctx.state();$('copperValue').textContent=s.copper;
@@ -33,6 +73,8 @@ export function createPhaseTwoUI(ctx){
       let startX=0;
       $('roomContent').querySelector('.outfit-stage').onpointerdown=e=>{startX=e.clientX;};
       $('roomContent').querySelector('.outfit-stage').onpointerup=e=>{const d=e.clientX-startX;if(Math.abs(d)>45){outfitIndex=(outfitIndex+(d<0?1:-1)+outfits.length)%outfits.length;renderRoom();}};
+    }else if(roomView==='cards'){
+      renderCards(s);
     }else if(roomView==='pantry'){
       $('roomContent').innerHTML='<div class="furnishing-grid">'+TREATS.map(t=>'<article class="furnishing-card"><span class="prop-icon">'+icon(t.tray==='tea'?'tea':'bun')+'</span><h2>'+esc(t.name)+'</h2><p class="effect-note">'+esc(t.description)+'</p><button data-treat="'+t.id+'">'+t.price+' copper · buy'+(s.pantry[t.id]?' · '+s.pantry[t.id]+' kept':'')+'</button></article>').join('')+'</div><p class="shop-note">treats appear in the feed and tea trays. each is a big comfort, and a little extra bond.</p>';
       document.querySelectorAll('[data-treat]').forEach(b=>b.onclick=()=>{try{const next=buyTreat(ctx.state(),b.dataset.treat);ctx.commit({state:next});ctx.toast(TREATS.find(t=>t.id===b.dataset.treat).name+' · into the pantry');renderRoom();}catch(e){ctx.toast(e.message);}});
@@ -189,7 +231,7 @@ export function createPhaseTwoUI(ctx){
     document.querySelectorAll('[data-memory]').forEach(b=>b.onclick=()=>ctx.replaceSheet('albumDialog',()=>ctx.openStory(b.dataset.memory)));
   }
 
-  $('roomSegments').querySelectorAll('button').forEach(b=>b.onclick=()=>{roomView=b.dataset.roomView;renderRoom();});
+  $('roomSegments').querySelectorAll('button').forEach(b=>b.onclick=()=>{roomView=b.dataset.roomView;pack=null;cardFocus=null;renderRoom();});
   $('journalSegments').querySelectorAll('button').forEach(b=>b.onclick=()=>{journalView=b.dataset.journalView;renderJournal(true);});
   $('activityBack').onclick=()=>{activity={view:'menu'};renderActivity();};
   $('albumButton').onclick=()=>{renderAlbum();ctx.showSheet('albumDialog');};

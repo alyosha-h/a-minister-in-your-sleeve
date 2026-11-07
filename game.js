@@ -1,5 +1,6 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS, TREATS } from './catalog.js';
 import { MOMENTS } from './moments.js';
+import { CARDS, RARITIES, PACK_PRICE, PACK_SIZE, DUPLICATE_REFUND } from './cards.js';
 import { CHECKIN, ABOUT_YOU } from './more-content.js';
 import { TEA_WISHES, teaWishKey, judgeTea, searchSpots, pageSpot } from './minigames.js';
 
@@ -38,7 +39,7 @@ const requestForDay = day=>({id:REQUESTS[(day-1)%REQUESTS.length].id,done:false,
 export function freshState(now=Date.now()) {
   return {schema:2,day:1,bond:0,copper:20,needs:{fullness:54,energy:72,comfort:63,mood:67},asleep:false,
     claimed:[],talked:false,played:false,tidied:false,attuned:0,flourished:false,stuffedAt:null,dayKey:dateKey(now),rituals:{key:dateKey(now),done:[]},affinity:{gentle:0,teasing:0,quiet:0},nudged:[],moments:{seen:[],key:null},preference:'gentle',chapter:blankChapter(),
-    chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter(),lamp:blankChapter(),lotus:blankChapter(),beside:blankChapter(),jade:blankChapter()},talisman:{mend:0,key:null,today:0},pantry:{},orchidKey:null,request:requestForDay(1),
+    chapters:{rain:blankChapter(),ribbon:blankChapter(),game:blankChapter(),lamp:blankChapter(),lotus:blankChapter(),beside:blankChapter(),jade:blankChapter()},talisman:{mend:0,key:null,today:0},pantry:{},cards:{},orchidKey:null,request:requestForDay(1),
     owned:['official'],outfit:'official',placed:[],memories:{name:'',lastTea:null,ribbon:null,recentActions:[],recentChats:[],tidyCount:0,holdCount:0,requestsDone:0,recipes:[],memorialPerfects:0,teaPerfects:0,teaNotes:[],gamesPlayed:0,pace:null,nickname:null,you:{day:null,about:{},aboutKey:null},datesDone:0,dateKey:null},
     settings:{sound:false,reducedMotion:false,theme:'system'},lastSeen:now};
 }
@@ -166,6 +167,7 @@ export function validateState(input) {
   }else s.request=requestForDay(s.day);
   const tal=input.talisman||{};s.talisman={mend:Number.isFinite(tal.mend)?Math.floor(clamp(tal.mend,0,MEND_GOAL)):0,key:KEY.test(tal.key)?tal.key:null,today:Number.isFinite(tal.today)?clamp(tal.today,0,MEND_DAILY):0};
   s.pantry=Object.fromEntries(TREATS.map(t=>[t.id,Number.isFinite(input.pantry?.[t.id])?Math.floor(clamp(input.pantry[t.id],0,999)):0]).filter(([,n])=>n>0));
+  s.cards=Object.fromEntries(CARDS.map(c=>[c.id,Number.isFinite(input.cards?.[c.id])?Math.floor(clamp(input.cards[c.id],0,999)):0]).filter(([,n])=>n>0));
   s.orchidKey=KEY.test(input.orchidKey)?input.orchidKey:null;
   s.settings.sound=input.settings?.sound===true;s.settings.reducedMotion=input.settings?.reducedMotion===true;s.settings.theme=['light','dark'].includes(input.settings?.theme)?input.settings.theme:'system';s.lastSeen=Math.max(0,input.lastSeen);
   if(s.chapters.ribbon.complete&&!s.memories.ribbon)s.memories.ribbon=RIBBONS[s.chapters.ribbon.choices.color??0].id;
@@ -208,6 +210,19 @@ export function waterOrchid(input,now=Date.now()){
 export function buyTreat(input,id){
   const t=TREATS.find(x=>x.id===id);if(!t)throw new Error('the kitchen doesn’t make that.');if(input.copper<t.price)throw new Error('a little more copper, and it’s yours.');
   const s=structuredClone(input);s.copper-=t.price;s.pantry[id]=(s.pantry[id]||0)+1;return s;
+}
+// portrait cards: painted ones only join the pool once you've shared that evening
+export function cardPool(s){return CARDS.filter(c=>!c.chapter||chapterRecord(s,c.chapter).complete);}
+export function openPack(input,rng=Math.random){
+  if(input.copper<PACK_PRICE)throw new Error('a little more copper, and it’s yours.');
+  const s=structuredClone(input),pool=cardPool(s),pulls=[];s.copper-=PACK_PRICE;s.cards={...s.cards};let refund=0;
+  for(let i=0;i<PACK_SIZE;i++){
+    const roll=rng(),tier=['lanternlit','rare'].find(r=>roll<RARITIES[r].odds&&pool.some(c=>c.rarity===r))||'common';
+    const options=pool.filter(c=>c.rarity===tier),card=options[Math.min(options.length-1,Math.floor(rng()*options.length))];
+    const duplicate=(s.cards[card.id]||0)>0;s.cards[card.id]=Math.min(999,(s.cards[card.id]||0)+1);if(duplicate)refund+=DUPLICATE_REFUND;
+    pulls.push({id:card.id,duplicate});
+  }
+  s.copper+=refund;return {state:s,pulls,refund};
 }
 // one small bonus per time of day, for the thing that suits it
 function ritual(s,action,now){
