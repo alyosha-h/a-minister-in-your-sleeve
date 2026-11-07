@@ -165,7 +165,6 @@
 :root[data-theme=dark] .lc-label small{color:#c1acbc}
 :root[data-theme=dark] .lc-rare .lc-label small{color:#bd9b69}
 :root[data-theme=dark] .lc-lanternlit .lc-label small{color:#b18ec5}
-:root[data-theme=dark] .pack-line{color:#a289a6}
 
 /* selected tabs should look lifted, not pressed in */
 :root[data-theme=dark] .segmented button[aria-pressed=true]{background:#40364b;color:#efe5f3}

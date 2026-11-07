@@ -634,14 +634,8 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .pack-view{display:flex;flex-direction:column;align-items:center;gap:12px;padding:4px 0 8px}
 .pack-eyebrow{align-self:center}
 .pack-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;width:100%}
-.lc-flip{position:relative;aspect-ratio:2/3;padding:0;background:none;perspective:700px;border-radius:10px}
-.lc-flip>.lc-back,.lc-flip>.lc-card{backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .6s cubic-bezier(.3,.7,.3,1)}
-.lc-flip>.lc-card{transform:rotateY(180deg)}
-.lc-flip.is-flipped>.lc-card{transform:rotateY(0)}
-.lc-flip.is-flipped>.lc-back{transform:rotateY(-180deg)}
 .lc-back{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid #d5b56e;background:repeating-linear-gradient(45deg,#7d6596 0 6px,#735b8c 6px 12px);box-shadow:0 3px 10px #44274a22;color:#f3dca5}
 .lc-back svg{width:34px;height:34px;stroke-width:1.1}
-.lc-flip:not(.is-flipped):hover>.lc-back{transform:translateY(-3px)}
 .lc-dupe{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);white-space:nowrap;font-size:8px;letter-spacing:.6px;text-transform:uppercase;padding:3px 7px;border-radius:9px;background:#efe4ec;color:#8f7396}
 .pack-line{font-family:var(--serif);font-size:19px;line-height:1.28;color:#8b6c90;text-align:center;min-height:3.9em;margin:8px 6px 0}
 .pack-actions{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
@@ -650,8 +644,7 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .focus-card .lc-label strong{font-size:18px;white-space:normal}
 .focus-card .lc-label small{font-size:9px}
 .reduced-motion .lc-foil{animation:none!important}
-.reduced-motion .lc-flip>*{transition:none!important}
-@media (prefers-reduced-motion:reduce){.lc-foil{animation:none}.lc-flip>*{transition:none}}
+
 .lc-afterdark{border-color:transparent;background:linear-gradient(#2c1f36,#2c1f36) padding-box,linear-gradient(135deg,#b23a5e,#5b2a6e,#e07a8f,#3e1f4f,#b23a5e) border-box;box-shadow:0 4px 18px #8c2a4f66}
 .lc-afterdark .lc-foil{background:radial-gradient(ellipse at 50% 110%,#d6406a30,transparent 60%),linear-gradient(115deg,transparent 38%,#ffb3c855 49%,transparent 60%);background-size:100% 100%,250% 100%;mix-blend-mode:screen;animation:foilSweep 5s ease-in-out infinite}
 .lc-afterdark .lc-art:after{content:'♥';position:absolute;top:4px;right:7px;color:#ffc2d1;font-size:12px;text-shadow:0 0 6px #d6406a}
@@ -659,3 +652,68 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .lc-afterdark .lc-label strong{color:#f6dbe4}
 .lc-afterdark .lc-label small{color:#e07a8f}
 .album-slot.is-empty.lc-afterdark{border-color:#c0607e;background:linear-gradient(160deg,#5b2a6e14,#b23a5e1a)}
+
+/* tcg tilt: --rx/--ry/--px/--py/--glare are set from the pointer */
+.tilt{--rx:0deg;--ry:0deg;--px:50%;--py:50%;--glare:0;position:relative;perspective:800px}
+.tilt-inner{position:absolute;inset:0;transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .65s cubic-bezier(.18,1.6,.4,1);will-change:transform}
+.tilt.is-tilting>.tilt-inner{transition:transform .07s linear}
+.album-slot>.tilt,.haul-slot>.tilt{position:absolute;inset:0}
+.focus-card,.reveal-card,.pack-wrap{touch-action:none;cursor:grab}
+.lc-glare{position:absolute;inset:0;pointer-events:none;border-radius:8px;background:radial-gradient(circle at var(--px) var(--py),#fff 0,#ffffff66 16%,transparent 55%);mix-blend-mode:soft-light;opacity:var(--glare);transition:opacity .45s}
+.is-tilting .lc-foil{animation:none!important;background-position:var(--px) var(--py)}
+.is-tilting .lc-lanternlit .lc-foil{filter:saturate(1.7) brightness(1.2)}
+.is-tilting .lc-afterdark .lc-foil{filter:brightness(1.3)}
+.pack-hint{font-size:9px;letter-spacing:.7px;text-transform:uppercase;color:#ab8fa4;text-align:center;transition:opacity .3s}
+/* the sealed pack */
+.pack-stage{display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 0 10px}
+.pack-wrap{width:min(56%,220px);aspect-ratio:5/8;margin:6px auto 4px}
+.pack{--pack-bg:linear-gradient(160deg,#7d68ab,#c7a3d8 28%,#f3dca5 46%,#b48ccd 60%,#5f4b8d);position:absolute;inset:0;filter:drop-shadow(0 12px 18px #3a234a40)}
+.pack:after{content:'';position:absolute;inset:0;border-radius:10px;pointer-events:none;background:linear-gradient(115deg,transparent 30%,#ffffff70 46%,transparent 60%);background-size:260% 100%;background-position:var(--px) 0;mix-blend-mode:overlay}
+.pack-top,.pack-body{position:absolute;left:0;right:0;background:var(--pack-bg)}
+.pack-top{top:0;height:14%;background-size:100% 714%;background-position:top;border-radius:10px 10px 2px 2px}
+.pack-top:before,.pack-body:after{content:'';position:absolute;left:0;right:0;height:9px;background:repeating-linear-gradient(90deg,#ffffff38 0 2px,#3a234a22 2px 5px)}
+.pack-top:before{top:0;border-radius:10px 10px 0 0}
+.pack-body{top:14%;bottom:0;background-size:100% 116.3%;background-position:bottom;border-radius:2px 2px 10px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fffaf0;text-align:center;padding:0 10px}
+.pack-body:after{bottom:0;border-radius:0 0 10px 10px}
+.pack-emblem{display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:50%;border:1.5px solid #fff1c8;background:#ffffff22;box-shadow:0 0 22px #fff3d080}
+.pack-emblem svg{width:36px;height:36px;stroke:#fff8e6;stroke-width:1.1}
+.pack-body strong{font:500 25px/1 var(--serif);text-shadow:0 1px 8px #4a2a6080;margin-top:6px}
+.pack-body small{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;opacity:.9}
+.pack-cut{position:absolute;left:-8%;right:-8%;top:7%;height:14%;z-index:3;cursor:ew-resize;touch-action:none}
+.pack-cut:before{content:'';position:absolute;left:8%;right:8%;top:50%;border-top:1.5px dashed #fffaf0cc;animation:cutHint 2.2s ease-in-out infinite}
+.pack-cut i{position:absolute;top:calc(50% - 2px);height:4px;width:0;border-radius:3px;background:#fff;box-shadow:0 0 10px #fff,0 0 18px #ffe39a;transition:width .25s}
+@keyframes cutHint{0%,100%{opacity:.5}50%{opacity:1}}
+.pack-glow{position:absolute;left:4%;right:4%;top:6%;height:26%;background:radial-gradient(ellipse at 50% 30%,#fffbe8,#ffe2a0aa 30%,transparent 70%);opacity:0;pointer-events:none;filter:blur(3px)}
+[data-stage=tearing] .pack-top{animation:tearTop .62s cubic-bezier(.4,.1,.6,1) forwards}
+[data-stage=tearing] .pack-glow{animation:glowUp .9s ease-out forwards}
+[data-stage=tearing] .pack-body{animation:packDrop .5s .45s ease-in forwards}
+[data-stage=tearing] .pack-cut,[data-stage=tearing] .pack-hint,[data-stage=tearing] #packTear{opacity:0;pointer-events:none}
+@keyframes tearTop{0%{transform:none}25%{transform:translate(3%,-12%) rotate(2deg)}100%{transform:translate(75%,-260%) rotate(30deg);opacity:0}}
+@keyframes glowUp{0%{opacity:0}35%{opacity:1}100%{opacity:1;transform:scaleY(2.4) translateY(10%)}}
+@keyframes packDrop{to{transform:translateY(40%) scale(.95);opacity:0}}
+/* one card at a time, like a fresh draw */
+.reveal-wrap{position:relative;width:min(64%,250px);aspect-ratio:2/3;margin:10px auto 4px}
+.reveal-card{position:absolute;inset:0;z-index:2;animation:cardRise .55s cubic-bezier(.2,1.25,.4,1) backwards;transition:transform .32s ease-in,opacity .32s ease-in}
+.reveal-card.fly-left{transform:translateX(-160%) rotate(-24deg);opacity:0}
+.reveal-card.fly-right{transform:translateX(160%) rotate(24deg);opacity:0}
+.reveal-card .lc-dupe{bottom:-11px}
+@keyframes cardRise{from{transform:translateY(28%) scale(.82);opacity:0}}
+.stack-back{position:absolute;inset:0;z-index:1;transform:translate(calc(var(--n)*5px),calc(var(--n)*-5px)) rotate(calc(var(--n)*2.5deg))}
+.reveal-burst{position:absolute;inset:-18% -22%;z-index:0;border-radius:50%;opacity:0;pointer-events:none}
+.reveal-burst:before{content:'';position:absolute;inset:8%;border-radius:50%;background:repeating-conic-gradient(from 0deg,#ffffff00 0 9deg,#ffffff55 10deg 12deg,#ffffff00 13deg 22deg);-webkit-mask:radial-gradient(circle,#000 20%,transparent 68%);mask:radial-gradient(circle,#000 20%,transparent 68%);animation:raySpin 14s linear infinite}
+.burst-rare .reveal-burst{background:radial-gradient(closest-side,#f8e2a8 0,#f2d48e66 28%,transparent 100%);animation:burstIn .7s ease-out forwards,burstPulse 2.8s .7s ease-in-out infinite}
+.burst-lanternlit .reveal-burst{background:radial-gradient(closest-side,#fff 0,#f3c3ddaa 18%,#c9b6f288 32%,#a9dcef55 44%,transparent 100%);animation:burstIn .7s ease-out forwards,burstPulse 2.4s .7s ease-in-out infinite}
+.burst-afterdark .reveal-burst{background:radial-gradient(closest-side,#ffd0dc 0,#e0577f99 22%,#7a2a6e66 40%,transparent 100%);animation:burstIn .7s ease-out forwards,burstPulse 2s .7s ease-in-out infinite}
+@keyframes burstIn{from{opacity:0;transform:scale(.4)}to{opacity:.95;transform:none}}
+@keyframes burstPulse{0%,100%{opacity:.95}50%{opacity:.6}}
+@keyframes raySpin{to{transform:rotate(360deg)}}
+.sparkles{position:absolute;inset:-12%;z-index:3;pointer-events:none}
+.sparkles i{position:absolute;width:14px;height:14px;background:#fff;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);filter:drop-shadow(0 0 4px #ffe7a8);animation:twinkle 1.8s ease-in-out infinite;opacity:0}
+.sparkles i:nth-child(1){left:2%;top:12%}.sparkles i:nth-child(2){right:4%;top:4%;animation-delay:.4s;transform:scale(.7)}.sparkles i:nth-child(3){right:0;top:58%;animation-delay:.9s}.sparkles i:nth-child(4){left:6%;bottom:6%;animation-delay:1.3s;transform:scale(.6)}.sparkles i:nth-child(5){left:48%;top:-2%;animation-delay:.7s}
+.burst-afterdark .sparkles i{background:#ffc2d1;filter:drop-shadow(0 0 4px #e0577f)}
+@keyframes twinkle{0%,100%{opacity:0;scale:.4}50%{opacity:1;scale:1}}
+.haul-slot{position:relative;aspect-ratio:2/3}
+.reduced-motion .tilt-inner,.reduced-motion .reveal-card{transition:none!important;animation:none!important}
+.reduced-motion .reveal-burst,.reduced-motion .reveal-burst:before,.reduced-motion .sparkles i,.reduced-motion .pack-cut:before{animation:none!important}
+.reduced-motion .reveal-burst{opacity:.9}
+@media (prefers-reduced-motion:reduce){.lc-foil,.reveal-burst:before,.sparkles i,.pack-cut:before{animation:none}.tilt-inner,.reveal-card{transition:none;animation:none}}
