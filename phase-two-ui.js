@@ -21,13 +21,11 @@ export function createPhaseTwoUI(ctx){
   function followOutfit(){const id=ctx.state().outfit;if(id!==shownOutfit){shownOutfit=id;outfitIndex=Math.max(0,outfits.findIndex(i=>i.id===id));}}
   followOutfit();
 
-  // portrait cards: the art is either a sprite pose, a close crop of a painted evening, or the whole painting
+  // portrait cards: the art is either a sprite pose or a painted portrait of its own
   const kebab=k=>k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());
   function cardArt(card){
     if(card.sprite){const st=spriteFrameStyle(card.sprite.frame,card.sprite.outfit);return '<span class="lc-pose"><span class="lc-sprite" style="'+esc(Object.entries(st).map(([k,v])=>kebab(k)+':'+v).join(';'))+'"></span></span>';}
-    const art=CHAPTERS.find(c=>c.id===card.chapter).art;
-    if(card.crop)return '<span class="lc-paint" style="background-image:url(\'./assets/'+art+'\');background-size:'+card.crop.zoom*100+'% auto;background-position:'+card.crop.x+'% '+card.crop.y+'%"></span>';
-    return '<span class="lc-paint" style="background-image:url(\'./assets/'+art+'\')"></span>';
+    return '<span class="lc-paint" style="background-image:url(\'./assets/'+card.art+'\')"></span>';
   }
   function cardFace(card,count=1){
     return '<span class="lc-card lc-'+card.rarity+'"><span class="lc-art">'+cardArt(card)+'</span><span class="lc-foil"></span><span class="lc-label"><strong>'+esc(card.name)+'</strong><small>'+esc(RARITIES[card.rarity].name)+(count>1?' · ×'+count:'')+'</small></span></span>';
