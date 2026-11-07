@@ -165,6 +165,34 @@
 :root[data-theme=dark] .lc-label small{color:#c1acbc}
 :root[data-theme=dark] .lc-rare .lc-label small{color:#bd9b69}
 :root[data-theme=dark] .lc-lanternlit .lc-label small{color:#b18ec5}
+:root[data-theme=dark] .pack-line{color:#a289a6}
+:root[data-theme=dark] .pack-hint{color:#c1acbc}
+:root[data-theme=dark] .room-content{--t-common:#bfabbd;--t-rare:#c1a16c;--t-lanternlit:#b18ec5;--t-afterdark:#cd6d8b;--t-screen:#d2a345}
+:root[data-theme=dark] .tier-all{--tier:#a595ac}
+:root[data-theme=dark] .pack-shelf{border:1px solid #352e3b;background:linear-gradient(120deg,#211a29,#2a2430)}
+:root[data-theme=dark] .shelf-copy h2{color:#c1b3c7}
+:root[data-theme=dark] .shelf-copy p{color:#a289a6}
+:root[data-theme=dark] .odds summary{color:#b29db8}
+:root[data-theme=dark] .odds li{color:#a595ac}
+:root[data-theme=dark] .odds p{color:#bdaebb}
+:root[data-theme=dark] .collection-progress>div{color:#a595ac}
+:root[data-theme=dark] .collection-progress strong{color:#c1b3c7}
+:root[data-theme=dark] .collection-progress .need-track>span{background:linear-gradient(90deg,#4a3e55,#e0c996,#cd6d8b)}
+:root[data-theme=dark] .filter-chip{border:1px solid #352e3b;background:#211a2966;color:#a595ac}
+:root[data-theme=dark] .filter-chip[aria-pressed=true]{background:#211a29;color:#c1b3c7}
+:root[data-theme=dark] .album-section h3 small{color:#bdaebb}
+:root[data-theme=dark] .cards-back{color:#a595ac}
+:root[data-theme=dark] .cards-purse{color:#be9f76}
+:root[data-theme=dark] .cards-purse svg{stroke:#be9f76}
+:root[data-theme=dark] .focus-tags small{color:#bdaebb}
+:root[data-theme=dark] .meta-chip{color:#a595ac;border:1px solid #352e3b}
+:root[data-theme=dark] .focus-step{border:1px solid #352e3b;background:#211a2966;color:#a595ac}
+:root[data-theme=dark] .album-slot.is-empty{border-color:#352e3b;background:linear-gradient(160deg,#28222d66,#2e283488)}
+:root[data-theme=dark] .album-slot.is-empty>span{color:var(--tier,#cebfcc)}
+:root[data-theme=dark] .album-slot.is-empty.lc-rare{border-color:#43374f}
+:root[data-theme=dark] .album-slot.is-empty.lc-lanternlit{border-color:#372e40}
+:root[data-theme=dark] .locked-note{border:1px dashed #3b3342;color:#b2a1b6}
+:root[data-theme=dark] .locked-note small{color:#cbbdc9}
 
 /* selected tabs should look lifted, not pressed in */
 :root[data-theme=dark] .segmented button[aria-pressed=true]{background:#40364b;color:#efe5f3}
