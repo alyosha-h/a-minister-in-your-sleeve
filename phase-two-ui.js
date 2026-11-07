@@ -2,9 +2,9 @@ import { CHAPTERS, ITEMS, RIBBONS, LETTERS, POSTSCRIPTS, TREATS } from './catalo
 import { gameTier, memorialPuzzle, clerkRank, LEAVES, STEEPS, TEA_WISHES, SEARCH_SPOTS, searchSpots } from './minigames.js';
 import { MOMENTS } from './moments.js';
 import { DATES } from './dates.js';
-import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, openPack, cardPool, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
+import { chapterRecord, requestDefinition, relationshipLabel, finishGame, tooTiredToPlay, styleOf, STYLES, momentDue, shareMoment, dateKey, currentTeaWish, orchidThirsty, waterOrchid, buyTreat, MEND_GOAL, searchPage, openPack, cardPool, seeCard, purchase, equipOutfit, placeFurnishing, rememberPlayer } from './game.js';
 import { spriteFrameStyle } from './sprites.js';
-import { CARDS, RARITIES, PACK_PRICE, DUPLICATE_REFUND } from './cards.js';
+import { CARDS, RARITIES, TIER_ORDER, PACK_PRICE, DUPLICATE_REFUND } from './cards.js';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -15,7 +15,7 @@ export function createPhaseTwoUI(ctx){
   const outfits=ITEMS.filter(i=>i.kind==='outfit');
   let roomView='outfits',journalView='today',outfitIndex=0,shownOutfit=null;
   let activity={view:'menu'};
-  let pack=null,cardFocus=null;
+  let pack=null,cardFocus=null,cardFilter='all';
   // Browsing previews is free, but when what he's wearing changes (shop, import,
   // cloud restore), bring the wardrobe back to the outfit he actually has on.
   function followOutfit(){const id=ctx.state().outfit;if(id!==shownOutfit){shownOutfit=id;outfitIndex=Math.max(0,outfits.findIndex(i=>i.id===id));}}
@@ -34,6 +34,18 @@ export function createPhaseTwoUI(ctx){
     if(!card.chapter||chapterRecord(s,card.chapter).complete)return 'still out there';
     const c=CHAPTERS.find(x=>x.id===card.chapter);return 'after evening '+c.number;
   }
+  // tiers from humblest to rarest, with each one's real chance per card (cutoffs nest, so subtract the tier above)
+  const TIERS=['common',...[...TIER_ORDER].reverse()];
+  const chance=t=>{const i=TIER_ORDER.indexOf(t),above=i>0?RARITIES[TIER_ORDER[i-1]].odds:0;return t==='common'?1-RARITIES[TIER_ORDER.at(-1)].odds:RARITIES[t].odds-above;};
+  const pct=v=>(v*100<1?(v*100).toFixed(1):Math.round(v*100))+'%';
+  const backArrow='<svg class="back-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>';
+  const badge=p=>p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':'<span class="lc-dupe lc-new">new</span>';
+  // a slim bar for the full-panel card views: a way back, and your copper
+  const cardsBar=(s,label='album')=>'<div class="cards-bar"><button id="cardsBack" class="cards-back">'+backArrow+'<span>'+label+'</span></button><span class="cards-purse">'+icon('coins')+'<span>'+s.copper+'</span></span></div>';
+  function bindBar(){const b=$('cardsBack');if(b)b.onclick=()=>{pack=null;cardFocus=null;renderRoom();};}
+  const ownedInView=s=>TIERS.filter(t=>cardFilter==='all'||cardFilter===t).flatMap(t=>CARDS.filter(c=>c.rarity===t&&s.cards[c.id]));
+  function stepFocus(d){const s=ctx.state(),list=ownedInView(s);if(list.length<2)return;const i=list.findIndex(c=>c.id===cardFocus);cardFocus=list[(i+d+list.length)%list.length].id;renderRoom();}
+  document.addEventListener('keydown',e=>{if(ctx.page()!=='room'||roomView!=='cards'||!cardFocus||document.querySelector('dialog[open]'))return;if(e.key==='ArrowLeft')stepFocus(-1);else if(e.key==='ArrowRight')stepFocus(1);else if(e.key==='Escape'){cardFocus=null;renderRoom();}});
   // tcg-style tilt: the card leans toward wherever you press, and the foil and glare follow your finger
   const noMotion=()=>document.body.classList.contains('reduced-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tilted=(face,cls='')=>'<div class="tilt '+cls+'"><div class="tilt-inner">'+face+'</div></div>';
@@ -56,8 +68,8 @@ export function createPhaseTwoUI(ctx){
   function renderPack(root){
     const card=pack.stage==='reveal'?CARDS.find(c=>c.id===pack.pulls[pack.index].id):null;
     if(pack.stage==='sealed'||pack.stage==='tearing'){
-      root.innerHTML='<div class="pack-stage" data-stage="'+pack.stage+'"><p class="eyebrow pack-eyebrow">a fresh pack</p>'+tilted(packFace,'pack-wrap')+'<p class="pack-hint">swipe along the top to tear it open</p><button id="packTear" class="text-button">or just open it '+icon('arrow')+'</button></div>';
-      if(pack.stage==='tearing')return;
+      root.innerHTML='<div class="pack-stage" data-stage="'+pack.stage+'">'+cardsBar(ctx.state())+'<p class="eyebrow pack-eyebrow">a fresh pack</p>'+tilted(packFace,'pack-wrap')+'<p class="pack-hint">swipe along the top to tear it open</p><button id="packTear" class="text-button">or just open it '+icon('arrow')+'</button></div>';
+      bindBar();if(pack.stage==='tearing')return;
       const wrap=root.querySelector('.pack-wrap'),cut=$('packCut'),trail=$('packTrail');attachTilt(wrap,{max:18});
       let span=null;
       cut.onpointerdown=e=>{e.stopPropagation();cut.setPointerCapture?.(e.pointerId);span={min:e.clientX,max:e.clientX};};
@@ -68,15 +80,17 @@ export function createPhaseTwoUI(ctx){
     }
     if(pack.stage==='reveal'){
       const p=pack.pulls[pack.index],left=pack.pulls.length-pack.index-1;
-      root.innerHTML='<div class="pack-stage" data-stage="reveal"><p class="eyebrow pack-eyebrow">card '+(pack.index+1)+' of '+pack.pulls.length+'</p><div class="reveal-wrap burst-'+card.rarity+'"><span class="reveal-burst"></span>'+(card.rarity!=='common'?'<span class="sparkles"><i></i><i></i><i></i><i></i><i></i></span>':'')+Array.from({length:left},(_,i)=>'<span class="stack-back" style="--n:'+(i+1)+'"><span class="lc-back">'+icon('lantern')+'</span></span>').join('')+tilted(cardFace(card)+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':''),'reveal-card')+'</div><p class="pack-line">'+esc(card.line)+'</p><button id="revealNext" class="primary-button">'+(left?'next card · or swipe him away':'see the haul')+'</button></div>';
-      const el=root.querySelector('.reveal-card');
+      root.innerHTML='<div class="pack-stage" data-stage="reveal">'+cardsBar(ctx.state())+'<p class="eyebrow pack-eyebrow">card '+(pack.index+1)+' of '+pack.pulls.length+'</p><div class="reveal-wrap burst-'+card.rarity+'"><span class="reveal-burst"></span>'+(card.rarity!=='common'?'<span class="sparkles"><i></i><i></i><i></i><i></i><i></i></span>':'')+Array.from({length:left},(_,i)=>'<span class="stack-back" style="--n:'+(i+1)+'"><span class="lc-back">'+icon('lantern')+'</span></span>').join('')+tilted(cardFace(card)+badge(p),'reveal-card')+'</div><p class="pack-line">'+esc(card.line)+'</p><button id="revealNext" class="primary-button">'+(left?'next card · or swipe him away':'see the haul')+'</button></div>';
+      bindBar();const el=root.querySelector('.reveal-card');
       const next=dir=>{if(el.dataset.gone)return;el.dataset.gone='1';el.classList.add(dir<0?'fly-left':'fly-right');setTimeout(()=>{if(!pack)return;pack.index++;if(pack.index>=pack.pulls.length)pack.stage='summary';renderRoom();},noMotion()?0:320);};
       attachTilt(el,{onRelease:({dx,dy,dt})=>{if(Math.abs(dx)>80)next(Math.sign(dx));else if(Math.hypot(dx,dy)<8&&dt<350)next(1);}});
       $('revealNext').onclick=()=>next(1);ctx.ping(card.rarity==='common'?'care':'lantern');return;
     }
-    root.innerHTML='<div class="pack-view"><p class="eyebrow pack-eyebrow">a fine haul</p><div class="pack-row">'+pack.pulls.map(p=>{const c=CARDS.find(x=>x.id===p.id);return '<div class="haul-slot">'+tilted(cardFace(c),'haul-card')+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':'')+'</div>';}).join('')+'</div><p class="pack-line">“well. i suppose you will be wanting to look at those for a while.”</p><div class="pack-actions"><button id="packAgain" class="primary-button">another pack · '+PACK_PRICE+' copper</button><button id="packDone" class="text-button">back to the album '+icon('arrow')+'</button></div>'+(pack.refund?'<p class="shop-note">spares are sold back to the kitchen staff, who collect. +'+pack.refund+' copper.</p>':'')+'</div>';
-    root.querySelectorAll('.haul-card').forEach(el=>attachTilt(el,{mouseOnly:true,max:18}));
-    $('packAgain').onclick=buyPack;$('packDone').onclick=()=>{pack=null;renderRoom();};
+    const fresh=pack.pulls.filter(p=>!p.duplicate).length,spare=pack.pulls.length-fresh;
+    root.innerHTML='<div class="pack-view">'+cardsBar(ctx.state())+'<p class="eyebrow pack-eyebrow">a fine haul · '+[fresh&&fresh+' new',spare&&spare+' spare'].filter(Boolean).join(' · ')+'</p><div class="pack-row">'+pack.pulls.map(p=>{const c=CARDS.find(x=>x.id===p.id);return '<button class="haul-slot" data-haul="'+c.id+'" aria-label="look at '+esc(c.name)+'">'+tilted(cardFace(c),'haul-card')+badge(p)+'</button>';}).join('')+'</div><p class="pack-line">“well. i suppose you will be wanting to look at those for a while.”</p><p class="pack-hint">tap a card to take a closer look</p><div class="pack-actions"><button id="packAgain" class="primary-button" '+(ctx.state().copper<PACK_PRICE?'disabled':'')+'>another pack · '+PACK_PRICE+' copper</button></div>'+(pack.refund?'<p class="shop-note">spares are sold back to the kitchen staff, who collect. +'+pack.refund+' copper.</p>':'')+'</div>';
+    bindBar();root.querySelectorAll('.haul-card').forEach(el=>attachTilt(el,{mouseOnly:true,max:18}));
+    root.querySelectorAll('[data-haul]').forEach(b=>b.onclick=()=>{pack=null;cardFilter='all';cardFocus=b.dataset.haul;renderRoom();});
+    $('packAgain').onclick=buyPack;
   }
   function tearPack(){
     if(!pack||pack.stage!=='sealed')return;const id=pack.id;pack.stage='tearing';ctx.ping('tea');
@@ -91,14 +105,26 @@ export function createPhaseTwoUI(ctx){
     if(key!=='album'&&root.dataset.view===key&&root.firstChild)return;root.dataset.view=key;
     if(pack)return renderPack(root);
     if(cardFocus){
-      const card=CARDS.find(c=>c.id===cardFocus);
-      root.innerHTML='<div class="pack-view card-focus">'+tilted(cardFace(card,s.cards[card.id]),'focus-card')+'<p class="pack-line">'+esc(card.line)+'</p><p class="pack-hint">drag to tilt him toward the light</p><button id="focusDone" class="text-button">back to the album '+icon('arrow')+'</button></div>';
-      attachTilt(root.querySelector('.focus-card'));
-      $('focusDone').onclick=()=>{cardFocus=null;renderRoom();};return;
+      const card=CARDS.find(c=>c.id===cardFocus),list=ownedInView(s),i=list.findIndex(c=>c.id===card.id),ch=CHAPTERS.find(c=>c.id===card.chapter),n=s.cards[card.id];
+      root.innerHTML='<div class="pack-view card-focus">'+cardsBar(s)+tilted(cardFace(card,n),'focus-card')+'<div class="focus-meta">'+(list.length>1?'<button id="focusPrev" class="focus-step" aria-label="previous card">'+backArrow+'</button>':'<span></span>')+'<div class="focus-tags"><span class="tier-chip tier-'+card.rarity+'"><i></i>'+esc(RARITIES[card.rarity].name)+'</span>'+(ch?'<span class="meta-chip">evening '+ch.number+'</span>':'')+(n>1?'<span class="meta-chip">×'+n+'</span>':'')+(i>=0?'<small>'+(i+1)+' of '+list.length+'</small>':'')+'</div>'+(list.length>1?'<button id="focusNext" class="focus-step" aria-label="next card">'+icon('arrow')+'</button>':'<span></span>')+'</div><p class="pack-line">'+esc(card.line)+'</p></div>';
+      bindBar();attachTilt(root.querySelector('.focus-card'));
+      if($('focusPrev')){$('focusPrev').onclick=()=>stepFocus(-1);$('focusNext').onclick=()=>stepFocus(1);}
+      if(s.cardsNew?.includes(card.id))ctx.commit({state:seeCard(s,card.id)});
+      return;
     }
-    const pool=cardPool(s),have=CARDS.filter(c=>s.cards[c.id]).length;
-    root.innerHTML='<div class="card-shop"><div><span class="eyebrow">portrait cards</span><p>'+have+' of '+CARDS.length+' collected · he “disapproves”.</p></div><button id="buyPack" class="primary-button">open a pack · '+PACK_PRICE+'</button></div><div class="card-album">'+CARDS.map(c=>s.cards[c.id]?'<button class="album-slot" data-card="'+c.id+'" aria-label="'+esc(c.name)+'">'+tilted(cardFace(c,s.cards[c.id]))+'</button>':'<span class="album-slot is-empty lc-'+c.rarity+'"><span>'+(pool.includes(c)?'?':icon('lantern'))+'</span><small>'+esc(lockedHint(s,c))+'</small></span>').join('')+'</div><p class="shop-note">three cards a pack. painted cards join the pool after each lantern evening, and the rarest come out after dark, or from behind the screen. spares sell back for a little copper.</p>';
+    const pool=cardPool(s),have=CARDS.filter(c=>s.cards[c.id]).length,afford=s.copper>=PACK_PRICE,fresh=new Set(s.cardsNew||[]);
+    const tally=t=>{const all=CARDS.filter(c=>c.rarity===t);return {have:all.filter(c=>s.cards[c.id]).length,all:all.length};};
+    const shelf='<div class="pack-shelf"><div class="shelf-pack" aria-hidden="true"><span class="shelf-wrapper"><span class="pack-emblem">'+icon('lantern')+'</span></span></div><div class="shelf-copy"><span class="eyebrow">portrait cards</span><h2>a fresh pack</h2><p>three cards, sealed. he insists he hasn’t peeked.</p><details class="odds"><summary>what’s inside</summary><ul>'+[...TIERS].reverse().map(t=>'<li><span class="tier-chip tier-'+t+'"><i></i>'+esc(RARITIES[t].name)+'</span><span>'+pct(chance(t))+' a card</span></li>').join('')+'</ul><p>painted cards join after each lantern evening. spares sell back for '+DUPLICATE_REFUND+' copper.</p></details></div><button id="buyPack" class="primary-button shelf-buy" '+(afford?'':'disabled')+'>'+icon('coins')+'<strong>'+PACK_PRICE+'</strong><small>'+(afford?'open one':(PACK_PRICE-s.copper)+' short')+'</small></button></div>';
+    const progress='<div class="collection-progress"><div><strong>'+have+'</strong><span> of '+CARDS.length+' collected</span>'+(fresh.size?'<span class="new-count">'+fresh.size+' new</span>':'')+'</div><span class="need-track"><span style="width:'+(have/CARDS.length*100)+'%"></span></span></div>';
+    const filters='<div class="tier-filters" role="group" aria-label="show cards">'+['all',...TIERS].map(f=>{const c=f==='all'?{have,all:CARDS.length}:tally(f);return '<button data-filter="'+f+'" aria-pressed="'+(cardFilter===f)+'" class="filter-chip tier-'+f+'">'+(f==='all'?'':'<i></i>')+esc(f==='all'?'all':RARITIES[f].name)+'<small>'+c.have+'/'+c.all+'</small></button>';}).join('')+'</div>';
+    const slot=c=>s.cards[c.id]?'<button class="album-slot" data-card="'+c.id+'" aria-label="'+esc(c.name)+(fresh.has(c.id)?', new':'')+'">'+tilted(cardFace(c,s.cards[c.id]))+(fresh.has(c.id)?'<span class="slot-new">new</span>':'')+'</button>':'<span class="album-slot is-empty lc-'+c.rarity+'"><span>'+(pool.includes(c)?'?':icon('lantern'))+'</span><small>'+esc(lockedHint(s,c))+'</small></span>';
+    const sections=TIERS.filter(t=>cardFilter==='all'||cardFilter===t).map(t=>{const c=tally(t);const mine=CARDS.filter(x=>x.rarity===t),own=mine.filter(x=>s.cards[x.id]),open=mine.filter(x=>!s.cards[x.id]&&pool.includes(x)),locked=mine.filter(x=>!s.cards[x.id]&&!pool.includes(x));
+      // cards behind evenings you haven't had fold into one quiet line, rather than a wall of empty frames
+      const next=locked.map(x=>CHAPTERS.find(ch=>ch.id===x.chapter)).sort((x,y)=>x.number.localeCompare(y.number))[0];
+      return '<section class="album-section"><h3><span class="tier-chip tier-'+t+'"><i></i>'+esc(RARITIES[t].name)+'</span><small>'+c.have+' / '+c.all+'</small></h3>'+(own.length||open.length?'<div class="card-album">'+[...own,...open].map(slot).join('')+'</div>':'')+(locked.length?'<div class="locked-note lc-'+t+'">'+icon('lantern')+'<span>'+(own.length||open.length?locked.length+' more':'all '+locked.length)+' wait behind later evenings</span><small>next · evening '+next.number+'</small></div>':'')+'</section>';}).join('');
+    root.innerHTML=shelf+progress+filters+sections+'<p class="shop-note">he “disapproves” of the whole collection. he has also asked twice how it’s coming along.</p>';
     $('buyPack').onclick=buyPack;
+    root.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{cardFilter=b.dataset.filter;renderRoom();});
     root.querySelectorAll('[data-card]').forEach(b=>{attachTilt(b.querySelector('.tilt'),{mouseOnly:true,max:20});b.onclick=()=>{cardFocus=b.dataset.card;renderRoom();};});
   }
   let packSeq=0;
