@@ -5,9 +5,12 @@
 export const PACK_PRICE = 18, PACK_SIZE = 3, DUPLICATE_REFUND = 3;
 export const RARITIES = {
   common:{name:'sketch',odds:1},
-  rare:{name:'close study',odds:.25},
-  lanternlit:{name:'lanternlit',odds:.07}
+  // a card is the first tier its roll falls under, so per card: ~4% after dark, ~7% lanternlit, ~22% close study
+  rare:{name:'close study',odds:.33},
+  lanternlit:{name:'lanternlit',odds:.11},
+  afterdark:{name:'after dark',odds:.04}
 };
+export const TIER_ORDER = ['afterdark','lanternlit','rare'];
 
 export const CARDS = [
   // sketches: the small minister, from the household's private stock
@@ -41,6 +44,15 @@ export const CARDS = [
   {id:'lit-lamp',rarity:'lanternlit',art:'cards/lit-lamp.webp',chapter:'lamp',name:'stay until the lamp goes out',line:'“i look tired in this one. i look happy, too. the artist said the two are rarely painted together.”'},
   {id:'lit-lotus',rarity:'lanternlit',art:'cards/lit-lotus.webp',chapter:'lotus',name:'the lotus pavilion',line:'“the lanterns are brighter than in life. i am exactly as besotted.”'},
   {id:'lit-beside',rarity:'lanternlit',art:'cards/lit-beside.webp',chapter:'beside',name:'a place beside him',line:'“a limited run of one. it is yours. if anyone else obtains a copy, i will have them audited.”'},
-  {id:'lit-jade',rarity:'lanternlit',art:'cards/lit-jade.webp',chapter:'jade',name:'the jade made whole',line:'“the last card. collectors keep these behind glass. i would rather you kept it in your sleeve.”'}
+  {id:'lit-jade',rarity:'lanternlit',art:'cards/lit-jade.webp',chapter:'jade',name:'the jade made whole',line:'“the last card. collectors keep these behind glass. i would rather you kept it in your sleeve.”'},
+  // after dark: what the painter was asked to leave out of the official set
+  {id:'ad-tea',rarity:'afterdark',art:'cards/ad-tea.webp',chapter:'tea',name:'the robe was in the way',line:'“the robe was in the way of the teapot. that is my official position. my unofficial position is that you are staring, and i am letting you.”'},
+  {id:'ad-rain',rarity:'afterdark',art:'cards/ad-rain.webp',chapter:'rain',name:'wrung out',line:'“you said you were cold. i am demonstrating that nothing can be done about it, except standing very close.”'},
+  {id:'ad-ribbon',rarity:'afterdark',art:'cards/ad-ribbon.webp',chapter:'ribbon',name:'tied, loosely',line:'“you tied it. i am merely declining to untie it. a minister knows when to yield.”'},
+  {id:'ad-game',rarity:'afterdark',art:'cards/ad-game.webp',chapter:'game',name:'a forfeit, paid in full',line:'“i lost the robe on purpose. i would like that noted. i would like you to come and collect your winnings.”'},
+  {id:'ad-lamp',rarity:'afterdark',art:'cards/ad-lamp.webp',chapter:'lamp',name:'the lamp went out',line:'“the lamp went out hours ago. i did not notice. i was occupied.”'},
+  {id:'ad-lotus',rarity:'afterdark',art:'cards/ad-lotus.webp',chapter:'lotus',name:'the water is warm',line:'“the water is warm. i am not going to say it twice. …it is very warm.”'},
+  {id:'ad-beside',rarity:'afterdark',art:'cards/ad-beside.webp',chapter:'beside',name:'nowhere else to look',line:'“there. now you cannot look anywhere else. i have considered this arrangement for some time.”'},
+  {id:'ad-jade',rarity:'afterdark',art:'cards/ad-jade.webp',chapter:'jade',name:'room for two',line:'“there is room for two. the tub has been measured. by me. twice.”'}
 ];
 export const CARD_IDS = CARDS.map(c=>c.id);

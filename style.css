@@ -652,3 +652,10 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .reduced-motion .lc-foil{animation:none!important}
 .reduced-motion .lc-flip>*{transition:none!important}
 @media (prefers-reduced-motion:reduce){.lc-foil{animation:none}.lc-flip>*{transition:none}}
+.lc-afterdark{border-color:transparent;background:linear-gradient(#2c1f36,#2c1f36) padding-box,linear-gradient(135deg,#b23a5e,#5b2a6e,#e07a8f,#3e1f4f,#b23a5e) border-box;box-shadow:0 4px 18px #8c2a4f66}
+.lc-afterdark .lc-foil{background:radial-gradient(ellipse at 50% 110%,#d6406a30,transparent 60%),linear-gradient(115deg,transparent 38%,#ffb3c855 49%,transparent 60%);background-size:100% 100%,250% 100%;mix-blend-mode:screen;animation:foilSweep 5s ease-in-out infinite}
+.lc-afterdark .lc-art:after{content:'♥';position:absolute;top:4px;right:7px;color:#ffc2d1;font-size:12px;text-shadow:0 0 6px #d6406a}
+.lc-afterdark .lc-label{background:#2c1f36f2;border-top-color:#5b2a6e}
+.lc-afterdark .lc-label strong{color:#f6dbe4}
+.lc-afterdark .lc-label small{color:#e07a8f}
+.album-slot.is-empty.lc-afterdark{border-color:#c0607e;background:linear-gradient(160deg,#5b2a6e14,#b23a5e1a)}

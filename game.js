@@ -1,6 +1,6 @@
 import { CHAPTERS, REQUESTS, ITEMS, RIBBONS, TREATS } from './catalog.js';
 import { MOMENTS } from './moments.js';
-import { CARDS, RARITIES, PACK_PRICE, PACK_SIZE, DUPLICATE_REFUND } from './cards.js';
+import { CARDS, RARITIES, TIER_ORDER, PACK_PRICE, PACK_SIZE, DUPLICATE_REFUND } from './cards.js';
 import { CHECKIN, ABOUT_YOU } from './more-content.js';
 import { TEA_WISHES, teaWishKey, judgeTea, searchSpots, pageSpot } from './minigames.js';
 
@@ -217,7 +217,7 @@ export function openPack(input,rng=Math.random){
   if(input.copper<PACK_PRICE)throw new Error('a little more copper, and it’s yours.');
   const s=structuredClone(input),pool=cardPool(s),pulls=[];s.copper-=PACK_PRICE;s.cards={...s.cards};let refund=0;
   for(let i=0;i<PACK_SIZE;i++){
-    const roll=rng(),tier=['lanternlit','rare'].find(r=>roll<RARITIES[r].odds&&pool.some(c=>c.rarity===r))||'common';
+    const roll=rng(),tier=TIER_ORDER.find(r=>roll<RARITIES[r].odds&&pool.some(c=>c.rarity===r))||'common';
     const options=pool.filter(c=>c.rarity===tier),card=options[Math.min(options.length-1,Math.floor(rng()*options.length))];
     const duplicate=(s.cards[card.id]||0)>0;s.cards[card.id]=Math.min(999,(s.cards[card.id]||0)+1);if(duplicate)refund+=DUPLICATE_REFUND;
     pulls.push({id:card.id,duplicate});
