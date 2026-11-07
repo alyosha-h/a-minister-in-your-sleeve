@@ -5,12 +5,13 @@
 export const PACK_PRICE = 18, PACK_SIZE = 3, DUPLICATE_REFUND = 3;
 export const RARITIES = {
   common:{name:'sketch',odds:1},
-  // a card is the first tier its roll falls under, so per card: ~4% after dark, ~7% lanternlit, ~22% close study
-  rare:{name:'close study',odds:.33},
-  lanternlit:{name:'lanternlit',odds:.11},
-  afterdark:{name:'after dark',odds:.04}
+  // a card is the first tier its roll falls under, so per card: ~2% behind the screen, ~4% after dark, ~7% lanternlit, ~22% close study
+  rare:{name:'close study',odds:.35},
+  lanternlit:{name:'lanternlit',odds:.13},
+  afterdark:{name:'after dark',odds:.06},
+  screen:{name:'behind the screen',odds:.02}
 };
-export const TIER_ORDER = ['afterdark','lanternlit','rare'];
+export const TIER_ORDER = ['screen','afterdark','lanternlit','rare'];
 
 export const CARDS = [
   // sketches: the small minister, from the household's private stock
@@ -53,6 +54,15 @@ export const CARDS = [
   {id:'ad-lamp',rarity:'afterdark',art:'cards/ad-lamp.webp',chapter:'lamp',name:'the lamp went out',line:'“the lamp went out hours ago. i did not notice. i was occupied.”'},
   {id:'ad-lotus',rarity:'afterdark',art:'cards/ad-lotus.webp',chapter:'lotus',name:'the water is warm',line:'“the water is warm. i am not going to say it twice. …it is very warm.”'},
   {id:'ad-beside',rarity:'afterdark',art:'cards/ad-beside.webp',chapter:'beside',name:'nowhere else to look',line:'“there. now you cannot look anywhere else. i have considered this arrangement for some time.”'},
-  {id:'ad-jade',rarity:'afterdark',art:'cards/ad-jade.webp',chapter:'jade',name:'room for two',line:'“there is room for two. the tub has been measured. by me. twice.”'}
+  {id:'ad-jade',rarity:'afterdark',art:'cards/ad-jade.webp',chapter:'jade',name:'room for two',line:'“there is room for two. the tub has been measured. by me. twice.”'},
+  // behind the screen: the folding screen is closed, the household is asleep, and he has stopped pretending
+  {id:'sc-tea',rarity:'screen',art:'cards/sc-tea.webp',chapter:'tea',name:'the whole morning, reconsidered',line:'“i was going to get up. then you looked at me like that, and i reconsidered the entire morning.”'},
+  {id:'sc-rain',rarity:'screen',art:'cards/sc-rain.webp',chapter:'rain',name:'a walled garden',line:'“the garden is walled. the servants are asleep. the rain, i am told, keeps secrets. come here.”'},
+  {id:'sc-ribbon',rarity:'screen',art:'cards/sc-ribbon.webp',chapter:'ribbon',name:'written on him',line:'“what did you write. no — don’t tell me. write it again. slower.”'},
+  {id:'sc-game',rarity:'screen',art:'cards/sc-game.webp',chapter:'game',name:'every stone, retrieved',line:'“i appear to have lost every stone. you may retrieve them. one at a time. by hand.”'},
+  {id:'sc-lamp',rarity:'screen',art:'cards/sc-lamp.webp',chapter:'lamp',name:'patience, ended',line:'“hold still. i have been very patient for a very long time, and i would like to stop.”'},
+  {id:'sc-lotus',rarity:'screen',art:'cards/sc-lotus.webp',chapter:'lotus',name:'modesty, lotus-assisted',line:'“the lotus are doing their best to preserve my modesty. i would not rely on them.”'},
+  {id:'sc-beside',rarity:'screen',art:'cards/sc-beside.webp',chapter:'beside',name:'a matter of state',line:'“you left marks. the ministry will ask. i intend to tell them it was a matter of state.”'},
+  {id:'sc-jade',rarity:'screen',art:'cards/sc-jade.webp',chapter:'jade',name:'in. now.',line:'“in. now. the water is warm and i am warmer, and you have been dressed for far too long.”'}
 ];
 export const CARD_IDS = CARDS.map(c=>c.id);
