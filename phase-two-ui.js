@@ -37,11 +37,13 @@ export function createPhaseTwoUI(ctx){
   // tcg-style tilt: the card leans toward wherever you press, and the foil and glare follow your finger
   const noMotion=()=>document.body.classList.contains('reduced-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tilted=(face,cls='')=>'<div class="tilt '+cls+'"><div class="tilt-inner">'+face+'</div></div>';
-  function attachTilt(el,{mouseOnly=false,max=16,onRelease}={}){
+  function attachTilt(el,{mouseOnly=false,max=26,onRelease}={}){
+    // eased so a small nudge off-centre already leans the card a good way
+    const curve=v=>Math.sign(v)*Math.abs(v)**.6;
     let down=null,last=null,raf=0;
     const apply=()=>{raf=0;if(!last)return;const r=el.getBoundingClientRect(),px=Math.min(1,Math.max(0,(last.x-r.left)/r.width)),py=Math.min(1,Math.max(0,(last.y-r.top)/r.height));
-      el.style.setProperty('--ry',((px-.5)*2*max).toFixed(2)+'deg');el.style.setProperty('--rx',(-(py-.5)*2*max).toFixed(2)+'deg');
-      el.style.setProperty('--px',(px*100).toFixed(1)+'%');el.style.setProperty('--py',(py*100).toFixed(1)+'%');el.style.setProperty('--glare',(.3+Math.hypot(px-.5,py-.5)).toFixed(2));};
+      el.style.setProperty('--ry',(curve((px-.5)*2)*max).toFixed(2)+'deg');el.style.setProperty('--rx',(-curve((py-.5)*2)*max).toFixed(2)+'deg');
+      el.style.setProperty('--px',(px*100).toFixed(1)+'%');el.style.setProperty('--py',(py*100).toFixed(1)+'%');el.style.setProperty('--glare',Math.min(1,.4+Math.hypot(px-.5,py-.5)*1.5).toFixed(2));};
     const reset=()=>{last=null;el.classList.remove('is-tilting');el.style.setProperty('--rx','0deg');el.style.setProperty('--ry','0deg');el.style.setProperty('--glare','0');};
     const move=e=>{if(e.pointerType==='mouse'?false:(mouseOnly||!down))return;last={x:e.clientX,y:e.clientY};el.classList.add('is-tilting');if(!raf)raf=requestAnimationFrame(apply);};
     el.addEventListener('pointerdown',e=>{if(mouseOnly&&e.pointerType!=='mouse')return;down={x:e.clientX,y:e.clientY,t:performance.now()};el.setPointerCapture?.(e.pointerId);move(e);});
@@ -56,7 +58,7 @@ export function createPhaseTwoUI(ctx){
     if(pack.stage==='sealed'||pack.stage==='tearing'){
       root.innerHTML='<div class="pack-stage" data-stage="'+pack.stage+'"><p class="eyebrow pack-eyebrow">a fresh pack</p>'+tilted(packFace,'pack-wrap')+'<p class="pack-hint">swipe along the top to tear it open</p><button id="packTear" class="text-button">or just open it '+icon('arrow')+'</button></div>';
       if(pack.stage==='tearing')return;
-      const wrap=root.querySelector('.pack-wrap'),cut=$('packCut'),trail=$('packTrail');attachTilt(wrap,{max:10});
+      const wrap=root.querySelector('.pack-wrap'),cut=$('packCut'),trail=$('packTrail');attachTilt(wrap,{max:18});
       let span=null;
       cut.onpointerdown=e=>{e.stopPropagation();cut.setPointerCapture?.(e.pointerId);span={min:e.clientX,max:e.clientX};};
       cut.onpointermove=e=>{if(!span)return;span.min=Math.min(span.min,e.clientX);span.max=Math.max(span.max,e.clientX);const r=cut.getBoundingClientRect();
@@ -66,14 +68,14 @@ export function createPhaseTwoUI(ctx){
     }
     if(pack.stage==='reveal'){
       const p=pack.pulls[pack.index],left=pack.pulls.length-pack.index-1;
-      root.innerHTML='<div class="pack-stage" data-stage="reveal"><p class="eyebrow pack-eyebrow">card '+(pack.index+1)+' of '+pack.pulls.length+'</p><div class="reveal-wrap burst-'+card.rarity+'"><span class="reveal-burst"></span>'+(card.rarity!=='common'?'<span class="sparkles"><i></i><i></i><i></i><i></i><i></i></span>':'')+Array.from({length:left},(_,i)=>'<span class="stack-back" style="--n:'+(i+1)+'"><span class="lc-back">'+icon('lantern')+'</span></span>').join('')+tilted(cardFace(card)+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':''),'reveal-card')+'</div><p class="pack-line">'+esc(card.line)+'</p><p class="pack-hint">drag to tilt · swipe it away for the next</p><button id="revealNext" class="primary-button">'+(left?'next card':'see the haul')+'</button></div>';
+      root.innerHTML='<div class="pack-stage" data-stage="reveal"><p class="eyebrow pack-eyebrow">card '+(pack.index+1)+' of '+pack.pulls.length+'</p><div class="reveal-wrap burst-'+card.rarity+'"><span class="reveal-burst"></span>'+(card.rarity!=='common'?'<span class="sparkles"><i></i><i></i><i></i><i></i><i></i></span>':'')+Array.from({length:left},(_,i)=>'<span class="stack-back" style="--n:'+(i+1)+'"><span class="lc-back">'+icon('lantern')+'</span></span>').join('')+tilted(cardFace(card)+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':''),'reveal-card')+'</div><p class="pack-line">'+esc(card.line)+'</p><button id="revealNext" class="primary-button">'+(left?'next card · or swipe him away':'see the haul')+'</button></div>';
       const el=root.querySelector('.reveal-card');
       const next=dir=>{if(el.dataset.gone)return;el.dataset.gone='1';el.classList.add(dir<0?'fly-left':'fly-right');setTimeout(()=>{if(!pack)return;pack.index++;if(pack.index>=pack.pulls.length)pack.stage='summary';renderRoom();},noMotion()?0:320);};
       attachTilt(el,{onRelease:({dx,dy,dt})=>{if(Math.abs(dx)>80)next(Math.sign(dx));else if(Math.hypot(dx,dy)<8&&dt<350)next(1);}});
       $('revealNext').onclick=()=>next(1);ctx.ping(card.rarity==='common'?'care':'lantern');return;
     }
     root.innerHTML='<div class="pack-view"><p class="eyebrow pack-eyebrow">a fine haul</p><div class="pack-row">'+pack.pulls.map(p=>{const c=CARDS.find(x=>x.id===p.id);return '<div class="haul-slot">'+tilted(cardFace(c),'haul-card')+(p.duplicate?'<span class="lc-dupe">spare · +'+DUPLICATE_REFUND+'</span>':'')+'</div>';}).join('')+'</div><p class="pack-line">“well. i suppose you will be wanting to look at those for a while.”</p><div class="pack-actions"><button id="packAgain" class="primary-button">another pack · '+PACK_PRICE+' copper</button><button id="packDone" class="text-button">back to the album '+icon('arrow')+'</button></div>'+(pack.refund?'<p class="shop-note">spares are sold back to the kitchen staff, who collect. +'+pack.refund+' copper.</p>':'')+'</div>';
-    root.querySelectorAll('.haul-card').forEach(el=>attachTilt(el,{mouseOnly:true,max:12}));
+    root.querySelectorAll('.haul-card').forEach(el=>attachTilt(el,{mouseOnly:true,max:18}));
     $('packAgain').onclick=buyPack;$('packDone').onclick=()=>{pack=null;renderRoom();};
   }
   function tearPack(){
@@ -97,7 +99,7 @@ export function createPhaseTwoUI(ctx){
     const pool=cardPool(s),have=CARDS.filter(c=>s.cards[c.id]).length;
     root.innerHTML='<div class="card-shop"><div><span class="eyebrow">portrait cards</span><p>'+have+' of '+CARDS.length+' collected · he “disapproves”.</p></div><button id="buyPack" class="primary-button">open a pack · '+PACK_PRICE+'</button></div><div class="card-album">'+CARDS.map(c=>s.cards[c.id]?'<button class="album-slot" data-card="'+c.id+'" aria-label="'+esc(c.name)+'">'+tilted(cardFace(c,s.cards[c.id]))+'</button>':'<span class="album-slot is-empty lc-'+c.rarity+'"><span>'+(pool.includes(c)?'?':icon('lantern'))+'</span><small>'+esc(lockedHint(s,c))+'</small></span>').join('')+'</div><p class="shop-note">three cards a pack. painted cards join the pool after each lantern evening, and the rarest come out after dark. spares sell back for a little copper.</p>';
     $('buyPack').onclick=buyPack;
-    root.querySelectorAll('[data-card]').forEach(b=>{attachTilt(b.querySelector('.tilt'),{mouseOnly:true,max:14});b.onclick=()=>{cardFocus=b.dataset.card;renderRoom();};});
+    root.querySelectorAll('[data-card]').forEach(b=>{attachTilt(b.querySelector('.tilt'),{mouseOnly:true,max:20});b.onclick=()=>{cardFocus=b.dataset.card;renderRoom();};});
   }
   let packSeq=0;
   function buyPack(){
@@ -106,6 +108,8 @@ export function createPhaseTwoUI(ctx){
 
   function renderRoom(){
     followOutfit();const s=ctx.state();$('copperValue').textContent=s.copper;if(roomView!=='cards')delete $('roomContent').dataset.view;
+    // a pack or a held card takes the whole panel, so the art can be as big as the screen allows
+    $('roomPanel').classList.toggle('cards-immersive',roomView==='cards'&&Boolean(pack||cardFocus));
     document.querySelectorAll('[data-room-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.roomView===roomView)));
     if(roomView==='outfits'){
       const item=outfits[outfitIndex],owned=s.owned.includes(item.id),wearing=s.outfit===item.id;
