@@ -816,3 +816,11 @@ button.haul-slot{padding:0;background:none;border-radius:10px;display:block;widt
 .locked-note svg{width:18px;height:18px;stroke-width:1.1;flex:none;opacity:.7}
 .locked-note small{margin-left:auto;font-size:8px;letter-spacing:.7px;text-transform:uppercase;color:#b4a0b2;white-space:nowrap}
 .room-content .pack-shelf .shelf-buy:not(:disabled){background:#7d6596;border-color:#6b5383;color:#fff6e8}
+/* a held card fits the panel exactly: the card takes whatever height is left once the bar, tags and line are placed */
+.cards-focus .segmented{display:none}
+.cards-focus .room-content{overflow:hidden}
+.card-focus{height:100%;gap:8px;padding-bottom:2px}
+.focus-stage{flex:1;min-height:0;width:100%;container-type:size;display:flex;align-items:center;justify-content:center}
+.focus-stage>.focus-card{width:min(100cqw,calc(100cqh*2/3),420px)}
+.card-focus .focus-tags small{width:auto}
+.card-focus .pack-line{flex:none;font-size:17px;line-height:1.25;margin:0 4px;max-width:440px}

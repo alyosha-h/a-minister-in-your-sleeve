@@ -106,7 +106,7 @@ export function createPhaseTwoUI(ctx){
     if(pack)return renderPack(root);
     if(cardFocus){
       const card=CARDS.find(c=>c.id===cardFocus),list=ownedInView(s),i=list.findIndex(c=>c.id===card.id),ch=CHAPTERS.find(c=>c.id===card.chapter),n=s.cards[card.id];
-      root.innerHTML='<div class="pack-view card-focus">'+cardsBar(s)+tilted(cardFace(card,n),'focus-card')+'<div class="focus-meta">'+(list.length>1?'<button id="focusPrev" class="focus-step" aria-label="previous card">'+backArrow+'</button>':'<span></span>')+'<div class="focus-tags"><span class="tier-chip tier-'+card.rarity+'"><i></i>'+esc(RARITIES[card.rarity].name)+'</span>'+(ch?'<span class="meta-chip">evening '+ch.number+'</span>':'')+(n>1?'<span class="meta-chip">×'+n+'</span>':'')+(i>=0?'<small>'+(i+1)+' of '+list.length+'</small>':'')+'</div>'+(list.length>1?'<button id="focusNext" class="focus-step" aria-label="next card">'+icon('arrow')+'</button>':'<span></span>')+'</div><p class="pack-line">'+esc(card.line)+'</p></div>';
+      root.innerHTML='<div class="pack-view card-focus">'+cardsBar(s)+'<div class="focus-stage">'+tilted(cardFace(card,n),'focus-card')+'</div><div class="focus-meta">'+(list.length>1?'<button id="focusPrev" class="focus-step" aria-label="previous card">'+backArrow+'</button>':'<span></span>')+'<div class="focus-tags"><span class="tier-chip tier-'+card.rarity+'"><i></i>'+esc(RARITIES[card.rarity].name)+'</span>'+(ch?'<span class="meta-chip">evening '+ch.number+'</span>':'')+(n>1?'<span class="meta-chip">×'+n+'</span>':'')+(i>=0?'<small>'+(i+1)+' of '+list.length+'</small>':'')+'</div>'+(list.length>1?'<button id="focusNext" class="focus-step" aria-label="next card">'+icon('arrow')+'</button>':'<span></span>')+'</div><p class="pack-line">'+esc(card.line)+'</p></div>';
       bindBar();attachTilt(root.querySelector('.focus-card'));
       if($('focusPrev')){$('focusPrev').onclick=()=>stepFocus(-1);$('focusNext').onclick=()=>stepFocus(1);}
       if(s.cardsNew?.includes(card.id))ctx.commit({state:seeCard(s,card.id)});
@@ -136,6 +136,7 @@ export function createPhaseTwoUI(ctx){
     followOutfit();const s=ctx.state();$('copperValue').textContent=s.copper;if(roomView!=='cards')delete $('roomContent').dataset.view;
     // a pack or a held card takes the whole panel, so the art can be as big as the screen allows
     $('roomPanel').classList.toggle('cards-immersive',roomView==='cards'&&Boolean(pack||cardFocus));
+    $('roomPanel').classList.toggle('cards-focus',roomView==='cards'&&!pack&&Boolean(cardFocus));
     document.querySelectorAll('[data-room-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.roomView===roomView)));
     if(roomView==='outfits'){
       const item=outfits[outfitIndex],owned=s.owned.includes(item.id),wearing=s.outfit===item.id;
