@@ -730,3 +730,13 @@ body[data-page=care] .toast{bottom:calc(145px + env(safe-area-inset-bottom))}
 .reveal-card .lc-label small{font-size:9px}
 .cards-immersive .pack-stage{gap:8px}
 .cards-immersive .pack-stage .pack-line{max-width:430px}
+.lc-screen{border-color:transparent;background:linear-gradient(#17111f,#17111f) padding-box,linear-gradient(135deg,#f6e3a1,#8a5a1f,#f9edc4,#b3262f,#f6e3a1) border-box;box-shadow:0 4px 20px #b3802f66}
+.lc-screen .lc-foil{background:radial-gradient(ellipse at 50% 115%,#c8343e38,transparent 60%),linear-gradient(115deg,transparent 36%,#ffe7a866 48%,#ff9fb033 53%,transparent 62%);background-size:100% 100%,250% 100%;mix-blend-mode:screen;animation:foilSweep 4s ease-in-out infinite}
+.lc-screen .lc-art:after{content:'❦';position:absolute;top:3px;right:7px;color:#f6e3a1;font-size:14px;text-shadow:0 0 6px #e0a43a}
+.lc-screen .lc-label{background:#17111ff2;border-top-color:#8a5a1f}
+.lc-screen .lc-label strong{color:#f9edc4}
+.lc-screen .lc-label small{color:#e2b75c}
+.is-tilting .lc-screen .lc-foil{filter:brightness(1.35) saturate(1.3)}
+.album-slot.is-empty.lc-screen{border-color:#c9a04e;border-style:solid;background:repeating-linear-gradient(90deg,#8a5a1f0d 0 18px,#8a5a1f1f 18px 20px)}
+.burst-screen .reveal-burst{background:radial-gradient(closest-side,#fff3cf 0,#f2c76a99 22%,#b3262f55 42%,transparent 100%);animation:burstIn .7s ease-out forwards,burstPulse 1.8s .7s ease-in-out infinite}
+.burst-screen .sparkles i{background:#f9e3a0;filter:drop-shadow(0 0 5px #e0a43a)}
